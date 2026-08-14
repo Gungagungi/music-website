@@ -78,7 +78,33 @@ export const PRODUCTS = {
     sku: 'HAR-ST62VI-010',
     brand: 'Harley Benton',
   },
+  /**
+   * Reserved for the stock-decrement assertion, and used by nothing else.
+   * That test reads the stock level, orders, then reads it again — any other
+   * spec ordering the same product in parallel would make it fail for a reason
+   * that has nothing to do with the behaviour under test.
+   */
+  stockTracking: {
+    slug: 'ibanez-rg550-genesis',
+    sku: 'IBA-RG550G-007',
+    brand: 'Ibanez',
+  },
 } as const;
+
+/**
+ * Inventory the suite consumes.
+ *
+ * Checkout specs decrement stock for real, and every browser project runs them
+ * again. Left alone, the shelf empties partway through a full parallel run and
+ * unrelated specs start failing with OUT_OF_STOCK — a failure mode that looks
+ * like a product bug and is not one. The run-level setup therefore tops these
+ * up once, right after the reset.
+ */
+export const STOCK_TOP_UP = [
+  { slug: PRODUCTS.inStock.slug, quantity: 999 },
+  { slug: PRODUCTS.cheap.slug, quantity: 999 },
+  { slug: PRODUCTS.strings.slug, quantity: 999 },
+] as const;
 
 export const CATEGORIES = {
   electricGuitars: { slug: 'guitares-electriques', label: 'Guitares électriques' },

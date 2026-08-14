@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page, Response } from '@playwright/test';
 
 import { BasePage } from '@/pages/BasePage';
@@ -30,15 +31,22 @@ export class ProductPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.root = page.getByTestId('product-page');
+    // Prices, availability and brand labels also live on the related-product
+    // cards at the bottom of the page, so everything about *this* product is
+    // scoped to the buy box or the identity block. Unscoped test ids here would
+    // resolve to five elements and fail on strict mode — correctly.
+    const buyBox = page.getByTestId('product-buybox');
+    const identity = page.getByTestId('product-identity');
+
     this.heading = page.getByTestId('product-title');
-    this.brand = page.getByTestId('product-brand');
+    this.brand = identity.getByTestId('product-brand');
     this.sku = page.getByTestId('product-sku');
     this.image = page.getByTestId('product-image');
     this.description = page.getByTestId('product-description');
-    this.price = page.getByTestId('product-price');
-    this.listPrice = page.getByTestId('product-list-price');
-    this.discountBadge = page.getByTestId('product-discount');
-    this.availability = page.getByTestId('product-availability');
+    this.price = buyBox.getByTestId('product-price');
+    this.listPrice = buyBox.getByTestId('product-list-price');
+    this.discountBadge = buyBox.getByTestId('product-discount');
+    this.availability = buyBox.getByTestId('product-availability');
     this.leftHandedBadge = page.getByTestId('left-handed-badge');
     this.specs = page.getByTestId('product-specs');
     this.reviews = page.getByTestId('review-item');
@@ -71,10 +79,24 @@ export class ProductPage extends BasePage {
    */
   async addToCart(options: { quantity?: number; color?: string } = {}): Promise<'success' | 'error'> {
     if (options.color) await this.colorSelect.selectOption(options.color);
-    if (options.quantity) await this.quantityInput.fill(String(options.quantity));
+
+    if (options.quantity) {
+      await this.quantityInput.fill(String(options.quantity));
+      // The quantity input is React-controlled. If hydration lands just after
+      // the fill, React re-renders from its own state and silently discards the
+      // typed value — the cart then receives quantity 1. Observed on WebKit;
+      // confirming the committed value closes the race on every engine.
+      await expect(this.quantityInput).toHaveValue(String(options.quantity));
+    }
 
     await this.addToCartButton.click();
     await this.page.locator('[data-testid="add-to-cart-status"]:not([data-status="idle"])').waitFor();
+
+    // Success triggers `router.refresh()` so the header badge catches up. On
+    // Firefox, navigating away while that refresh is in flight aborts it with
+    // NS_BINDING_ABORTED, which surfaces as a failed `page.goto` in the *next*
+    // step. Letting it settle keeps the failure where it belongs.
+    await this.page.waitForLoadState('networkidle');
 
     return (await this.addToCartStatus.getAttribute('data-status')) === 'success' ? 'success' : 'error';
   }

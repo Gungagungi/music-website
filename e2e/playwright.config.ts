@@ -102,6 +102,10 @@ export default defineConfig({
       name: 'mobile-chrome',
       testMatch: /tests\/ui\/.*\.spec\.ts/,
       dependencies: ['setup-auth'],
+      // Only the smoke set: a mobile viewport is a layout risk, not a logic
+      // risk, so re-running the whole regression suite on it buys runtime
+      // rather than coverage.
+      grep: /@smoke/,
       use: { ...devices['Pixel 7'] },
     },
 

@@ -60,8 +60,11 @@ export default async function ProductPage({ params }: PageProps) {
               data-testid="product-image"
             />
 
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-ink-500">
+            <div data-testid="product-identity">
+              <p
+                className="text-sm font-semibold uppercase tracking-wide text-ink-500"
+                data-testid="product-brand"
+              >
                 {product.brand}
               </p>
               <h1 className="mt-1 text-3xl font-bold" data-testid="product-title">
@@ -97,6 +100,12 @@ export default async function ProductPage({ params }: PageProps) {
             <h2 id="reviews-title" className="text-xl font-bold">
               Avis clients
             </h2>
+            {/* The star rating aggregates the product's whole history; only the
+                most recent reviews are kept in full. */}
+            <p className="mt-1 text-sm text-ink-500" data-testid="reviews-summary">
+              Note moyenne {product.rating.toFixed(1)}/5 sur {product.reviewCount} avis ·{' '}
+              {reviews.length} avis détaillé{reviews.length > 1 ? 's' : ''}
+            </p>
             {reviews.length === 0 ? (
               <p className="mt-3 text-ink-500" data-testid="no-reviews">
                 Aucun avis pour le moment. Soyez le premier à donner le vôtre.
@@ -129,7 +138,12 @@ export default async function ProductPage({ params }: PageProps) {
           </section>
         </div>
 
-        <aside className="h-fit rounded-lg border border-ink-100 bg-white p-6 lg:sticky lg:top-6">
+        {/* The buy box carries its own test id: prices and availability labels
+            also appear on the related-product cards further down the page. */}
+        <aside
+          className="h-fit rounded-lg border border-ink-100 bg-white p-6 lg:sticky lg:top-6"
+          data-testid="product-buybox"
+        >
           <PriceTag
             price={product.price}
             listPrice={product.listPrice}

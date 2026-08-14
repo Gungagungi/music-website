@@ -7,11 +7,12 @@ export const MAX_PAGE_SIZE = 100;
 
 /**
  * One deliberately seeded defect, gated behind SEED_BUGS=1.
- * See docs/bug-reports/BUG-002-unstable-price-sort.md — price ties fall back to
- * the catalog's natural order only when the flag is off; with the flag on the
- * tie-break is dropped, which makes pagination duplicate and skip rows.
+ * See docs/bug-reports/BUG-002-sort-after-pagination.md — with the flag on, the
+ * result set is sliced *before* being sorted, so each page is ordered only
+ * within itself. Page 2 then opens with an item cheaper than the last one on
+ * page 1, which is one of the most common ordering bugs in real catalogues.
  */
-const UNSTABLE_SORT_ENABLED = process.env.SEED_BUGS === '1';
+const SORT_AFTER_PAGINATION_ENABLED = process.env.SEED_BUGS === '1';
 
 function normalise(value: string): string {
   return value
@@ -73,23 +74,27 @@ export function queryProducts(query: ProductQuery = {}): Paginated<Product> {
   }
 
   const sort = query.sort ?? 'pertinence';
-  if (sort !== 'pertinence') {
+  // The id tie-break is what makes the ordering total, and therefore what makes
+  // pagination correct when several products share a price or a rating.
+  const sortItems = (list: Product[]): Product[] => {
+    if (sort === 'pertinence') return list;
     const compare = SORTERS[sort];
-    // The id tie-break is what makes the ordering total, and therefore what makes
-    // pagination correct when several products share a price or a rating.
-    items.sort((a, b) => {
-      const primary = compare(a, b);
-      if (primary !== 0) return primary;
-      return UNSTABLE_SORT_ENABLED ? 0 : a.id.localeCompare(b.id);
-    });
-  }
+    return list.sort((a, b) => compare(a, b) || a.id.localeCompare(b.id));
+  };
 
   const total = items.length;
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const start = (page - 1) * limit;
 
+  // Sorting must happen across the whole result set, before slicing. Doing it
+  // the other way round yields pages that are each internally ordered but
+  // globally wrong.
+  const pageItems = SORT_AFTER_PAGINATION_ENABLED
+    ? sortItems(items.slice(start, start + limit))
+    : sortItems(items).slice(start, start + limit);
+
   return {
-    items: items.slice(start, start + limit),
+    items: pageItems,
     page,
     limit,
     total,
