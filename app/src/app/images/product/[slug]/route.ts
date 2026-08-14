@@ -41,11 +41,12 @@ function silhouette(category: CategorySlug, accent: string): string {
       return `
         <rect x="192" y="60" width="16" height="180" rx="4" ${body('#8a6a45')} />
         <path d="M176 46 h48 a14 14 0 0 1 14 14 v20 a14 14 0 0 1 -14 14 h-48 a14 14 0 0 1 -14 -14 v-20 a14 14 0 0 1 14 -14 z" ${body('#6f5537')} />
-        <path d="M200 232 c-46 0 -78 18 -84 56 c-6 38 22 66 56 66 c18 0 28 -10 28 -10 c0 0 10 10 28 10 c34 0 62 -28 56 -66 c-6 -38 -38 -56 -84 -56 z" ${body(accent)} />
-        <rect x="176" y="262" width="48" height="14" rx="3" fill="rgba(0,0,0,0.45)" />
-        <rect x="176" y="288" width="48" height="14" rx="3" fill="rgba(0,0,0,0.45)" />
-        <circle cx="232" cy="326" r="7" fill="rgba(0,0,0,0.5)" />
-        <circle cx="256" cy="316" r="7" fill="rgba(0,0,0,0.5)" />`;
+        <path d="M200 230 c-22 0 -34 -8 -52 -8 c-24 0 -40 18 -40 42 c0 16 8 26 12 38 c4 12 0 22 4 32 c8 20 34 34 76 34 s68 -14 76 -34 c4 -10 0 -20 4 -32 c4 -12 12 -22 12 -38 c0 -24 -16 -42 -40 -42 c-18 0 -30 8 -52 8 z" ${body(accent)} />
+        <rect x="168" y="256" width="64" height="13" rx="3" fill="rgba(0,0,0,0.45)" />
+        <rect x="168" y="284" width="64" height="13" rx="3" fill="rgba(0,0,0,0.45)" />
+        <rect x="172" y="312" width="56" height="10" rx="2" fill="rgba(0,0,0,0.55)" />
+        <circle cx="244" cy="330" r="6" fill="rgba(0,0,0,0.5)" />
+        <circle cx="262" cy="312" r="6" fill="rgba(0,0,0,0.5)" />`;
 
     case 'guitares-acoustiques':
     case 'guitares-classiques':
