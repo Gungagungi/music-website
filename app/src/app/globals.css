@@ -1,0 +1,50 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink-950: #0b1220;
+  --color-ink-900: #111c2e;
+  --color-ink-800: #1b2a41;
+  --color-ink-700: #2a3d59;
+  --color-ink-500: #5b6f8d;
+  --color-ink-300: #a7b4c6;
+  --color-ink-100: #e5eaf1;
+  --color-ink-50: #f5f7fa;
+
+  --color-amber-brand: #e0872b;
+  --color-amber-brandDark: #c26f1c;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-ink-50);
+  color: var(--color-ink-900);
+}
+
+/* Visible focus everywhere — the accessibility suite asserts on it, and it is
+   the single cheapest a11y win in a form-heavy application. */
+:focus-visible {
+  outline: 3px solid var(--color-amber-brand);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-ink-900);
+  color: white;
+  border-radius: 0 0 0.5rem 0;
+}
+
+.skip-link:focus {
+  left: 0;
+}

@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Next.js
+app/.next/
+app/out/
+app/next-env.d.ts
+
+# Playwright
+e2e/test-results/
+e2e/playwright-report/
+e2e/blob-report/
+e2e/reports/
+e2e/.auth/
+e2e/.cache/
+
+# k6
+perf/results/
+
+# Build & tooling caches
+*.tsbuildinfo
+.eslintcache
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# OS / editors
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log
+npm-debug.log*

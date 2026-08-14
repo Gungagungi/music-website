@@ -1,0 +1,2180 @@
+[
+  {
+    "id": "PRD-0001",
+    "sku": "FEN-PLAYER-001",
+    "slug": "fender-player-ii-stratocaster-mn",
+    "name": "Player II Stratocaster MN",
+    "brand": "Fender",
+    "category": "guitares-electriques",
+    "price": 80655,
+    "listPrice": 84900,
+    "discountPct": 5,
+    "currency": "EUR",
+    "stock": 0,
+    "rating": 4.3,
+    "reviewCount": 168,
+    "releasedAt": "2025-02-09",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Sunburst",
+      "Noir",
+      "Blanc Vintage"
+    ],
+    "specs": {
+      "Corps": "Aulne",
+      "Manche": "Érable",
+      "Touche": "Érable",
+      "Micros": "3x Single Coil",
+      "Frettes": "22"
+    },
+    "description": "La Fender Player II Stratocaster MN reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Aulne · Manche : Érable · Touche : Érable."
+  },
+  {
+    "id": "PRD-0002",
+    "sku": "FEN-AMERIC-002",
+    "slug": "fender-american-pro-iii-telecaster",
+    "name": "American Pro III Telecaster",
+    "brand": "Fender",
+    "category": "guitares-electriques",
+    "price": 189900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 31,
+    "rating": 4.8,
+    "reviewCount": 123,
+    "releasedAt": "2025-06-03",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Butterscotch",
+      "Noir"
+    ],
+    "specs": {
+      "Corps": "Frêne",
+      "Manche": "Érable",
+      "Touche": "Palissandre",
+      "Micros": "2x Single Coil",
+      "Frettes": "22"
+    },
+    "description": "La Fender American Pro III Telecaster reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Frêne · Manche : Érable · Touche : Palissandre."
+  },
+  {
+    "id": "PRD-0003",
+    "sku": "GIB-LESPAU-003",
+    "slug": "gibson-les-paul-standard-60s",
+    "name": "Les Paul Standard 60s",
+    "brand": "Gibson",
+    "category": "guitares-electriques",
+    "price": 279900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 32,
+    "rating": 4.3,
+    "reviewCount": 183,
+    "releasedAt": "2024-02-01",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Bourbon Burst",
+      "Ebony"
+    ],
+    "specs": {
+      "Corps": "Acajou",
+      "Table": "Érable flammé",
+      "Touche": "Palissandre",
+      "Micros": "2x Humbucker",
+      "Frettes": "22"
+    },
+    "description": "La Gibson Les Paul Standard 60s reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Table : Érable flammé · Touche : Palissandre."
+  },
+  {
+    "id": "PRD-0004",
+    "sku": "GIB-SGSTAN-004",
+    "slug": "gibson-sg-standard",
+    "name": "SG Standard",
+    "brand": "Gibson",
+    "category": "guitares-electriques",
+    "price": 189900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 28,
+    "rating": 3.2,
+    "reviewCount": 223,
+    "releasedAt": "2025-07-06",
+    "bestSeller": true,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Heritage Cherry",
+      "Ebony"
+    ],
+    "specs": {
+      "Corps": "Acajou",
+      "Manche": "Acajou",
+      "Touche": "Palissandre",
+      "Micros": "2x Humbucker",
+      "Frettes": "22"
+    },
+    "description": "La Gibson SG Standard reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Manche : Acajou · Touche : Palissandre."
+  },
+  {
+    "id": "PRD-0005",
+    "sku": "EPI-LESPAU-005",
+    "slug": "epiphone-les-paul-classic",
+    "name": "Les Paul Classic",
+    "brand": "Epiphone",
+    "category": "guitares-electriques",
+    "price": 69900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 15,
+    "rating": 4.1,
+    "reviewCount": 212,
+    "releasedAt": "2024-03-08",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Honey Burst",
+      "Ebony"
+    ],
+    "specs": {
+      "Corps": "Acajou",
+      "Table": "Érable",
+      "Touche": "Laurier",
+      "Micros": "2x Humbucker",
+      "Frettes": "22"
+    },
+    "description": "La Epiphone Les Paul Classic reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Table : Érable · Touche : Laurier."
+  },
+  {
+    "id": "PRD-0006",
+    "sku": "SQU-CLASSI-006",
+    "slug": "squier-classic-vibe-60s-stratocaster",
+    "name": "Classic Vibe 60s Stratocaster",
+    "brand": "Squier",
+    "category": "guitares-electriques",
+    "price": 40755,
+    "listPrice": 42900,
+    "discountPct": 5,
+    "currency": "EUR",
+    "stock": 26,
+    "rating": 4.9,
+    "reviewCount": 231,
+    "releasedAt": "2025-10-07",
+    "bestSeller": false,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Lake Placid Blue",
+      "Sunburst"
+    ],
+    "specs": {
+      "Corps": "Peuplier",
+      "Manche": "Érable",
+      "Touche": "Laurier",
+      "Micros": "3x Single Coil",
+      "Frettes": "21"
+    },
+    "description": "La Squier Classic Vibe 60s Stratocaster reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Peuplier · Manche : Érable · Touche : Laurier."
+  },
+  {
+    "id": "PRD-0007",
+    "sku": "IBA-RG550G-007",
+    "slug": "ibanez-rg550-genesis",
+    "name": "RG550 Genesis",
+    "brand": "Ibanez",
+    "category": "guitares-electriques",
+    "price": 109900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 5,
+    "rating": 4.5,
+    "reviewCount": 19,
+    "releasedAt": "2025-04-17",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Desert Sun Yellow",
+      "Purple Neon"
+    ],
+    "specs": {
+      "Corps": "Tilleul",
+      "Manche": "Érable/Noyer",
+      "Touche": "Érable",
+      "Micros": "HSH",
+      "Frettes": "24"
+    },
+    "description": "La Ibanez RG550 Genesis reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Tilleul · Manche : Érable/Noyer · Touche : Érable."
+  },
+  {
+    "id": "PRD-0008",
+    "sku": "IBA-AZ2402-008",
+    "slug": "ibanez-az2402-prestige",
+    "name": "AZ2402 Prestige",
+    "brand": "Ibanez",
+    "category": "guitares-electriques",
+    "price": 229900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 32,
+    "rating": 3.9,
+    "reviewCount": 73,
+    "releasedAt": "2024-02-06",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Ice Blue",
+      "Black Flat"
+    ],
+    "specs": {
+      "Corps": "Aulne",
+      "Manche": "Érable rôti",
+      "Touche": "Érable",
+      "Micros": "2x Humbucker",
+      "Frettes": "24"
+    },
+    "description": "La Ibanez AZ2402 Prestige reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Aulne · Manche : Érable rôti · Touche : Érable."
+  },
+  {
+    "id": "PRD-0009",
+    "sku": "PRS-SECUST-009",
+    "slug": "prs-se-custom-24",
+    "name": "SE Custom 24",
+    "brand": "PRS",
+    "category": "guitares-electriques",
+    "price": 66430,
+    "listPrice": 94900,
+    "discountPct": 30,
+    "currency": "EUR",
+    "stock": 19,
+    "rating": 4.5,
+    "reviewCount": 201,
+    "releasedAt": "2025-06-23",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Faded Blue",
+      "Charcoal Burst"
+    ],
+    "specs": {
+      "Corps": "Acajou",
+      "Table": "Érable",
+      "Touche": "Palissandre",
+      "Micros": "2x Humbucker",
+      "Frettes": "24"
+    },
+    "description": "La PRS SE Custom 24 reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Table : Érable · Touche : Palissandre."
+  },
+  {
+    "id": "PRD-0010",
+    "sku": "HAR-ST62VI-010",
+    "slug": "harley-benton-st-62-vintage-series",
+    "name": "ST-62 Vintage Series",
+    "brand": "Harley Benton",
+    "category": "guitares-electriques",
+    "price": 16500,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 5,
+    "rating": 3.6,
+    "reviewCount": 3,
+    "releasedAt": "2023-04-12",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": true,
+    "colors": [
+      "Sunburst",
+      "Noir",
+      "Rouge"
+    ],
+    "specs": {
+      "Corps": "Tilleul",
+      "Manche": "Érable",
+      "Touche": "Laurier",
+      "Micros": "3x Single Coil",
+      "Frettes": "21"
+    },
+    "description": "La Harley Benton ST-62 Vintage Series reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Tilleul · Manche : Érable · Touche : Laurier."
+  },
+  {
+    "id": "PRD-0011",
+    "sku": "ESP-LTDEC2-011",
+    "slug": "esp-ltd-ec-256",
+    "name": "LTD EC-256",
+    "brand": "ESP",
+    "category": "guitares-electriques",
+    "price": 54900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 27,
+    "rating": 3.7,
+    "reviewCount": 91,
+    "releasedAt": "2023-06-16",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black Satin",
+      "Snow White"
+    ],
+    "specs": {
+      "Corps": "Acajou",
+      "Manche": "Acajou",
+      "Touche": "Jatoba",
+      "Micros": "2x Humbucker",
+      "Frettes": "22"
+    },
+    "description": "La ESP LTD EC-256 reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Manche : Acajou · Touche : Jatoba."
+  },
+  {
+    "id": "PRD-0012",
+    "sku": "JAC-PROSER-012",
+    "slug": "jackson-pro-series-soloist-sl2",
+    "name": "Pro Series Soloist SL2",
+    "brand": "Jackson",
+    "category": "guitares-electriques",
+    "price": 124900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 0,
+    "rating": 4,
+    "reviewCount": 146,
+    "releasedAt": "2024-07-29",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Riviera Blue",
+      "Black"
+    ],
+    "specs": {
+      "Corps": "Aulne",
+      "Manche": "Érable",
+      "Touche": "Ébène",
+      "Micros": "2x Humbucker",
+      "Frettes": "24"
+    },
+    "description": "La Jackson Pro Series Soloist SL2 reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Aulne · Manche : Érable · Touche : Ébène."
+  },
+  {
+    "id": "PRD-0013",
+    "sku": "GRE-G2622S-013",
+    "slug": "gretsch-g2622-streamliner",
+    "name": "G2622 Streamliner",
+    "brand": "Gretsch",
+    "category": "guitares-electriques",
+    "price": 49410,
+    "listPrice": 54900,
+    "discountPct": 10,
+    "currency": "EUR",
+    "stock": 29,
+    "rating": 4.7,
+    "reviewCount": 43,
+    "releasedAt": "2025-05-07",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Walnut Stain",
+      "Torino Green"
+    ],
+    "specs": {
+      "Corps": "Érable laminé",
+      "Manche": "Nato",
+      "Touche": "Laurier",
+      "Micros": "2x Broad’Tron",
+      "Frettes": "22"
+    },
+    "description": "La Gretsch G2622 Streamliner reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Érable laminé · Manche : Nato · Touche : Laurier."
+  },
+  {
+    "id": "PRD-0014",
+    "sku": "MAR-D28STA-014",
+    "slug": "martin-guitar-d-28-standard",
+    "name": "D-28 Standard",
+    "brand": "Martin Guitar",
+    "category": "guitares-acoustiques",
+    "price": 339900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 20,
+    "rating": 4.6,
+    "reviewCount": 236,
+    "releasedAt": "2025-03-15",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Natural"
+    ],
+    "specs": {
+      "Format": "Dreadnought",
+      "Table": "Épicéa Sitka",
+      "Dos & éclisses": "Palissandre",
+      "Touche": "Ébène",
+      "Électronique": "Non"
+    },
+    "description": "La Martin Guitar D-28 Standard offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought · Table : Épicéa Sitka · Dos & éclisses : Palissandre."
+  },
+  {
+    "id": "PRD-0015",
+    "sku": "TAY-214CEP-015",
+    "slug": "taylor-214ce-plus",
+    "name": "214ce Plus",
+    "brand": "Taylor",
+    "category": "guitares-acoustiques",
+    "price": 144900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 8,
+    "rating": 4,
+    "reviewCount": 181,
+    "releasedAt": "2025-11-03",
+    "bestSeller": false,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Natural"
+    ],
+    "specs": {
+      "Format": "Grand Auditorium",
+      "Table": "Épicéa Sitka",
+      "Dos & éclisses": "Koa laminé",
+      "Touche": "Ébène",
+      "Électronique": "Expression System 2"
+    },
+    "description": "La Taylor 214ce Plus offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Grand Auditorium · Table : Épicéa Sitka · Dos & éclisses : Koa laminé."
+  },
+  {
+    "id": "PRD-0016",
+    "sku": "YAM-FG800M-016",
+    "slug": "yamaha-fg800m",
+    "name": "FG800M",
+    "brand": "Yamaha",
+    "category": "guitares-acoustiques",
+    "price": 22900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 39,
+    "rating": 3.2,
+    "reviewCount": 233,
+    "releasedAt": "2024-08-13",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Natural Matte"
+    ],
+    "specs": {
+      "Format": "Dreadnought",
+      "Table": "Épicéa massif",
+      "Dos & éclisses": "Nato",
+      "Touche": "Palissandre",
+      "Électronique": "Non"
+    },
+    "description": "La Yamaha FG800M offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought · Table : Épicéa massif · Dos & éclisses : Nato."
+  },
+  {
+    "id": "PRD-0017",
+    "sku": "HAR-D120CE-017",
+    "slug": "harley-benton-d-120ce",
+    "name": "D-120CE",
+    "brand": "Harley Benton",
+    "category": "guitares-acoustiques",
+    "price": 12510,
+    "listPrice": 13900,
+    "discountPct": 10,
+    "currency": "EUR",
+    "stock": 29,
+    "rating": 3.6,
+    "reviewCount": 224,
+    "releasedAt": "2023-08-10",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Natural",
+      "Black"
+    ],
+    "specs": {
+      "Format": "Dreadnought Cutaway",
+      "Table": "Épicéa",
+      "Dos & éclisses": "Acajou",
+      "Touche": "Amarante",
+      "Électronique": "Oui"
+    },
+    "description": "La Harley Benton D-120CE offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought Cutaway · Table : Épicéa · Dos & éclisses : Acajou."
+  },
+  {
+    "id": "PRD-0018",
+    "sku": "GIB-J45STU-018",
+    "slug": "gibson-j-45-studio-walnut",
+    "name": "J-45 Studio Walnut",
+    "brand": "Gibson",
+    "category": "guitares-acoustiques",
+    "price": 153930,
+    "listPrice": 219900,
+    "discountPct": 30,
+    "currency": "EUR",
+    "stock": 37,
+    "rating": 4.3,
+    "reviewCount": 170,
+    "releasedAt": "2023-05-07",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Walnut Burst"
+    ],
+    "specs": {
+      "Format": "Round Shoulder",
+      "Table": "Épicéa Sitka",
+      "Dos & éclisses": "Noyer",
+      "Touche": "Palissandre",
+      "Électronique": "LR Baggs VTC"
+    },
+    "description": "La Gibson J-45 Studio Walnut offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Round Shoulder · Table : Épicéa Sitka · Dos & éclisses : Noyer."
+  },
+  {
+    "id": "PRD-0019",
+    "sku": "COR-EARTH7-019",
+    "slug": "cort-earth-70-op",
+    "name": "Earth 70 OP",
+    "brand": "Cort",
+    "category": "guitares-acoustiques",
+    "price": 25900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 13,
+    "rating": 3.3,
+    "reviewCount": 101,
+    "releasedAt": "2024-08-02",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Open Pore Natural"
+    ],
+    "specs": {
+      "Format": "Dreadnought",
+      "Table": "Épicéa massif",
+      "Dos & éclisses": "Acajou",
+      "Touche": "Merbau",
+      "Électronique": "Non"
+    },
+    "description": "La Cort Earth 70 OP offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought · Table : Épicéa massif · Dos & éclisses : Acajou."
+  },
+  {
+    "id": "PRD-0020",
+    "sku": "FEN-CD60SC-020",
+    "slug": "fender-cd-60sce-all-mahogany",
+    "name": "CD-60SCE All Mahogany",
+    "brand": "Fender",
+    "category": "guitares-acoustiques",
+    "price": 21675,
+    "listPrice": 28900,
+    "discountPct": 25,
+    "currency": "EUR",
+    "stock": 40,
+    "rating": 3.5,
+    "reviewCount": 227,
+    "releasedAt": "2023-03-21",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": true,
+    "colors": [
+      "Natural Mahogany"
+    ],
+    "specs": {
+      "Format": "Dreadnought Cutaway",
+      "Table": "Acajou",
+      "Dos & éclisses": "Acajou",
+      "Touche": "Laurier",
+      "Électronique": "Fishman"
+    },
+    "description": "La Fender CD-60SCE All Mahogany offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought Cutaway · Table : Acajou · Dos & éclisses : Acajou."
+  },
+  {
+    "id": "PRD-0021",
+    "sku": "TAK-GD30CE-021",
+    "slug": "takamine-gd30ce-nat",
+    "name": "GD30CE-NAT",
+    "brand": "Takamine",
+    "category": "guitares-acoustiques",
+    "price": 42900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 19,
+    "rating": 3.6,
+    "reviewCount": 190,
+    "releasedAt": "2025-12-26",
+    "bestSeller": true,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Natural"
+    ],
+    "specs": {
+      "Format": "Dreadnought Cutaway",
+      "Table": "Épicéa massif",
+      "Dos & éclisses": "Acajou",
+      "Touche": "Laurier",
+      "Électronique": "TP-4TD"
+    },
+    "description": "La Takamine GD30CE-NAT offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought Cutaway · Table : Épicéa massif · Dos & éclisses : Acajou."
+  },
+  {
+    "id": "PRD-0022",
+    "sku": "YAM-C40IIX-022",
+    "slug": "yamaha-c40-ii",
+    "name": "C40 II",
+    "brand": "Yamaha",
+    "category": "guitares-classiques",
+    "price": 14900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 5,
+    "rating": 4.9,
+    "reviewCount": 22,
+    "releasedAt": "2024-02-04",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Natural"
+    ],
+    "specs": {
+      "Taille": "4/4",
+      "Table": "Épicéa",
+      "Dos & éclisses": "Meranti",
+      "Touche": "Palissandre",
+      "Cordes": "Nylon"
+    },
+    "description": "La Yamaha C40 II propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Épicéa · Dos & éclisses : Meranti."
+  },
+  {
+    "id": "PRD-0023",
+    "sku": "ALH-3CCLAS-023",
+    "slug": "alhambra-3c-classical",
+    "name": "3C Classical",
+    "brand": "Alhambra",
+    "category": "guitares-classiques",
+    "price": 54900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 0,
+    "rating": 3.7,
+    "reviewCount": 146,
+    "releasedAt": "2024-05-08",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Natural"
+    ],
+    "specs": {
+      "Taille": "4/4",
+      "Table": "Cèdre massif",
+      "Dos & éclisses": "Sapelli",
+      "Touche": "Palissandre",
+      "Cordes": "Nylon"
+    },
+    "description": "La Alhambra 3C Classical propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Cèdre massif · Dos & éclisses : Sapelli."
+  },
+  {
+    "id": "PRD-0024",
+    "sku": "HAR-CG2003-024",
+    "slug": "harley-benton-cg-200-3-4",
+    "name": "CG-200 3/4",
+    "brand": "Harley Benton",
+    "category": "guitares-classiques",
+    "price": 8900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 0,
+    "rating": 3.4,
+    "reviewCount": 160,
+    "releasedAt": "2023-07-07",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Natural"
+    ],
+    "specs": {
+      "Taille": "3/4",
+      "Table": "Épicéa",
+      "Dos & éclisses": "Tilleul",
+      "Touche": "Amarante",
+      "Cordes": "Nylon"
+    },
+    "description": "La Harley Benton CG-200 3/4 propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 3/4 · Table : Épicéa · Dos & éclisses : Tilleul."
+  },
+  {
+    "id": "PRD-0025",
+    "sku": "COR-C5CEDA-025",
+    "slug": "cordoba-c5-cedar",
+    "name": "C5 Cedar",
+    "brand": "Cordoba",
+    "category": "guitares-classiques",
+    "price": 28425,
+    "listPrice": 37900,
+    "discountPct": 25,
+    "currency": "EUR",
+    "stock": 29,
+    "rating": 3.1,
+    "reviewCount": 72,
+    "releasedAt": "2024-11-16",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Natural"
+    ],
+    "specs": {
+      "Taille": "4/4",
+      "Table": "Cèdre massif",
+      "Dos & éclisses": "Acajou",
+      "Touche": "Palissandre",
+      "Cordes": "Nylon"
+    },
+    "description": "La Cordoba C5 Cedar propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Cèdre massif · Dos & éclisses : Acajou."
+  },
+  {
+    "id": "PRD-0026",
+    "sku": "ORT-R121FA-026",
+    "slug": "ortega-r121-family-series",
+    "name": "R121 Family Series",
+    "brand": "Ortega",
+    "category": "guitares-classiques",
+    "price": 18905,
+    "listPrice": 19900,
+    "discountPct": 5,
+    "currency": "EUR",
+    "stock": 20,
+    "rating": 4.1,
+    "reviewCount": 148,
+    "releasedAt": "2025-10-14",
+    "bestSeller": false,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Natural Satin"
+    ],
+    "specs": {
+      "Taille": "4/4",
+      "Table": "Épicéa",
+      "Dos & éclisses": "Catalpa",
+      "Touche": "Amarante",
+      "Cordes": "Nylon"
+    },
+    "description": "La Ortega R121 Family Series propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Épicéa · Dos & éclisses : Catalpa."
+  },
+  {
+    "id": "PRD-0027",
+    "sku": "LAM-RUBINI-027",
+    "slug": "la-mancha-rubinito-cm-63",
+    "name": "Rubinito CM 63",
+    "brand": "La Mancha",
+    "category": "guitares-classiques",
+    "price": 19425,
+    "listPrice": 25900,
+    "discountPct": 25,
+    "currency": "EUR",
+    "stock": 1,
+    "rating": 4.7,
+    "reviewCount": 166,
+    "releasedAt": "2025-02-13",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Natural"
+    ],
+    "specs": {
+      "Taille": "7/8",
+      "Table": "Cèdre",
+      "Dos & éclisses": "Sapelli",
+      "Touche": "Palissandre",
+      "Cordes": "Nylon"
+    },
+    "description": "La La Mancha Rubinito CM 63 propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 7/8 · Table : Cèdre · Dos & éclisses : Sapelli."
+  },
+  {
+    "id": "PRD-0028",
+    "sku": "FEN-PLAYER-028",
+    "slug": "fender-player-ii-precision-bass",
+    "name": "Player II Precision Bass",
+    "brand": "Fender",
+    "category": "basses-electriques",
+    "price": 89900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 7,
+    "rating": 4.5,
+    "reviewCount": 187,
+    "releasedAt": "2023-09-19",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black",
+      "3-Color Sunburst"
+    ],
+    "specs": {
+      "Corps": "Aulne",
+      "Manche": "Érable",
+      "Touche": "Palissandre",
+      "Micros": "Split Coil",
+      "Cordes": "4"
+    },
+    "description": "La Fender Player II Precision Bass délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Aulne · Manche : Érable · Touche : Palissandre."
+  },
+  {
+    "id": "PRD-0029",
+    "sku": "FEN-AMERIC-029",
+    "slug": "fender-american-pro-ii-jazz-bass-v",
+    "name": "American Pro II Jazz Bass V",
+    "brand": "Fender",
+    "category": "basses-electriques",
+    "price": 175920,
+    "listPrice": 219900,
+    "discountPct": 20,
+    "currency": "EUR",
+    "stock": 35,
+    "rating": 4.3,
+    "reviewCount": 236,
+    "releasedAt": "2025-10-15",
+    "bestSeller": false,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Olympic White",
+      "Dark Night"
+    ],
+    "specs": {
+      "Corps": "Aulne",
+      "Manche": "Érable",
+      "Touche": "Palissandre",
+      "Micros": "2x Single Coil",
+      "Cordes": "5"
+    },
+    "description": "La Fender American Pro II Jazz Bass V délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Aulne · Manche : Érable · Touche : Palissandre."
+  },
+  {
+    "id": "PRD-0030",
+    "sku": "MUS-STINGR-030",
+    "slug": "music-man-stingray-special-4h",
+    "name": "StingRay Special 4H",
+    "brand": "Music Man",
+    "category": "basses-electriques",
+    "price": 289900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 13,
+    "rating": 4.8,
+    "reviewCount": 111,
+    "releasedAt": "2025-06-19",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Ivory White",
+      "Firemist Purple"
+    ],
+    "specs": {
+      "Corps": "Frêne",
+      "Manche": "Érable rôti",
+      "Touche": "Érable",
+      "Micros": "Humbucker",
+      "Cordes": "4"
+    },
+    "description": "La Music Man StingRay Special 4H délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Frêne · Manche : Érable rôti · Touche : Érable."
+  },
+  {
+    "id": "PRD-0031",
+    "sku": "IBA-SR300E-031",
+    "slug": "ibanez-sr300e",
+    "name": "SR300E",
+    "brand": "Ibanez",
+    "category": "basses-electriques",
+    "price": 39900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 0,
+    "rating": 3.1,
+    "reviewCount": 140,
+    "releasedAt": "2025-01-12",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Iron Pewter",
+      "Pearl White"
+    ],
+    "specs": {
+      "Corps": "Peuplier",
+      "Manche": "Érable/Noyer",
+      "Touche": "Jatoba",
+      "Micros": "2x PowerSpan",
+      "Cordes": "4"
+    },
+    "description": "La Ibanez SR300E délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Peuplier · Manche : Érable/Noyer · Touche : Jatoba."
+  },
+  {
+    "id": "PRD-0032",
+    "sku": "HAR-PB50VI-032",
+    "slug": "harley-benton-pb-50-vintage-series",
+    "name": "PB-50 Vintage Series",
+    "brand": "Harley Benton",
+    "category": "basses-electriques",
+    "price": 10850,
+    "listPrice": 15500,
+    "discountPct": 30,
+    "currency": "EUR",
+    "stock": 29,
+    "rating": 3.5,
+    "reviewCount": 202,
+    "releasedAt": "2024-12-25",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Vintage Sunburst",
+      "Sea Foam Green"
+    ],
+    "specs": {
+      "Corps": "Tilleul",
+      "Manche": "Érable",
+      "Touche": "Amarante",
+      "Micros": "Split Coil",
+      "Cordes": "4"
+    },
+    "description": "La Harley Benton PB-50 Vintage Series délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Tilleul · Manche : Érable · Touche : Amarante."
+  },
+  {
+    "id": "PRD-0033",
+    "sku": "HOF-IGNITI-033",
+    "slug": "hofner-ignition-bass-sb",
+    "name": "Ignition Bass SB",
+    "brand": "Höfner",
+    "category": "basses-electriques",
+    "price": 33520,
+    "listPrice": 41900,
+    "discountPct": 20,
+    "currency": "EUR",
+    "stock": 20,
+    "rating": 4,
+    "reviewCount": 166,
+    "releasedAt": "2024-04-01",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Sunburst"
+    ],
+    "specs": {
+      "Corps": "Épicéa/Érable",
+      "Manche": "Érable",
+      "Touche": "Palissandre",
+      "Micros": "2x Staple",
+      "Cordes": "4"
+    },
+    "description": "La Höfner Ignition Bass SB délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Épicéa/Érable · Manche : Érable · Touche : Palissandre."
+  },
+  {
+    "id": "PRD-0034",
+    "sku": "YAM-TRBX30-034",
+    "slug": "yamaha-trbx304",
+    "name": "TRBX304",
+    "brand": "Yamaha",
+    "category": "basses-electriques",
+    "price": 28425,
+    "listPrice": 37900,
+    "discountPct": 25,
+    "currency": "EUR",
+    "stock": 0,
+    "rating": 4.5,
+    "reviewCount": 23,
+    "releasedAt": "2025-10-14",
+    "bestSeller": false,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Mist Green",
+      "Black"
+    ],
+    "specs": {
+      "Corps": "Acajou",
+      "Manche": "Érable/Acajou",
+      "Touche": "Palissandre",
+      "Micros": "P/J actif",
+      "Cordes": "4"
+    },
+    "description": "La Yamaha TRBX304 délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Acajou · Manche : Érable/Acajou · Touche : Palissandre."
+  },
+  {
+    "id": "PRD-0035",
+    "sku": "COR-ACTION-035",
+    "slug": "cort-action-dlx-as",
+    "name": "Action DLX AS",
+    "brand": "Cort",
+    "category": "basses-electriques",
+    "price": 34900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 37,
+    "rating": 4.4,
+    "reviewCount": 191,
+    "releasedAt": "2023-12-18",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Open Pore Natural"
+    ],
+    "specs": {
+      "Corps": "Frêne",
+      "Manche": "Érable",
+      "Touche": "Jatoba",
+      "Micros": "PJ actif",
+      "Cordes": "4"
+    },
+    "description": "La Cort Action DLX AS délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Frêne · Manche : Érable · Touche : Jatoba."
+  },
+  {
+    "id": "PRD-0036",
+    "sku": "FEN-BLUESJ-036",
+    "slug": "fender-blues-junior-iv",
+    "name": "Blues Junior IV",
+    "brand": "Fender",
+    "category": "amplis-guitare",
+    "price": 74900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 1,
+    "rating": 3.6,
+    "reviewCount": 2,
+    "releasedAt": "2023-06-22",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black Tolex",
+      "Tweed"
+    ],
+    "specs": {
+      "Type": "Lampes",
+      "Puissance": "15 W",
+      "Haut-parleur": "1x12\"",
+      "Canaux": "1",
+      "Réverbe": "Oui"
+    },
+    "description": "Le Fender Blues Junior IV couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 15 W · Haut-parleur : 1x12\"."
+  },
+  {
+    "id": "PRD-0037",
+    "sku": "MAR-DSL40C-037",
+    "slug": "marshall-dsl40cr",
+    "name": "DSL40CR",
+    "brand": "Marshall",
+    "category": "amplis-guitare",
+    "price": 89900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 0,
+    "rating": 4.8,
+    "reviewCount": 117,
+    "releasedAt": "2023-10-03",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Lampes",
+      "Puissance": "40 W",
+      "Haut-parleur": "1x12\"",
+      "Canaux": "2",
+      "Réverbe": "Oui"
+    },
+    "description": "Le Marshall DSL40CR couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 40 W · Haut-parleur : 1x12\"."
+  },
+  {
+    "id": "PRD-0038",
+    "sku": "BOS-KATANA-038",
+    "slug": "boss-katana-50-mkii",
+    "name": "Katana-50 MkII",
+    "brand": "Boss",
+    "category": "amplis-guitare",
+    "price": 22320,
+    "listPrice": 27900,
+    "discountPct": 20,
+    "currency": "EUR",
+    "stock": 7,
+    "rating": 3.8,
+    "reviewCount": 15,
+    "releasedAt": "2023-11-29",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Modélisation",
+      "Puissance": "50 W",
+      "Haut-parleur": "1x12\"",
+      "Canaux": "5",
+      "Effets": "60+"
+    },
+    "description": "Le Boss Katana-50 MkII couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Modélisation · Puissance : 50 W · Haut-parleur : 1x12\"."
+  },
+  {
+    "id": "PRD-0039",
+    "sku": "ORA-CRUSH2-039",
+    "slug": "orange-crush-20rt",
+    "name": "Crush 20RT",
+    "brand": "Orange",
+    "category": "amplis-guitare",
+    "price": 18900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 14,
+    "rating": 3.1,
+    "reviewCount": 114,
+    "releasedAt": "2023-07-19",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Orange",
+      "Black"
+    ],
+    "specs": {
+      "Type": "Transistor",
+      "Puissance": "20 W",
+      "Haut-parleur": "1x8\"",
+      "Canaux": "2",
+      "Réverbe": "Oui"
+    },
+    "description": "Le Orange Crush 20RT couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Transistor · Puissance : 20 W · Haut-parleur : 1x8\"."
+  },
+  {
+    "id": "PRD-0040",
+    "sku": "VOX-AC15C1-040",
+    "slug": "vox-ac15c1",
+    "name": "AC15C1",
+    "brand": "Vox",
+    "category": "amplis-guitare",
+    "price": 79900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 31,
+    "rating": 4.7,
+    "reviewCount": 113,
+    "releasedAt": "2024-08-22",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Lampes",
+      "Puissance": "15 W",
+      "Haut-parleur": "1x12\"",
+      "Canaux": "2",
+      "Trémolo": "Oui"
+    },
+    "description": "Le Vox AC15C1 couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 15 W · Haut-parleur : 1x12\"."
+  },
+  {
+    "id": "PRD-0041",
+    "sku": "BLA-HT5RMK-041",
+    "slug": "blackstar-ht-5r-mkiii",
+    "name": "HT-5R MkIII",
+    "brand": "Blackstar",
+    "category": "amplis-guitare",
+    "price": 40755,
+    "listPrice": 42900,
+    "discountPct": 5,
+    "currency": "EUR",
+    "stock": 24,
+    "rating": 3.7,
+    "reviewCount": 223,
+    "releasedAt": "2025-12-12",
+    "bestSeller": true,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Lampes",
+      "Puissance": "5 W",
+      "Haut-parleur": "1x12\"",
+      "Canaux": "2",
+      "Réverbe": "Oui"
+    },
+    "description": "Le Blackstar HT-5R MkIII couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 5 W · Haut-parleur : 1x12\"."
+  },
+  {
+    "id": "PRD-0042",
+    "sku": "HAR-HB20RX-042",
+    "slug": "harley-benton-hb-20r",
+    "name": "HB-20R",
+    "brand": "Harley Benton",
+    "category": "amplis-guitare",
+    "price": 7900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 39,
+    "rating": 4.3,
+    "reviewCount": 22,
+    "releasedAt": "2024-05-17",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Transistor",
+      "Puissance": "20 W",
+      "Haut-parleur": "1x8\"",
+      "Canaux": "2",
+      "Réverbe": "Oui"
+    },
+    "description": "Le Harley Benton HB-20R couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Transistor · Puissance : 20 W · Haut-parleur : 1x8\"."
+  },
+  {
+    "id": "PRD-0043",
+    "sku": "POS-SPARK4-043",
+    "slug": "positive-grid-spark-40",
+    "name": "Spark 40",
+    "brand": "Positive Grid",
+    "category": "amplis-guitare",
+    "price": 25415,
+    "listPrice": 29900,
+    "discountPct": 15,
+    "currency": "EUR",
+    "stock": 15,
+    "rating": 4.4,
+    "reviewCount": 148,
+    "releasedAt": "2025-06-05",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": true,
+    "colors": [
+      "Black",
+      "Pearl"
+    ],
+    "specs": {
+      "Type": "Modélisation",
+      "Puissance": "40 W",
+      "Haut-parleur": "2x4\"",
+      "Bluetooth": "Oui",
+      "App": "Oui"
+    },
+    "description": "Le Positive Grid Spark 40 couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Modélisation · Puissance : 40 W · Haut-parleur : 2x4\"."
+  },
+  {
+    "id": "PRD-0044",
+    "sku": "AMP-ROCKET-044",
+    "slug": "ampeg-rocket-bass-rb-115",
+    "name": "Rocket Bass RB-115",
+    "brand": "Ampeg",
+    "category": "amplis-basse",
+    "price": 41175,
+    "listPrice": 54900,
+    "discountPct": 25,
+    "currency": "EUR",
+    "stock": 25,
+    "rating": 3.5,
+    "reviewCount": 19,
+    "releasedAt": "2023-05-01",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Combo",
+      "Puissance": "200 W",
+      "Haut-parleur": "1x15\"",
+      "DI": "Oui"
+    },
+    "description": "Le Ampeg Rocket Bass RB-115 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 200 W · Haut-parleur : 1x15\"."
+  },
+  {
+    "id": "PRD-0045",
+    "sku": "MAR-CMD121-045",
+    "slug": "markbass-cmd-121p",
+    "name": "CMD 121P",
+    "brand": "Markbass",
+    "category": "amplis-basse",
+    "price": 89900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 9,
+    "rating": 4.1,
+    "reviewCount": 58,
+    "releasedAt": "2024-04-20",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black/Yellow"
+    ],
+    "specs": {
+      "Type": "Combo",
+      "Puissance": "300 W",
+      "Haut-parleur": "1x12\"",
+      "Poids": "13 kg"
+    },
+    "description": "Le Markbass CMD 121P allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 300 W · Haut-parleur : 1x12\"."
+  },
+  {
+    "id": "PRD-0046",
+    "sku": "FEN-RUMBLE-046",
+    "slug": "fender-rumble-100-v3",
+    "name": "Rumble 100 V3",
+    "brand": "Fender",
+    "category": "amplis-basse",
+    "price": 34900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 39,
+    "rating": 3.7,
+    "reviewCount": 87,
+    "releasedAt": "2024-11-24",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": true,
+    "colors": [
+      "Black/Silver"
+    ],
+    "specs": {
+      "Type": "Combo",
+      "Puissance": "100 W",
+      "Haut-parleur": "1x12\"",
+      "Overdrive": "Oui"
+    },
+    "description": "Le Fender Rumble 100 V3 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 100 W · Haut-parleur : 1x12\"."
+  },
+  {
+    "id": "PRD-0047",
+    "sku": "HAR-HD75XX-047",
+    "slug": "hartke-hd75",
+    "name": "HD75",
+    "brand": "Hartke",
+    "category": "amplis-basse",
+    "price": 29900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 21,
+    "rating": 3.3,
+    "reviewCount": 237,
+    "releasedAt": "2023-12-17",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Combo",
+      "Puissance": "75 W",
+      "Haut-parleur": "1x12\"",
+      "EQ": "3 bandes"
+    },
+    "description": "Le Hartke HD75 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 75 W · Haut-parleur : 1x12\"."
+  },
+  {
+    "id": "PRD-0048",
+    "sku": "HAR-BA40BX-048",
+    "slug": "harley-benton-ba-40b",
+    "name": "BA-40B",
+    "brand": "Harley Benton",
+    "category": "amplis-basse",
+    "price": 12900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 13,
+    "rating": 3.6,
+    "reviewCount": 195,
+    "releasedAt": "2023-07-03",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Combo",
+      "Puissance": "40 W",
+      "Haut-parleur": "1x10\"",
+      "EQ": "3 bandes"
+    },
+    "description": "Le Harley Benton BA-40B allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 40 W · Haut-parleur : 1x10\"."
+  },
+  {
+    "id": "PRD-0049",
+    "sku": "GAL-MB110X-049",
+    "slug": "gallien-krueger-mb110",
+    "name": "MB110",
+    "brand": "Gallien-Krueger",
+    "category": "amplis-basse",
+    "price": 42900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 20,
+    "rating": 4.6,
+    "reviewCount": 182,
+    "releasedAt": "2023-12-19",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Combo",
+      "Puissance": "100 W",
+      "Haut-parleur": "1x10\"",
+      "Poids": "10 kg"
+    },
+    "description": "Le Gallien-Krueger MB110 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 100 W · Haut-parleur : 1x10\"."
+  },
+  {
+    "id": "PRD-0050",
+    "sku": "BOS-DS1DIS-050",
+    "slug": "boss-ds-1-distortion",
+    "name": "DS-1 Distortion",
+    "brand": "Boss",
+    "category": "pedales-effets",
+    "price": 4130,
+    "listPrice": 5900,
+    "discountPct": 30,
+    "currency": "EUR",
+    "stock": 26,
+    "rating": 4.3,
+    "reviewCount": 56,
+    "releasedAt": "2025-12-18",
+    "bestSeller": true,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Orange"
+    ],
+    "specs": {
+      "Type": "Distorsion",
+      "Alimentation": "9 V",
+      "True Bypass": "Non",
+      "Réglages": "3"
+    },
+    "description": "La Boss DS-1 Distortion est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Distorsion · Alimentation : 9 V · True Bypass : Non."
+  },
+  {
+    "id": "PRD-0051",
+    "sku": "IBA-TS9TUB-051",
+    "slug": "ibanez-ts9-tube-screamer",
+    "name": "TS9 Tube Screamer",
+    "brand": "Ibanez",
+    "category": "pedales-effets",
+    "price": 10900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 4,
+    "rating": 3.1,
+    "reviewCount": 123,
+    "releasedAt": "2023-08-04",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Green"
+    ],
+    "specs": {
+      "Type": "Overdrive",
+      "Alimentation": "9 V",
+      "True Bypass": "Non",
+      "Réglages": "3"
+    },
+    "description": "La Ibanez TS9 Tube Screamer est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Overdrive · Alimentation : 9 V · True Bypass : Non."
+  },
+  {
+    "id": "PRD-0052",
+    "sku": "ELE-BIGMUF-052",
+    "slug": "electro-harmonix-big-muff-pi",
+    "name": "Big Muff Pi",
+    "brand": "Electro Harmonix",
+    "category": "pedales-effets",
+    "price": 8900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 34,
+    "rating": 3.3,
+    "reviewCount": 123,
+    "releasedAt": "2023-02-08",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": true,
+    "colors": [
+      "Silver"
+    ],
+    "specs": {
+      "Type": "Fuzz",
+      "Alimentation": "9 V",
+      "True Bypass": "Oui",
+      "Réglages": "3"
+    },
+    "description": "La Electro Harmonix Big Muff Pi est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Fuzz · Alimentation : 9 V · True Bypass : Oui."
+  },
+  {
+    "id": "PRD-0053",
+    "sku": "STR-BIGSKY-053",
+    "slug": "strymon-bigsky-mx",
+    "name": "BigSky MX",
+    "brand": "Strymon",
+    "category": "pedales-effets",
+    "price": 67900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 28,
+    "rating": 3.9,
+    "reviewCount": 169,
+    "releasedAt": "2025-09-11",
+    "bestSeller": false,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Blue"
+    ],
+    "specs": {
+      "Type": "Réverbe",
+      "Alimentation": "9 V",
+      "True Bypass": "Sélectionnable",
+      "Presets": "300"
+    },
+    "description": "La Strymon BigSky MX est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Réverbe · Alimentation : 9 V · True Bypass : Sélectionnable."
+  },
+  {
+    "id": "PRD-0054",
+    "sku": "MXR-M234AN-054",
+    "slug": "mxr-m234-analog-chorus",
+    "name": "M234 Analog Chorus",
+    "brand": "MXR",
+    "category": "pedales-effets",
+    "price": 10115,
+    "listPrice": 11900,
+    "discountPct": 15,
+    "currency": "EUR",
+    "stock": 7,
+    "rating": 3.6,
+    "reviewCount": 98,
+    "releasedAt": "2025-05-31",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Silver"
+    ],
+    "specs": {
+      "Type": "Chorus",
+      "Alimentation": "9 V",
+      "True Bypass": "Oui",
+      "Réglages": "4"
+    },
+    "description": "La MXR M234 Analog Chorus est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Chorus · Alimentation : 9 V · True Bypass : Oui."
+  },
+  {
+    "id": "PRD-0055",
+    "sku": "DUN-CRYBAB-055",
+    "slug": "dunlop-cry-baby-gcb95",
+    "name": "Cry Baby GCB95",
+    "brand": "Dunlop",
+    "category": "pedales-effets",
+    "price": 8910,
+    "listPrice": 9900,
+    "discountPct": 10,
+    "currency": "EUR",
+    "stock": 18,
+    "rating": 3.6,
+    "reviewCount": 100,
+    "releasedAt": "2025-11-16",
+    "bestSeller": true,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Wah",
+      "Alimentation": "9 V",
+      "True Bypass": "Non",
+      "Format": "Pédale"
+    },
+    "description": "La Dunlop Cry Baby GCB95 est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Wah · Alimentation : 9 V · True Bypass : Non."
+  },
+  {
+    "id": "PRD-0056",
+    "sku": "TCE-POLYTU-056",
+    "slug": "tc-electronic-polytune-3",
+    "name": "Polytune 3",
+    "brand": "TC Electronic",
+    "category": "pedales-effets",
+    "price": 8900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 2,
+    "rating": 4,
+    "reviewCount": 191,
+    "releasedAt": "2025-06-11",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Blue"
+    ],
+    "specs": {
+      "Type": "Accordeur",
+      "Alimentation": "9 V",
+      "True Bypass": "Oui",
+      "Buffer": "Oui"
+    },
+    "description": "La TC Electronic Polytune 3 est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Accordeur · Alimentation : 9 V · True Bypass : Oui."
+  },
+  {
+    "id": "PRD-0057",
+    "sku": "HAR-VINTAG-057",
+    "slug": "harley-benton-vintage-overdrive",
+    "name": "Vintage Overdrive",
+    "brand": "Harley Benton",
+    "category": "pedales-effets",
+    "price": 2900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 37,
+    "rating": 3.9,
+    "reviewCount": 222,
+    "releasedAt": "2025-01-13",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Green"
+    ],
+    "specs": {
+      "Type": "Overdrive",
+      "Alimentation": "9 V",
+      "True Bypass": "Oui",
+      "Réglages": "3"
+    },
+    "description": "La Harley Benton Vintage Overdrive est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Overdrive · Alimentation : 9 V · True Bypass : Oui."
+  },
+  {
+    "id": "PRD-0058",
+    "sku": "LIN-HXSTOM-058",
+    "slug": "line-6-hx-stomp-xl",
+    "name": "HX Stomp XL",
+    "brand": "Line 6",
+    "category": "pedales-effets",
+    "price": 74900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 34,
+    "rating": 4,
+    "reviewCount": 143,
+    "releasedAt": "2023-06-11",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Multi-effets",
+      "Alimentation": "9 V DC",
+      "Blocs": "8",
+      "IR": "Oui"
+    },
+    "description": "La Line 6 HX Stomp XL est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Multi-effets · Alimentation : 9 V DC · Blocs : 8."
+  },
+  {
+    "id": "PRD-0059",
+    "sku": "DAD-EXL110-059",
+    "slug": "daddario-exl110-nickel-wound-10-46",
+    "name": "EXL110 Nickel Wound 10-46",
+    "brand": "Daddario",
+    "category": "cordes",
+    "price": 900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 15,
+    "rating": 4.5,
+    "reviewCount": 140,
+    "releasedAt": "2023-11-07",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Standard"
+    ],
+    "specs": {
+      "Instrument": "Guitare électrique",
+      "Tirant": "010-046",
+      "Matière": "Nickel",
+      "Jeux": "1"
+    },
+    "description": "Les cordes Daddario EXL110 Nickel Wound 10-46 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare électrique · Tirant : 010-046 · Matière : Nickel."
+  },
+  {
+    "id": "PRD-0060",
+    "sku": "ERN-REGULA-060",
+    "slug": "ernie-ball-regular-slinky-10-46",
+    "name": "Regular Slinky 10-46",
+    "brand": "Ernie Ball",
+    "category": "cordes",
+    "price": 560,
+    "listPrice": 800,
+    "discountPct": 30,
+    "currency": "EUR",
+    "stock": 10,
+    "rating": 4.8,
+    "reviewCount": 129,
+    "releasedAt": "2025-05-24",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Standard"
+    ],
+    "specs": {
+      "Instrument": "Guitare électrique",
+      "Tirant": "010-046",
+      "Matière": "Nickel",
+      "Jeux": "1"
+    },
+    "description": "Les cordes Ernie Ball Regular Slinky 10-46 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare électrique · Tirant : 010-046 · Matière : Nickel."
+  },
+  {
+    "id": "PRD-0061",
+    "sku": "ERN-SUPERS-061",
+    "slug": "ernie-ball-super-slinky-3-pack",
+    "name": "Super Slinky 3-Pack",
+    "brand": "Ernie Ball",
+    "category": "cordes",
+    "price": 1980,
+    "listPrice": 2200,
+    "discountPct": 10,
+    "currency": "EUR",
+    "stock": 18,
+    "rating": 3.8,
+    "reviewCount": 62,
+    "releasedAt": "2023-11-09",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Standard"
+    ],
+    "specs": {
+      "Instrument": "Guitare électrique",
+      "Tirant": "009-042",
+      "Matière": "Nickel",
+      "Jeux": "3"
+    },
+    "description": "Les cordes Ernie Ball Super Slinky 3-Pack garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare électrique · Tirant : 009-042 · Matière : Nickel."
+  },
+  {
+    "id": "PRD-0062",
+    "sku": "ELI-NANOWE-062",
+    "slug": "elixir-nanoweb-phosphor-bronze-12-53",
+    "name": "Nanoweb Phosphor Bronze 12-53",
+    "brand": "Elixir",
+    "category": "cordes",
+    "price": 1425,
+    "listPrice": 1900,
+    "discountPct": 25,
+    "currency": "EUR",
+    "stock": 38,
+    "rating": 4.7,
+    "reviewCount": 113,
+    "releasedAt": "2023-11-08",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Standard"
+    ],
+    "specs": {
+      "Instrument": "Guitare acoustique",
+      "Tirant": "012-053",
+      "Matière": "Bronze phosphoreux",
+      "Traitement": "Nanoweb"
+    },
+    "description": "Les cordes Elixir Nanoweb Phosphor Bronze 12-53 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare acoustique · Tirant : 012-053 · Matière : Bronze phosphoreux."
+  },
+  {
+    "id": "PRD-0063",
+    "sku": "DAD-EXL170-063",
+    "slug": "daddario-exl170-bass-45-100",
+    "name": "EXL170 Bass 45-100",
+    "brand": "Daddario",
+    "category": "cordes",
+    "price": 2400,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 15,
+    "rating": 3.1,
+    "reviewCount": 200,
+    "releasedAt": "2024-02-19",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Standard"
+    ],
+    "specs": {
+      "Instrument": "Basse 4 cordes",
+      "Tirant": "045-100",
+      "Matière": "Nickel",
+      "Jeux": "1"
+    },
+    "description": "Les cordes Daddario EXL170 Bass 45-100 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Basse 4 cordes · Tirant : 045-100 · Matière : Nickel."
+  },
+  {
+    "id": "PRD-0064",
+    "sku": "SAV-520RCL-064",
+    "slug": "savarez-520r-classical-normal",
+    "name": "520R Classical Normal",
+    "brand": "Savarez",
+    "category": "cordes",
+    "price": 990,
+    "listPrice": 1100,
+    "discountPct": 10,
+    "currency": "EUR",
+    "stock": 36,
+    "rating": 4.1,
+    "reviewCount": 188,
+    "releasedAt": "2025-10-05",
+    "bestSeller": true,
+    "isNew": true,
+    "leftHanded": true,
+    "colors": [
+      "Standard"
+    ],
+    "specs": {
+      "Instrument": "Guitare classique",
+      "Tension": "Normale",
+      "Matière": "Nylon",
+      "Jeux": "1"
+    },
+    "description": "Les cordes Savarez 520R Classical Normal garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare classique · Tension : Normale · Matière : Nylon."
+  },
+  {
+    "id": "PRD-0065",
+    "sku": "ROT-SWINGB-065",
+    "slug": "rotosound-swing-bass-66-45-105",
+    "name": "Swing Bass 66 45-105",
+    "brand": "Rotosound",
+    "category": "cordes",
+    "price": 2900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 6,
+    "rating": 3.6,
+    "reviewCount": 205,
+    "releasedAt": "2023-07-28",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Standard"
+    ],
+    "specs": {
+      "Instrument": "Basse 4 cordes",
+      "Tirant": "045-105",
+      "Matière": "Acier inox",
+      "Jeux": "1"
+    },
+    "description": "Les cordes Rotosound Swing Bass 66 45-105 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Basse 4 cordes · Tirant : 045-105 · Matière : Acier inox."
+  },
+  {
+    "id": "PRD-0066",
+    "sku": "FEN-DELUXE-066",
+    "slug": "fender-deluxe-molded-strat-case",
+    "name": "Deluxe Molded Strat Case",
+    "brand": "Fender",
+    "category": "accessoires",
+    "price": 14900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 8,
+    "rating": 4.9,
+    "reviewCount": 150,
+    "releasedAt": "2025-09-08",
+    "bestSeller": false,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Étui rigide",
+      "Compatibilité": "Stratocaster/Telecaster",
+      "Poids": "3.9 kg"
+    },
+    "description": "Fender Deluxe Molded Strat Case : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Étui rigide · Compatibilité : Stratocaster/Telecaster · Poids : 3.9 kg."
+  },
+  {
+    "id": "PRD-0067",
+    "sku": "HER-GS414B-067",
+    "slug": "hercules-gs414b-plus-stand",
+    "name": "GS414B Plus Stand",
+    "brand": "Hercules",
+    "category": "accessoires",
+    "price": 5500,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 30,
+    "rating": 4.3,
+    "reviewCount": 79,
+    "releasedAt": "2024-11-03",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Stand",
+      "Instrument": "Guitare/Basse",
+      "Système": "Auto Grip"
+    },
+    "description": "Hercules GS414B Plus Stand : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Stand · Instrument : Guitare/Basse · Système : Auto Grip."
+  },
+  {
+    "id": "PRD-0068",
+    "sku": "DUN-TORTEX-068",
+    "slug": "dunlop-tortex-standard-88-pack-12",
+    "name": "Tortex Standard .88 Pack 12",
+    "brand": "Dunlop",
+    "category": "accessoires",
+    "price": 595,
+    "listPrice": 700,
+    "discountPct": 15,
+    "currency": "EUR",
+    "stock": 11,
+    "rating": 3.4,
+    "reviewCount": 141,
+    "releasedAt": "2025-01-11",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": true,
+    "colors": [
+      "Green"
+    ],
+    "specs": {
+      "Type": "Médiators",
+      "Épaisseur": "0.88 mm",
+      "Quantité": "12"
+    },
+    "description": "Dunlop Tortex Standard .88 Pack 12 : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Médiators · Épaisseur : 0.88 mm · Quantité : 12."
+  },
+  {
+    "id": "PRD-0069",
+    "sku": "BOS-PSA230-069",
+    "slug": "boss-psa-230es-adapter",
+    "name": "PSA-230ES Adapter",
+    "brand": "Boss",
+    "category": "accessoires",
+    "price": 2175,
+    "listPrice": 2900,
+    "discountPct": 25,
+    "currency": "EUR",
+    "stock": 19,
+    "rating": 3.3,
+    "reviewCount": 107,
+    "releasedAt": "2024-12-29",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Alimentation",
+      "Tension": "9 V DC",
+      "Intensité": "200 mA"
+    },
+    "description": "Boss PSA-230ES Adapter : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Alimentation · Tension : 9 V DC · Intensité : 200 mA."
+  },
+  {
+    "id": "PRD-0070",
+    "sku": "COR-CSI6PP-070",
+    "slug": "cordial-csi-6-pp-cable-6m",
+    "name": "CSI 6 PP Cable 6m",
+    "brand": "Cordial",
+    "category": "accessoires",
+    "price": 2400,
+    "listPrice": 3200,
+    "discountPct": 25,
+    "currency": "EUR",
+    "stock": 29,
+    "rating": 4,
+    "reviewCount": 173,
+    "releasedAt": "2024-05-08",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Câble jack",
+      "Longueur": "6 m",
+      "Connecteurs": "Jack/Jack"
+    },
+    "description": "Cordial CSI 6 PP Cable 6m : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Câble jack · Longueur : 6 m · Connecteurs : Jack/Jack."
+  },
+  {
+    "id": "PRD-0071",
+    "sku": "SHU-GLXD16-071",
+    "slug": "shure-glxd16-wireless",
+    "name": "GLXD16+ Wireless",
+    "brand": "Shure",
+    "category": "accessoires",
+    "price": 69900,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 13,
+    "rating": 4.6,
+    "reviewCount": 13,
+    "releasedAt": "2025-10-06",
+    "bestSeller": false,
+    "isNew": true,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Système sans fil",
+      "Bande": "2.4/5.8 GHz",
+      "Autonomie": "12 h"
+    },
+    "description": "Shure GLXD16+ Wireless : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Système sans fil · Bande : 2.4/5.8 GHz · Autonomie : 12 h."
+  },
+  {
+    "id": "PRD-0072",
+    "sku": "ERN-POLYPR-072",
+    "slug": "ernie-ball-polypro-strap-black",
+    "name": "Polypro Strap Black",
+    "brand": "Ernie Ball",
+    "category": "accessoires",
+    "price": 960,
+    "listPrice": 1200,
+    "discountPct": 20,
+    "currency": "EUR",
+    "stock": 35,
+    "rating": 3.2,
+    "reviewCount": 153,
+    "releasedAt": "2023-11-21",
+    "bestSeller": true,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black",
+      "Red"
+    ],
+    "specs": {
+      "Type": "Sangle",
+      "Longueur": "96-152 cm",
+      "Matière": "Polypropylène"
+    },
+    "description": "Ernie Ball Polypro Strap Black : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Sangle · Longueur : 96-152 cm · Matière : Polypropylène."
+  },
+  {
+    "id": "PRD-0073",
+    "sku": "PLA-PROWIN-073",
+    "slug": "planet-waves-pro-winder-string-winder",
+    "name": "Pro-Winder String Winder",
+    "brand": "Planet Waves",
+    "category": "accessoires",
+    "price": 1400,
+    "listPrice": null,
+    "discountPct": 0,
+    "currency": "EUR",
+    "stock": 26,
+    "rating": 3.1,
+    "reviewCount": 112,
+    "releasedAt": "2024-04-15",
+    "bestSeller": false,
+    "isNew": false,
+    "leftHanded": false,
+    "colors": [
+      "Black"
+    ],
+    "specs": {
+      "Type": "Outil",
+      "Fonctions": "Bobineur/Coupe-cordes",
+      "Compatibilité": "Universelle"
+    },
+    "description": "Planet Waves Pro-Winder String Winder : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Outil · Fonctions : Bobineur/Coupe-cordes · Compatibilité : Universelle."
+  }
+]
