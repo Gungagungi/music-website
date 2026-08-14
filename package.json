@@ -1,0 +1,30 @@
+{
+  "name": "music-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fretline — a fictional guitar & bass e-commerce demo site with a full QA automation framework",
+  "license": "MIT",
+  "workspaces": [
+    "app",
+    "e2e"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "npm run dev -w app",
+    "build": "npm run build -w app",
+    "start": "npm run start -w app",
+    "lint": "npm run lint -w app && npm run lint -w e2e",
+    "typecheck": "npm run typecheck -w app && npm run typecheck -w e2e",
+    "test": "npm run test -w e2e",
+    "test:smoke": "npm run test:smoke -w e2e",
+    "test:ui": "npm run test:ui -w e2e",
+    "test:api": "npm run test:api -w e2e",
+    "test:a11y": "npm run test:a11y -w e2e",
+    "test:visual": "npm run test:visual -w e2e",
+    "report": "npm run report -w e2e",
+    "perf:smoke": "k6 run perf/smoke.js",
+    "perf:load": "k6 run perf/load.js"
+  }
+}
