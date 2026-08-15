@@ -15,8 +15,9 @@ e2e/reports/
 e2e/.auth/
 e2e/.cache/
 
-# k6
-perf/results/
+# k6 — le dossier est conservé, son contenu non
+perf/results/*
+!perf/results/.gitkeep
 
 # Build & tooling caches
 *.tsbuildinfo

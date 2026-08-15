@@ -1,0 +1,157 @@
+name: Nightly
+
+# The exhaustive run. Everything CI trims for speed happens here: the full
+# regression on all three engines, and a real load test rather than a smoke.
+# Scheduled rather than gating, because a two-hour feedback loop on a pull
+# request is a feedback loop nobody uses.
+on:
+  schedule:
+    - cron: '0 2 * * *' # 02:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  TEST_API_TOKEN: fretline-ci-token
+
+jobs:
+  build:
+    name: Build de production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-build
+          path: app/.next
+          retention-days: 1
+          include-hidden-files: true
+
+  regression-complete:
+    name: Régression ${{ matrix.project }} (${{ matrix.shard }}/2)
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, firefox, webkit]
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: app/.next
+
+      - name: Suite complète
+        working-directory: e2e
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-${{ matrix.project }}-${{ matrix.shard }}.zip
+        run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}/2
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-${{ matrix.project }}-${{ matrix.shard }}
+          path: e2e/blob-report
+          retention-days: 14
+
+      - name: Publier les traces d’échec
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: traces-${{ matrix.project }}-${{ matrix.shard }}
+          path: e2e/test-results
+          retention-days: 14
+
+  charge:
+    name: Test de charge (50 VU)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: app/.next
+
+      - uses: grafana/setup-k6-action@v1
+
+      - name: Démarrer l’application
+        run: |
+          E2E_TEST_MODE=1 npm run start -w app &
+          for _ in $(seq 1 60); do
+            curl -sf http://localhost:3000/api/health >/dev/null && exit 0
+            sleep 1
+          done
+          echo "L’application n’a pas répondu dans le délai imparti." >&2
+          exit 1
+
+      - name: Montée en charge
+        run: k6 run perf/load.js
+
+      - name: Ajouter le résumé au job
+        if: ${{ !cancelled() }}
+        run: cat perf/results/load.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: perf-load
+          path: perf/results
+          retention-days: 30
+
+  rapport:
+    name: Rapport consolidé
+    needs: regression-complete
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: blob-*
+          path: e2e/all-blobs
+          merge-multiple: true
+
+      - name: Fusionner en un rapport unique
+        working-directory: e2e
+        run: npx playwright merge-reports --reporter html,./reporters/summary-reporter.ts ./all-blobs
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: reports/html
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rapport-nightly
+          path: e2e/reports/html
+          retention-days: 30

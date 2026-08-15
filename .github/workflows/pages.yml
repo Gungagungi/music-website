@@ -1,0 +1,87 @@
+name: Publier le rapport sur GitHub Pages
+
+# ⚠️ Ce workflow est prêt mais volontairement inerte pour l'instant.
+#
+# GitHub Pages n'est pas disponible sur un dépôt privé en plan Free. Tant que
+# `music-website` reste privé, ce workflow ne peut pas aboutir — il est donc
+# déclenché uniquement à la main, et sa garde `if` l'empêche de tourner pour
+# rien.
+#
+# Pour l'activer, une fois le dépôt passé en public :
+#   1. Settings → Pages → Source : « GitHub Actions »
+#   2. Lancer ce workflow depuis l'onglet Actions (ou décommenter le `schedule`)
+#
+# Le rapport devient alors consultable à l'adresse
+# https://gungagungi.github.io/music-website/ — un lien partageable dans un CV,
+# ce qu'un artifact de CI n'est pas.
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '30 2 * * *'   # après le nightly
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  TEST_API_TOKEN: fretline-ci-token
+
+jobs:
+  publier:
+    name: Générer et publier le rapport
+    if: ${{ github.event.repository.visibility == 'public' }}
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - run: npm run build -w app
+
+      - name: Suite complète (chromium + API + a11y)
+        working-directory: e2e
+        run: npx playwright test --project=api --project=chromium --project=a11y
+
+      - name: Assembler le site
+        run: |
+          mkdir -p site
+          cp -r e2e/reports/html/* site/
+          mkdir -p site/docs
+          cp -r docs/* site/docs/ 2>/dev/null || true
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploiement
+        uses: actions/deploy-pages@v4
+
+  explication:
+    name: Pourquoi ce workflow ne tourne pas
+    if: ${{ github.event.repository.visibility != 'public' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Expliquer la garde
+        run: |
+          {
+            echo "## ⏸️ Publication non effectuée"
+            echo ""
+            echo "GitHub Pages n'est pas disponible sur un dépôt **privé** en plan Free."
+            echo "Le rapport reste accessible en tant qu'artifact du workflow \`CI\`."
+            echo ""
+            echo "Pour publier : passer le dépôt en public, puis Settings → Pages → Source : GitHub Actions."
+          } >> "$GITHUB_STEP_SUMMARY"
