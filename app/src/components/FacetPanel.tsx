@@ -18,9 +18,32 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const selectedBrands = searchParams.getAll('brand');
   const [minPrice, setMinPrice] = useState(centsToEuroInput(searchParams.get('minPrice')));
   const [maxPrice, setMaxPrice] = useState(centsToEuroInput(searchParams.get('maxPrice')));
+
+  /**
+   * Checkbox state is mirrored locally so a click registers immediately.
+   * Driving these inputs straight from the URL made them appear inert until the
+   * server round-trip finished — the control snapped back to its previous state
+   * for a beat, which reads as a broken filter. The URL stays the source of
+   * truth; this is only the optimistic echo of it.
+   *
+   * The re-sync happens during render rather than in an effect: React's
+   * documented way to adjust state when an input changes, and it avoids the
+   * extra paint an effect would cause.
+   */
+  const paramsKey = searchParams.toString();
+  const [syncedKey, setSyncedKey] = useState(paramsKey);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(() => searchParams.getAll('brand'));
+  const [flags, setFlags] = useState(() => readFlags(searchParams));
+  const [minRating, setMinRating] = useState(() => searchParams.get('minRating') ?? '');
+
+  if (paramsKey !== syncedKey) {
+    setSyncedKey(paramsKey);
+    setSelectedBrands(searchParams.getAll('brand'));
+    setFlags(readFlags(searchParams));
+    setMinRating(searchParams.get('minRating') ?? '');
+  }
 
   function pushWith(mutate: (params: URLSearchParams) => void) {
     const params = new URLSearchParams(searchParams.toString());
@@ -32,6 +55,9 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
   }
 
   function toggleBrand(brand: string, checked: boolean) {
+    setSelectedBrands((current) =>
+      checked ? [...current, brand] : current.filter((value) => value !== brand),
+    );
     pushWith((params) => {
       const kept = params.getAll('brand').filter((value) => value !== brand);
       params.delete('brand');
@@ -40,7 +66,8 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
     });
   }
 
-  function toggleFlag(key: string, checked: boolean) {
+  function toggleFlag(key: FlagKey, checked: boolean) {
+    setFlags((current) => ({ ...current, [key]: checked }));
     pushWith((params) => {
       if (checked) params.set(key, 'true');
       else params.delete(key);
@@ -61,6 +88,9 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
   function clearAll() {
     setMinPrice('');
     setMaxPrice('');
+    setSelectedBrands([]);
+    setFlags({ inStock: false, onSale: false, leftHanded: false });
+    setMinRating('');
     const params = new URLSearchParams();
     const q = searchParams.get('q');
     const sort = searchParams.get('sort');
@@ -165,19 +195,19 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
         <CheckboxRow
           id="facet-in-stock"
           label="En stock uniquement"
-          checked={searchParams.get('inStock') === 'true'}
+          checked={flags.inStock}
           onChange={(checked) => toggleFlag('inStock', checked)}
         />
         <CheckboxRow
           id="facet-on-sale"
           label="En promotion"
-          checked={searchParams.get('onSale') === 'true'}
+          checked={flags.onSale}
           onChange={(checked) => toggleFlag('onSale', checked)}
         />
         <CheckboxRow
           id="facet-left-handed"
           label="Modèle gaucher"
-          checked={searchParams.get('leftHanded') === 'true'}
+          checked={flags.leftHanded}
           onChange={(checked) => toggleFlag('leftHanded', checked)}
         />
       </fieldset>
@@ -190,13 +220,15 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
         <select
           id="facet-min-rating"
           className="mt-2 w-full rounded border border-ink-100 px-2 py-2 text-sm"
-          value={searchParams.get('minRating') ?? ''}
-          onChange={(event) =>
+          value={minRating}
+          onChange={(event) => {
+            const value = event.target.value;
+            setMinRating(value);
             pushWith((params) => {
-              if (event.target.value) params.set('minRating', event.target.value);
+              if (value) params.set('minRating', value);
               else params.delete('minRating');
-            })
-          }
+            });
+          }}
           data-testid="facet-min-rating"
         >
           <option value="">Toutes les notes</option>
@@ -234,6 +266,16 @@ function CheckboxRow({
       </label>
     </div>
   );
+}
+
+type FlagKey = 'inStock' | 'onSale' | 'leftHanded';
+
+function readFlags(params: URLSearchParams): Record<FlagKey, boolean> {
+  return {
+    inStock: params.get('inStock') === 'true',
+    onSale: params.get('onSale') === 'true',
+    leftHanded: params.get('leftHanded') === 'true',
+  };
 }
 
 function centsToEuroInput(value: string | null): string {

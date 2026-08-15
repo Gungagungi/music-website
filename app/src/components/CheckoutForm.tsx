@@ -7,9 +7,9 @@ import { formatPrice } from '@/lib/money';
 import type { Cart } from '@/lib/types';
 
 /**
- * One deliberately seeded defect, gated behind SEED_BUGS=1.
- * See docs/bug-reports/BUG-003-newsletter-missing-label.md for the sibling case;
- * here the "complément d'adresse" field loses its label association.
+ * One deliberately seeded defect, gated behind SEED_BUGS=1 (build-time, since
+ * this is a client component). See docs/bug-reports/BUG-003-missing-form-labels.md
+ * — the "complément d'adresse" field loses its label association.
  */
 const MISSING_LABEL_BUG_ENABLED = process.env.NEXT_PUBLIC_SEED_BUGS === '1';
 
@@ -191,7 +191,6 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
               {MISSING_LABEL_BUG_ENABLED ? (
                 <input
                   type="text"
-                  placeholder="Complément d’adresse"
                   value={address.line2}
                   onChange={(event) => setAddress({ ...address, line2: event.target.value })}
                   className="w-full rounded border border-ink-100 px-3 py-2"

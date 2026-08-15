@@ -44,12 +44,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   };
   db.reviews.push(review);
 
-  // The catalog carries denormalised aggregates, so they have to be refreshed
-  // alongside the write — a classic source of "the list says 4.2, the page says
-  // 4.3" defects worth having a regression test for.
-  const all = reviewsForProduct(product.id);
-  product.reviewCount = all.length;
-  product.rating = Math.round((all.reduce((sum, item) => sum + item.rating, 0) / all.length) * 10) / 10;
+  // The catalog carries denormalised aggregates covering the product's whole
+  // review history, of which only the most recent are stored individually.
+  // Recomputing from the stored rows alone would wipe that history — a rating
+  // of 4.3 over 183 reviews would collapse to whatever the newest reviewer
+  // typed. The aggregate is therefore updated incrementally.
+  const previousTotal = product.rating * product.reviewCount;
+  product.reviewCount += 1;
+  product.rating = Math.round(((previousTotal + parsed.data.rating) / product.reviewCount) * 10) / 10;
 
   return created(review);
 }

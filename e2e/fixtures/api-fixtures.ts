@@ -24,8 +24,17 @@ export const test = base.extend<ApiFixtures>({
     await use(new ApiClient(request));
   },
 
-  otherApi: async ({ request }, use) => {
-    await use(new ApiClient(request));
+  /**
+   * A genuinely independent client, with its own cookie jar.
+   *
+   * Reusing the `request` fixture here would hand both clients the same
+   * cookies — including the guest cart id — so "another user cannot see my
+   * cart" would pass for the wrong reason, or fail for the wrong one.
+   */
+  otherApi: async ({ playwright, baseURL }, use) => {
+    const context = await playwright.request.newContext({ baseURL });
+    await use(new ApiClient(context));
+    await context.dispose();
   },
 
   authedUser: async ({ request }, use) => {
@@ -34,8 +43,10 @@ export const test = base.extend<ApiFixtures>({
     await use({ credentials, token, userId });
   },
 
-  authedApi: async ({ request, authedUser }, use) => {
-    await use(new ApiClient(request).withToken(authedUser.token));
+  authedApi: async ({ playwright, baseURL, authedUser }, use) => {
+    const context = await playwright.request.newContext({ baseURL });
+    await use(new ApiClient(context).withToken(authedUser.token));
+    await context.dispose();
   },
 });
 

@@ -4,8 +4,10 @@ import { CATEGORIES } from '@/data/categories';
 
 /**
  * One deliberately seeded defect, gated behind SEED_BUGS=1.
- * See docs/bug-reports/BUG-003-newsletter-missing-label.md — the newsletter
- * input loses its programmatic label, which axe reports as a WCAG 3.3.2 failure.
+ * See docs/bug-reports/BUG-003-missing-form-labels.md — the newsletter input
+ * loses every source of an accessible name (no label, no aria-label, and no
+ * placeholder either, since axe accepts a placeholder as a last-resort name).
+ * axe reports it as a WCAG 4.1.2 / 3.3.2 failure.
  */
 const MISSING_LABEL_BUG_ENABLED = process.env.SEED_BUGS === '1';
 
@@ -50,7 +52,6 @@ export function Footer() {
             {MISSING_LABEL_BUG_ENABLED ? (
               <input
                 type="email"
-                placeholder="Votre adresse e-mail"
                 className="rounded-md border border-ink-700 bg-ink-900 px-3 py-2 text-white placeholder:text-ink-500"
                 data-testid="newsletter-email"
               />

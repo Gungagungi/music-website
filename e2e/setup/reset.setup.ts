@@ -1,7 +1,7 @@
 import { expect, test as setup } from '@playwright/test';
 
 import { ApiClient } from '@/api/ApiClient';
-import { CATALOG_TOTAL_PRODUCTS } from '@/data/seed';
+import { CATALOG_TOTAL_PRODUCTS, STOCK_TOP_UP } from '@/data/seed';
 
 /**
  * Restores the application to its seeded state, exactly once per run.
@@ -31,4 +31,11 @@ setup('remettre la base de données à son état initial', async ({ request }) =
   expect(body.products).toBe(CATALOG_TOTAL_PRODUCTS);
   expect(body.orders).toBe(0);
   expect(body.carts).toBe(0);
+
+  // Checkout specs consume real inventory, and each browser project runs them
+  // again. Without this top-up the shelf empties partway through a full parallel
+  // run, and specs that have nothing to do with stock start failing on
+  // OUT_OF_STOCK — the worst kind of failure, because it looks like a product bug.
+  const seeded = await api.seed({ stock: [...STOCK_TOP_UP] });
+  expect(seeded.status(), await seeded.text()).toBe(201);
 });
