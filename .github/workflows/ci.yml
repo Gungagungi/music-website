@@ -42,6 +42,13 @@ jobs:
       - name: Vérification des types
         run: npm run typecheck
 
+      # La matrice et le CSV sont dérivés des annotations des specs. Sans cette
+      # garde, ils restent committés dans un état qui décrit une suite qui
+      # n'existe plus — pire qu'absents, puisqu'on continue de s'y fier.
+      - name: Vérifier la traçabilité générée
+        working-directory: e2e
+        run: npm run trace:check
+
       - name: Build de production
         run: npm run build
 

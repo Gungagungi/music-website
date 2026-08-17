@@ -31,7 +31,7 @@ test.describe('Panier — contenu', () => {
     'le panier vide propose un retour vers le catalogue',
     {
       tag: [TAGS.smoke],
-      annotation: [testCase('TC-102', 'État vide du panier')],
+      annotation: [testCase('TC-102', 'État vide du panier'), covers('REQ-CART-01')],
     },
     async ({ cartPage }) => {
       await cartPage.open();
@@ -86,7 +86,7 @@ test.describe('Panier — contenu', () => {
     'vider le panier ligne à ligne ramène à l’état vide',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-105', 'Panier vidé intégralement')],
+      annotation: [testCase('TC-105', 'Panier vidé intégralement'), covers('REQ-CART-07')],
     },
     async ({ cartWith, cartPage }) => {
       await cartWith([{ sku: PRODUCTS.cheap.sku, quantity: 1 }]);

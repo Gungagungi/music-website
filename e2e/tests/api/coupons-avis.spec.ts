@@ -30,10 +30,26 @@ test.describe('API — codes promo', () => {
   );
 
   test.describe('refus', () => {
+    // Chaque scénario porte son propre identifiant : trois cas de test partageant
+    // un seul TC rendent la matrice de traçabilité fausse — une ligne y couvrirait
+    // trois vérifications, et en retirer une passerait inaperçu.
     const cases = [
-      { name: 'inconnu', code: COUPONS.unknown.code, status: 404, expected: 'COUPON_UNKNOWN' },
-      { name: 'expiré', code: COUPONS.expired.code, status: 422, expected: 'COUPON_EXPIRED' },
       {
+        tc: 'TC-271',
+        name: 'inconnu',
+        code: COUPONS.unknown.code,
+        status: 404,
+        expected: 'COUPON_UNKNOWN',
+      },
+      {
+        tc: 'TC-276',
+        name: 'expiré',
+        code: COUPONS.expired.code,
+        status: 422,
+        expected: 'COUPON_EXPIRED',
+      },
+      {
+        tc: 'TC-277',
         name: 'sous le minimum d’achat',
         code: COUPONS.highMinimum.code,
         status: 422,
@@ -46,7 +62,7 @@ test.describe('API — codes promo', () => {
         `un code ${scenario.name} est refusé avec le code ${scenario.expected}`,
         {
           tag: [TAGS.regression, TAGS.contract],
-          annotation: [testCase('TC-271', `Refus de code promo — ${scenario.name}`), covers('REQ-API-41')],
+          annotation: [testCase(scenario.tc, `Refus de code promo — ${scenario.name}`), covers('REQ-API-41')],
         },
         async ({ api }) => {
           await api.addToCartAndTrack({ sku: PRODUCTS.cheap.sku, quantity: 2 });

@@ -13,4 +13,12 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
     },
   },
+  {
+    // Les scripts de maintenance tournent sous Node, hors du contexte Playwright :
+    // `process` et `console` y sont légitimes.
+    files: ['scripts/**/*.mjs', '*.config.mjs'],
+    languageOptions: {
+      globals: { process: 'readonly', console: 'readonly' },
+    },
+  },
 );

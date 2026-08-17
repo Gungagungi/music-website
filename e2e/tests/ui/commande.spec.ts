@@ -204,7 +204,7 @@ test.describe('Tunnel de commande', () => {
     'accéder au tunnel avec un panier vide propose un retour à la boutique',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-129', 'Commande sans panier')],
+      annotation: [testCase('TC-129', 'Commande sans panier'), covers('REQ-ORDER-08')],
     },
     async ({ checkoutPage }) => {
       await checkoutPage.open();

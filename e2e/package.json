@@ -16,9 +16,10 @@
     "test:bugs": "SEED_BUGS=1 playwright test --grep @known-bug",
     "codegen": "playwright codegen http://localhost:3000",
     "report": "playwright show-report reports/html",
-    "trace": "playwright show-trace",
+    "trace": "node scripts/traceability.mjs",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "trace:check": "node scripts/traceability.mjs --check"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

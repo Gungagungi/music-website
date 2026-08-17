@@ -29,7 +29,7 @@ test.describe('Accueil', () => {
     'le panier démarre vide pour un visiteur non identifié',
     {
       tag: [TAGS.smoke],
-      annotation: [testCase('TC-011', 'Compteur panier à l’état initial')],
+      annotation: [testCase('TC-011', 'Compteur panier à l’état initial'), covers('REQ-CART-01')],
     },
     async ({ homePage }) => {
       await expect(homePage.header.cartCount).toHaveText('0');
