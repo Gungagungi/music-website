@@ -143,6 +143,11 @@ jobs:
         working-directory: e2e
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-${{ matrix.project }}-${{ matrix.shard || 'all' }}.zip
+          # Firefox refuses to start as root when $HOME belongs to someone else,
+          # and the container's default $HOME (/github/home) is owned by pwuser.
+          # Chromium and WebKit do not care; Firefox fails at launch, before a
+          # single test runs.
+          HOME: /root
         run: |
           npx playwright test --project=${{ matrix.project }} ${{ matrix.grep }} \
             ${{ matrix.shard && format('--shard={0}/{1}', matrix.shard, matrix.shards) || '' }}
@@ -188,6 +193,7 @@ jobs:
         working-directory: e2e
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-a11y.zip
+          HOME: /root
         run: npx playwright test --project=a11y
 
       - uses: actions/upload-artifact@v4
@@ -221,6 +227,7 @@ jobs:
         working-directory: e2e
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-visual.zip
+          HOME: /root
         run: npx playwright test --project=visual
 
       # The diff images are the whole point of a failed visual run: without them
@@ -317,6 +324,7 @@ jobs:
         env:
           SEED_BUGS: '1'
           NEXT_PUBLIC_SEED_BUGS: '1'
+          HOME: /root
         run: npx playwright test --project=chromium --grep @known-bug
 
       - name: Vérifier que la détection a bien eu lieu
@@ -358,11 +366,14 @@ jobs:
 
       # Every shard and project emits a blob; merging them is what turns eight
       # partial runs into one report a human can read.
+      #
+      # `-c merge.config.ts` is not optional: half these blobs come from the
+      # container (checkout at /__w/...) and half from the runner host
+      # (/home/runner/work/...), and merge-reports refuses two testDirs unless
+      # a config names the canonical one.
       - name: Fusionner en un rapport unique
         working-directory: e2e
-        run: npx playwright merge-reports --reporter html,./reporters/summary-reporter.ts ./all-blobs
-        env:
-          PLAYWRIGHT_HTML_OUTPUT_DIR: reports/html
+        run: npx playwright merge-reports -c merge.config.ts ./all-blobs
 
       - name: Publier le rapport HTML
         uses: actions/upload-artifact@v4

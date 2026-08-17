@@ -52,6 +52,8 @@ jobs:
 
       - name: Suite complète (chromium + API + a11y)
         working-directory: e2e
+        env:
+          HOME: /root
         run: npx playwright test --project=api --project=chromium --project=a11y
 
       - name: Assembler le site

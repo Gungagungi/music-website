@@ -65,6 +65,9 @@ jobs:
         working-directory: e2e
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-${{ matrix.project }}-${{ matrix.shard }}.zip
+          # Firefox will not launch as root unless $HOME is owned by root; the
+          # container's default /github/home belongs to pwuser.
+          HOME: /root
         run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}/2
 
       - uses: actions/upload-artifact@v4
@@ -146,9 +149,7 @@ jobs:
 
       - name: Fusionner en un rapport unique
         working-directory: e2e
-        run: npx playwright merge-reports --reporter html,./reporters/summary-reporter.ts ./all-blobs
-        env:
-          PLAYWRIGHT_HTML_OUTPUT_DIR: reports/html
+        run: npx playwright merge-reports -c merge.config.ts ./all-blobs
 
       - uses: actions/upload-artifact@v4
         with:
