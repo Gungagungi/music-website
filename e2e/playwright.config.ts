@@ -122,6 +122,13 @@ export default defineConfig({
       dependencies: ['setup-db'],
       // Baselines are captured on one engine only. Cross-browser screenshot
       // baselines are a maintenance tax with almost no defect-finding return.
+      //
+      // They are also captured in one *environment*: the CI container. Font
+      // metrics differ enough between distributions to shift every word by a
+      // few pixels, which is a 6% diff and zero real regressions. Running this
+      // project on a workstation will therefore fail — regenerate through the
+      // `Régénérer les baselines visuelles` workflow instead of relaxing
+      // maxDiffPixelRatio, which would blind the suite to actual regressions.
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } },
     },
   ],
