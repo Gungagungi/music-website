@@ -13,6 +13,7 @@ decision cost what it cost.
 | [Traceability matrix](traceability-matrix.md) | Requirement ↔ test case, both ways — **generated**, verified in CI |
 | [Bug reports](bug-reports/) | The three seeded defects, with real reproduction data |
 | [Architecture decisions](adr/) | Four ADRs, including one fix that was wrong and why |
+| [Deployment](deployment.md) | Running it for real — Docker Compose, backups, and the post-deployment check that is not decoration |
 
 ## Where to start
 

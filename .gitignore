@@ -7,6 +7,12 @@ app/.next/
 app/out/
 app/next-env.d.ts
 
+# Commandes de base compilées pour l'image de production (npm run db:build)
+app/dist/
+
+# Sauvegardes produites par scripts/sauvegarde.sh
+sauvegardes/
+
 # Playwright
 e2e/test-results/
 e2e/playwright-report/

@@ -8,8 +8,8 @@ A fictional guitar and bass shop, and the test framework that holds it to accoun
 The shop is not the point. It exists to give the suite something realistic to break — faceted
 search, sorting across pagination, a cart with coupons and VAT, a three-step checkout,
 authentication, stock that actually runs out. Every application design decision was arbitrated by
-testability and determinism, which is why the whole thing runs offline with `npm install && npm test`
-and no database, no Docker, and no native module to compile.
+testability and determinism — including the one to put it on a real PostgreSQL, because two
+checkouts racing for the last unit in stock is not a defect an in-memory store can have.
 
 **175 automated test cases · 129 requirements · 0 untraced · 0 flaky.**
 
@@ -36,10 +36,10 @@ and no database, no Docker, and no native module to compile.
 
 | Suite | Cases | Runtime | Scope |
 | --- | ---: | ---: | --- |
-| **API** | 64 | ~10 s | Every endpoint, response contracts validated with strict Zod schemas, error codes, pagination, negatives, security |
-| **UI** | 88 | ~5 min | Catalogue and facets, sorting, pagination, search, product page, cart, coupons, checkout, authentication, comparator |
-| **Accessibility** | 13 | ~1 min 30 | axe-core WCAG 2.1 A/AA across 8 pages and the checkout funnel, skip link, keyboard-only journey, text alternatives |
-| **Visual** | 10 | ~40 s | Component baselines captured in the CI container |
+| **API** | 65 | ~10 s | Every endpoint, response contracts validated with strict Zod schemas, error codes, pagination, negatives, security |
+| **UI** | 90 | ~5 min | Catalogue and facets, sorting, pagination, search, product page, cart, coupons, checkout, authentication, comparator |
+| **Accessibility** | 15 | ~1 min 30 | axe-core WCAG 2.1 A/AA across 8 pages and the checkout funnel, skip link, keyboard-only journey, text alternatives |
+| **Visual** | 11 | ~40 s | Component baselines captured in the CI container |
 | **Performance** | 2 scripts | 30 s / 4 min | k6 smoke on every PR, load test nightly |
 
 Tags: `@smoke` 36 · `@regression` 122 · `@critical` 54 · `@contract` 19 · `@security` 18 ·
@@ -48,7 +48,7 @@ Tags: `@smoke` 36 · `@regression` 122 · `@critical` 54 · `@contract` 19 · `@
 Browsers: Chromium carries the full regression across three shards; Firefox and WebKit run
 `@smoke` only; mobile Chrome covers the responsive viewport. That split is not laziness — Firefox
 and WebKit have each already caught an engine-specific defect the others never surfaced. But
-running 88 tests three times to find two bugs a year is a bad trade.
+running 90 tests three times to find two bugs a year is a bad trade.
 
 ## Stack
 
@@ -70,7 +70,9 @@ differently.
 ```
 music-website/
 ├── app/                    # System under test — Next.js + REST API
-│   ├── src/lib/            # money.ts, cart.ts, catalog.ts, db.ts, auth.ts, api.ts
+│   ├── src/lib/            # money.ts, cart.ts, catalog.ts, auth.ts, api.ts
+│   ├── src/lib/repositories/  # every SQL query, one module per aggregate
+│   ├── src/db/             # Drizzle schema, migrations, seed, CLI commands
 │   ├── src/app/api/        # REST endpoints + guarded test hooks
 │   └── src/data/           # 73 products, 9 categories, deterministic seed
 ├── e2e/                    # The framework
@@ -84,6 +86,7 @@ music-website/
 │   ├── scripts/            # Traceability generator
 │   └── tests/              # ui/ api/ a11y/ visual/
 ├── perf/                   # k6 — smoke.js, load.js
+├── scripts/                # backups, post-deployment checks
 ├── docs/                   # QA documentation
 └── .github/workflows/      # ci · nightly · visual baselines · pages
 ```
@@ -96,18 +99,24 @@ cd music-website
 npm install
 npx playwright install --with-deps chromium
 
+npm run db:setup   # .env, PostgreSQL in Docker, migrations, seed data
 npm run build      # required — the suite serves the production build
 npm test           # everything
 ```
 
-Three commands after the clone. That is a deliberate design constraint, not a coincidence: a suite
-that needs a database container and a `.env` file is a suite that gets run by CI and by nobody
-else.
+`db:setup` is the line that used to not exist. The store kept everything in memory, and the
+suite ran with no service, no Docker and no `.env` — which was the single biggest factor in
+whether anyone actually ran it. That is now traded for transactional semantics: a whole class
+of defect, starting with two checkouts racing for the last unit in stock, cannot be reached
+from an in-memory store at all. It is a real cost, and it is stated rather than glossed over.
+
+Everything else about the local run is unchanged, including `npm run test:api` finishing in
+about ten seconds.
 
 ### Targeted runs
 
 ```bash
-npm run test:api            # 64 API tests, ~10 s, no browser
+npm run test:api            # 65 API tests, ~10 s, no browser
 npm run test:smoke          # the @smoke set
 npm run test:ui             # UI on Chromium
 npm run test:a11y           # accessibility scans
@@ -214,7 +223,7 @@ from the internals of a blob report, because the job was green and the upload wa
 | Job | Content |
 | --- | --- |
 | `qualite` | ESLint, `tsc --noEmit`, production build — **published as an artifact** |
-| `tests-api` | 64 API tests, no browser |
+| `tests-api` | 65 API tests, no browser |
 | `tests-ui` | Chromium ×3 shards (full regression) + Firefox/WebKit `@smoke` + mobile |
 | `tests-a11y` · `tests-visual` | axe-core scans, baseline comparison |
 | `perf-smoke` | k6, 10 VU / 30 s, `p95 < 500 ms` |
@@ -293,6 +302,7 @@ one, because the failed attempt is what explains the shape of the answer.
 | [Traceability matrix](docs/traceability-matrix.md) | Both directions, generated, CI-verified |
 | [Bug reports](docs/bug-reports/) | Three defects with real reproduction data |
 | [ADRs](docs/adr/) | Four decisions, with what each one costs |
+| [Deployment](docs/deployment.md) | Docker Compose on a VPS, backups, and the post-deployment check |
 
 ## Known limitations
 

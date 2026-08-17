@@ -2,7 +2,7 @@
   "name": "music-website",
   "version": "1.0.0",
   "private": true,
-  "description": "Fretline — a fictional guitar & bass e-commerce demo site with a full QA automation framework",
+  "description": "Fretline \u2014 a fictional guitar & bass e-commerce demo site with a full QA automation framework",
   "license": "MIT",
   "workspaces": [
     "app",
@@ -31,11 +31,12 @@
     "db:migrate": "npm run db:migrate -w app",
     "db:seed": "npm run db:seed -w app",
     "db:reset": "npm run db:reset -w app",
-    "db:env": "[ -f .env ] || (cp .env.example .env && echo '.env créé depuis .env.example')",
+    "db:purge": "npm run db:purge -w app",
+    "db:build": "npm run db:build -w app",
+    "db:env": "node scripts/preparer-env.mjs",
     "db:setup": "npm run db:env && npm run db:up && npm run db:migrate && npm run db:seed",
     "perf:smoke": "k6 run perf/smoke.js",
     "perf:load": "k6 run perf/load.js",
-    "trace": "npm run trace -w e2e",
-    "db:purge": "npm run db:purge -w app"
+    "trace": "npm run trace -w e2e"
   }
 }

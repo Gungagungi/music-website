@@ -1,8 +1,6 @@
-import { pathToFileURL } from 'node:url';
-
 import { sql } from 'drizzle-orm';
 
-import { closePool, db } from '@/db/client';
+import { db } from '@/db/client';
 import type { DbOrTx } from '@/db/client';
 import { cartItems, carts, coupons, orderItems, orders, products, reviews, users } from '@/db/schema';
 import { COUPONS } from '@/data/coupons';
@@ -185,20 +183,4 @@ export async function isDatabaseEmpty(): Promise<boolean> {
     sql`SELECT count(*) AS count FROM ${products}`,
   );
   return Number(result.rows[0]?.count ?? 0) === 0;
-}
-
-/** True when this module was launched directly, false when imported. */
-function runAsScript(): boolean {
-  const invoked = process.argv[1];
-  return Boolean(invoked && import.meta.url === pathToFileURL(invoked).href);
-}
-
-if (runAsScript()) {
-  seedDatabase()
-    .then(() => console.log('[db] graines insérées'))
-    .catch((error: unknown) => {
-      console.error('[db] échec du seed :', error);
-      process.exitCode = 1;
-    })
-    .finally(closePool);
 }

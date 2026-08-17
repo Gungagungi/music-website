@@ -59,7 +59,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-build
-          path: app/.next
+          # `standalone/` est exclu : c'est une copie autonome de l'application
+          # avec ses dépendances tracées, ~70 Mo dont l'image de production est la
+          # seule consommatrice. Les jobs de test lancent `next start`, qui lit
+          # `.next` directement — les embarquer ferait payer ces 70 Mo à un
+          # téléchargement près de dix fois par pipeline, pour rien.
+          path: |
+            app/.next
+            !app/.next/standalone
           retention-days: 1
           include-hidden-files: true
 
@@ -476,6 +483,58 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
+
+  deploiement:
+    name: Image et pile de production
+    runs-on: ubuntu-latest
+    # Indépendant de `qualite` : ce job ne consomme aucun artifact, il rebuild
+    # tout dans l'image. C'est le seul endroit où le Dockerfile, le compose et le
+    # Caddyfile sont exécutés avant un déploiement réel — sans lui, ils
+    # pourrissent en silence et on ne l'apprend qu'un soir de mise en ligne.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurer la pile
+        run: |
+          cat > .env <<EOF
+          FRETLINE_DOMAIN=:80
+          POSTGRES_PASSWORD=$(openssl rand -base64 24)
+          AUTH_SECRET=$(openssl rand -base64 48)
+          EOF
+
+      - name: Construire l’image et démarrer la pile
+        run: docker compose up -d --build
+
+      - name: Attendre que le site réponde
+        run: |
+          for _ in $(seq 1 90); do
+            curl -sf http://localhost/api/health >/dev/null && exit 0
+            sleep 2
+          done
+          echo "La pile n’a pas répondu dans le délai imparti." >&2
+          exit 1
+
+      # Les mêmes vérifications que celles lancées après un déploiement réel, sur
+      # les mêmes artefacts. La plus importante est que /api/test/* réponde 404 :
+      # ces routes effacent la base, et rien dans l'interface ne signale qu'elles
+      # sont ouvertes.
+      - name: Vérifications post-déploiement
+        run: ./scripts/verifier-deploiement.sh http://localhost
+
+      # La commande est celle du service `migrate`, relancée à la main : elle doit
+      # être rejouable sans effet, sinon toute mise à jour du site est un pari.
+      - name: La préparation de base doit être rejouable
+        run: |
+          docker compose run --rm migrate 2>&1 | tee /tmp/rejeu.log
+          grep -q 'base déjà peuplée' /tmp/rejeu.log
+
+      - name: Journaux de la pile
+        if: failure()
+        run: docker compose logs --no-color --tail=200
+
+      - name: Arrêter la pile
+        if: always()
+        run: docker compose down --volumes
 
   rapport:
     name: Rapport consolidé

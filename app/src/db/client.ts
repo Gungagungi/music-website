@@ -82,11 +82,19 @@ export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 /** Accepts either the pool-backed client or an open transaction. */
 export type DbOrTx = Db | Tx;
 
-/** Closes the pool. For scripts and test teardown; the server keeps it open. */
+/**
+ * Closes the pool. For scripts and test teardown; the server keeps it open.
+ *
+ * The handle is cleared *before* the await, so a second caller arriving while
+ * the first is still closing sees nothing to close and returns. `pool.end()`
+ * throws on a second call, and that error — raised from a `finally` — replaces
+ * whatever failure was actually being reported.
+ */
 export async function closePool(): Promise<void> {
-  if (globalRef.__fretlinePool) {
-    await globalRef.__fretlinePool.end();
-    globalRef.__fretlinePool = undefined;
-    globalRef.__fretlineDrizzle = undefined;
-  }
+  const pool = globalRef.__fretlinePool;
+  if (!pool) return;
+
+  globalRef.__fretlinePool = undefined;
+  globalRef.__fretlineDrizzle = undefined;
+  await pool.end();
 }
