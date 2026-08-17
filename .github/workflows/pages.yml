@@ -1,23 +1,18 @@
 name: Publier le rapport sur GitHub Pages
 
-# ⚠️ Ce workflow est prêt mais volontairement inerte pour l'instant.
+# Publie le rapport Playwright sur https://gungagungi.github.io/music-website/
+# — un lien partageable, ce qu'un artifact de CI n'est pas.
 #
-# GitHub Pages n'est pas disponible sur un dépôt privé en plan Free. Tant que
-# `music-website` reste privé, ce workflow ne peut pas aboutir — il est donc
-# déclenché uniquement à la main, et sa garde `if` l'empêche de tourner pour
-# rien.
+# Le workflow relance sa propre suite plutôt que de réutiliser le rapport du
+# nightly : les deux runs sont indépendants, et dépendre d'un artifact produit
+# par un autre workflow ferait échouer la publication chaque fois que le nightly
+# échoue — alors que publier un rapport rouge est précisément ce qu'on veut.
 #
-# Pour l'activer, une fois le dépôt passé en public :
-#   1. Settings → Pages → Source : « GitHub Actions »
-#   2. Lancer ce workflow depuis l'onglet Actions (ou décommenter le `schedule`)
-#
-# Le rapport devient alors consultable à l'adresse
-# https://gungagungi.github.io/music-website/ — un lien partageable dans un CV,
-# ce qu'un artifact de CI n'est pas.
+# La cadence est calée après le nightly pour ne pas se disputer les runners.
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: '30 2 * * *'   # après le nightly
+  schedule:
+    - cron: '30 2 * * *' # 02:30 UTC, après le nightly
 
 permissions:
   contents: read
@@ -35,7 +30,6 @@ env:
 jobs:
   publier:
     name: Générer et publier le rapport
-    if: ${{ github.event.repository.visibility == 'public' }}
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
@@ -71,19 +65,3 @@ jobs:
 
       - id: deploiement
         uses: actions/deploy-pages@v4
-
-  explication:
-    name: Pourquoi ce workflow ne tourne pas
-    if: ${{ github.event.repository.visibility != 'public' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Expliquer la garde
-        run: |
-          {
-            echo "## ⏸️ Publication non effectuée"
-            echo ""
-            echo "GitHub Pages n'est pas disponible sur un dépôt **privé** en plan Free."
-            echo "Le rapport reste accessible en tant qu'artifact du workflow \`CI\`."
-            echo ""
-            echo "Pour publier : passer le dépôt en public, puis Settings → Pages → Source : GitHub Actions."
-          } >> "$GITHUB_STEP_SUMMARY"
