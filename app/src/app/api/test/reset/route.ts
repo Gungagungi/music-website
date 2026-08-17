@@ -1,5 +1,5 @@
+import { resetDatabase } from '@/db/seed';
 import { fail, ok, testEndpointsEnabled, testTokenValid } from '@/lib/api';
-import { resetDb } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,12 +20,9 @@ export async function POST(request: Request) {
     return fail('FORBIDDEN', 'Jeton de test invalide.');
   }
 
-  const db = resetDb();
-  return ok({
-    reset: true,
-    products: db.products.length,
-    users: db.users.length,
-    orders: db.orders.length,
-    carts: db.carts.size,
-  });
+  // TRUNCATE plus a replay of the seeds, in a single transaction: a reset that
+  // failed halfway would leave an empty catalogue behind, and the suite would
+  // report dozens of unrelated failures instead of one clear error.
+  const summary = await resetDatabase();
+  return ok({ reset: true, ...summary });
 }

@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 import { created, fail, parseBody, testEndpointsEnabled, testTokenValid } from '@/lib/api';
 import { toPublicUser } from '@/lib/auth';
-import { getDb, hashPassword, nextUserId } from '@/lib/db';
-import { getProductBySlug } from '@/lib/catalog';
+import { setProductStock } from '@/lib/repositories/products';
+import { createUser } from '@/lib/repositories/users';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,29 +35,20 @@ export async function POST(request: Request) {
   const parsed = await parseBody(request, seedSchema);
   if (!parsed.ok) return parsed.response;
 
-  const db = getDb();
   const createdUsers = [];
 
+  // An address that already exists is skipped, not an error: the endpoint states
+  // a precondition ("this account exists"), and re-running a spec must not start
+  // failing just because the arrangement already holds.
   for (const seed of parsed.data.users ?? []) {
-    const email = seed.email.toLowerCase();
-    if (db.users.some((user) => user.email === email)) continue;
-    const user = {
-      id: nextUserId(),
-      email,
-      firstName: seed.firstName,
-      lastName: seed.lastName,
-      passwordHash: hashPassword(seed.password),
-      createdAt: new Date().toISOString(),
-    };
-    db.users.push(user);
-    createdUsers.push(toPublicUser(user));
+    const user = await createUser(seed);
+    if (user) createdUsers.push(toPublicUser(user));
   }
 
   const updatedStock = [];
   for (const entry of parsed.data.stock ?? []) {
-    const product = getProductBySlug(entry.slug);
+    const product = await setProductStock(entry.slug, entry.quantity);
     if (!product) return fail('NOT_FOUND', `Produit « ${entry.slug} » introuvable.`);
-    product.stock = entry.quantity;
     updatedStock.push({ slug: product.slug, stock: product.stock });
   }
 
