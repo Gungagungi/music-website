@@ -160,14 +160,19 @@ jobs:
           retention-days: 7
 
       # Traces are the reason a failure can be diagnosed without reproducing it
-      # locally. They are only uploaded on failure — they are large.
-      - name: Publier les traces d’échec
-        if: failure()
+      # locally — and a flaky test is precisely the one that will not reproduce.
+      # Uploading only on failure throws away the evidence for every test that
+      # passed on retry, which is how a race survives three pipelines in a row.
+      # `test-results` only holds artifacts for runs that failed at least once,
+      # so a fully green job uploads nothing.
+      - name: Publier les traces (échecs et instables)
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: traces-${{ matrix.project }}-${{ matrix.shard || 'all' }}
           path: e2e/test-results
           retention-days: 7
+          if-no-files-found: ignore
 
   tests-a11y:
     name: Accessibilité

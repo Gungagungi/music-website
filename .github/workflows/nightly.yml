@@ -77,13 +77,16 @@ jobs:
           path: e2e/blob-report
           retention-days: 14
 
-      - name: Publier les traces d’échec
-        if: failure()
+      # Échecs *et* instables : un test qui passe à la relance est celui qui ne
+      # se reproduira pas en local, donc celui dont la trace compte le plus.
+      - name: Publier les traces (échecs et instables)
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: traces-${{ matrix.project }}-${{ matrix.shard }}
           path: e2e/test-results
           retention-days: 14
+          if-no-files-found: ignore
 
   charge:
     name: Test de charge (50 VU)
