@@ -1,13 +1,6 @@
 import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import type {
-  FullConfig,
-  FullResult,
-  Reporter,
-  Suite,
-  TestCase,
-  TestResult,
-} from '@playwright/test/reporter';
+import type { FullConfig, FullResult, Reporter, Suite, TestCase } from '@playwright/test/reporter';
 
 interface ProjectStats {
   passed: number;
@@ -36,53 +29,17 @@ interface FailureRecord {
 export default class SummaryReporter implements Reporter {
   private readonly stats = new Map<string, ProjectStats>();
   private readonly failures: FailureRecord[] = [];
-  private startedAt = 0;
+  private readonly flakes: FailureRecord[] = [];
+  private rootSuite: Suite | undefined;
   private totalTests = 0;
 
   onBegin(_config: FullConfig, suite: Suite): void {
-    this.startedAt = Date.now();
+    this.rootSuite = suite;
     this.totalTests = suite.allTests().length;
   }
 
-  onTestEnd(test: TestCase, result: TestResult): void {
-    const project = test.parent.project()?.name ?? 'inconnu';
-    const entry = this.stats.get(project) ?? {
-      passed: 0,
-      failed: 0,
-      flaky: 0,
-      skipped: 0,
-      durationMs: 0,
-    };
-    entry.durationMs += result.duration;
-
-    switch (test.outcome()) {
-      case 'expected':
-        // A retried test that eventually passed is counted once, on its last run.
-        if (result.retry === test.results.length - 1) entry.passed += 1;
-        break;
-      case 'flaky':
-        if (result.retry === test.results.length - 1) entry.flaky += 1;
-        break;
-      case 'unexpected':
-        if (result.retry === test.results.length - 1) {
-          entry.failed += 1;
-          this.failures.push({
-            project,
-            title: test.titlePath().slice(3).join(' › '),
-            file: test.location.file.split('/').slice(-2).join('/'),
-            message: firstLine(result.error?.message ?? 'Échec sans message.'),
-          });
-        }
-        break;
-      case 'skipped':
-        entry.skipped += 1;
-        break;
-    }
-
-    this.stats.set(project, entry);
-  }
-
   onEnd(result: FullResult): void {
+    this.tally();
     const markdown = this.render(result);
 
     const localPath = 'reports/summary.md';
@@ -91,6 +48,55 @@ export default class SummaryReporter implements Reporter {
 
     const githubSummary = process.env.GITHUB_STEP_SUMMARY;
     if (githubSummary) appendFileSync(githubSummary, `${markdown}\n`, 'utf8');
+  }
+
+  /**
+   * Counts once per test, at the end, from `test.outcome()`.
+   *
+   * Counting inside `onTestEnd` looks equivalent and is not: `outcome()` is
+   * derived from the results recorded so far, so a test that fails then passes
+   * reports `unexpected` on the first call and `flaky` on the second. The
+   * obvious guard against double-counting — comparing `result.retry` to
+   * `test.results.length - 1` — is always true during a live run, because the
+   * results array grows in lockstep with the retry index. The summary therefore
+   * reported the same test as both a failure and a flake.
+   */
+  private tally(): void {
+    for (const test of this.rootSuite?.allTests() ?? []) {
+      const project = test.parent.project()?.name ?? 'inconnu';
+      const entry = this.stats.get(project) ?? {
+        passed: 0,
+        failed: 0,
+        flaky: 0,
+        skipped: 0,
+        durationMs: 0,
+      };
+
+      entry.durationMs += test.results.reduce((sum, attempt) => sum + attempt.duration, 0);
+
+      const outcome = test.outcome();
+      if (outcome === 'expected') entry.passed += 1;
+      else if (outcome === 'skipped') entry.skipped += 1;
+      else if (outcome === 'flaky') {
+        entry.flaky += 1;
+        this.flakes.push(this.describe(test, project));
+      } else {
+        entry.failed += 1;
+        this.failures.push(this.describe(test, project));
+      }
+
+      this.stats.set(project, entry);
+    }
+  }
+
+  private describe(test: TestCase, project: string): FailureRecord {
+    const attempt = test.results.find((candidate) => candidate.error) ?? test.results.at(-1);
+    return {
+      project,
+      title: test.titlePath().slice(3).join(' › '),
+      file: test.location.file.split('/').slice(-2).join('/'),
+      message: firstLine(attempt?.error?.message ?? 'Échec sans message.'),
+    };
   }
 
   private render(result: FullResult): string {
@@ -106,13 +112,17 @@ export default class SummaryReporter implements Reporter {
     );
 
     const icon = result.status === 'passed' ? '✅' : result.status === 'failed' ? '❌' : '⚠️';
-    const wallClock = formatDuration(Date.now() - this.startedAt);
 
     const lines: string[] = [
       `## ${icon} Fretline — résultats des tests`,
       '',
+      // Cumulated test time, not elapsed time: the same summary is rendered
+      // after a live run and after `merge-reports`, where wall clock would be
+      // the duration of the merge itself — a couple of seconds, reported for a
+      // suite that took a quarter of an hour across six machines.
       `**${totals.passed}/${this.totalTests}** réussis · **${totals.failed}** échecs · ` +
-        `**${totals.flaky}** instables · **${totals.skipped}** ignorés · ⏱️ ${wallClock}`,
+        `**${totals.flaky}** instables · **${totals.skipped}** ignorés · ` +
+        `⏱️ ${formatDuration(totals.durationMs)} cumulés`,
       '',
       '| Projet | ✅ | ❌ | ⚠️ Instables | ⏭️ Ignorés | Durée |',
       '| --- | ---: | ---: | ---: | ---: | ---: |',
@@ -124,19 +134,28 @@ export default class SummaryReporter implements Reporter {
       );
     }
 
-    if (this.failures.length > 0) {
-      lines.push('', '### Échecs', '');
-      for (const failure of this.failures.slice(0, 20)) {
-        lines.push(`- **\`${failure.project}\`** · ${failure.file} — ${failure.title}`);
-        lines.push(`  > ${failure.message}`);
-      }
-      if (this.failures.length > 20) {
-        lines.push('', `_…et ${this.failures.length - 20} autres échecs (voir le rapport HTML)._`);
-      }
-    }
+    appendSection(lines, '### Échecs', this.failures);
+
+    // Flakes are surfaced separately rather than folded into the failure list.
+    // A green pipeline that quietly retried its way past an unstable test is
+    // how a suite stops being trusted; naming them keeps the debt visible.
+    appendSection(lines, '### Instables (réussis après relance)', this.flakes);
 
     lines.push('', '_Rapport HTML complet et traces disponibles dans les artifacts du job._');
     return lines.join('\n');
+  }
+}
+
+function appendSection(lines: string[], heading: string, records: FailureRecord[]): void {
+  if (records.length === 0) return;
+
+  lines.push('', heading, '');
+  for (const record of records.slice(0, 20)) {
+    lines.push(`- **\`${record.project}\`** · ${record.file} — ${record.title}`);
+    lines.push(`  > ${record.message}`);
+  }
+  if (records.length > 20) {
+    lines.push('', `_…et ${records.length - 20} autres (voir le rapport HTML)._`);
   }
 }
 

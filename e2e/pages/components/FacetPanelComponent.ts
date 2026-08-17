@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { fillOnceHydrated } from '@/utils/forms';
 
 /**
  * The catalog filter sidebar.
@@ -48,8 +49,8 @@ export class FacetPanelComponent {
 
   /** Bounds are expressed in euros, matching what the shopper types. */
   async setPriceRange(minEuros: number | null, maxEuros: number | null): Promise<void> {
-    await this.minPrice.fill(minEuros === null ? '' : String(minEuros));
-    await this.maxPrice.fill(maxEuros === null ? '' : String(maxEuros));
+    await fillOnceHydrated(this.minPrice, minEuros === null ? '' : String(minEuros));
+    await fillOnceHydrated(this.maxPrice, maxEuros === null ? '' : String(maxEuros));
     await this.applyPrice.click();
     await this.page.waitForURL((url) =>
       minEuros === null

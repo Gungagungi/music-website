@@ -1,0 +1,86 @@
+name: Régénérer les baselines visuelles
+
+# Les captures de référence appartiennent à l'environnement qui les compare.
+#
+# Une baseline produite sur un poste de développement et comparée dans le
+# container CI échoue systématiquement : les polices n'ont pas exactement les
+# mêmes métriques d'un système à l'autre, chaque mot se décale de quelques
+# pixels, et le diff atteint 6 % de l'image sans qu'aucune régression n'ait eu
+# lieu. Baisser le seuil de tolérance pour absorber l'écart reviendrait à rendre
+# la suite aveugle aux vraies régressions.
+#
+# L'environnement de référence est donc le container CI — celui qui garde les
+# merges. Ce workflow y régénère les captures et les recommite sur la branche
+# choisie. À lancer après tout changement d'interface assumé.
+#
+#   Actions → Régénérer les baselines visuelles → Run workflow → choisir la branche
+#
+# Puis relire le diff des PNG comme n'importe quel diff : une baseline acceptée
+# sans être regardée transforme la régression visuelle en formalité.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: baselines-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  TEST_API_TOKEN: fretline-ci-token
+
+jobs:
+  regenerer:
+    name: Régénérer et commiter
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build de production
+        run: npm run build -w app
+
+      - name: Régénérer les captures de référence
+        working-directory: e2e
+        env:
+          HOME: /root
+        run: npx playwright test --project=visual --update-snapshots
+
+      - name: Publier les captures pour relecture
+        uses: actions/upload-artifact@v4
+        with:
+          name: baselines-visuelles
+          path: e2e/tests/visual/__screenshots__
+          retention-days: 14
+
+      - name: Commiter si les captures ont changé
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add e2e/tests/visual/__screenshots__
+
+          if git diff --cached --quiet; then
+            echo "Aucune capture n'a changé : les baselines sont déjà à jour." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          {
+            echo "## 📸 Baselines mises à jour"
+            echo ""
+            git diff --cached --stat
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          git commit -m "test(visual): régénérer les baselines dans l'environnement CI"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

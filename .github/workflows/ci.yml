@@ -1,0 +1,388 @@
+name: CI
+
+# Gate every push and pull request. The split between this workflow and
+# nightly.yml is deliberate: this one has to stay fast enough that nobody is
+# tempted to merge without it, so it runs the full regression on one engine and
+# only the smoke set on the other two. The exhaustive matrix runs at night.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# The Playwright container tag must match the @playwright/test version in
+# e2e/package.json — the image ships browser binaries built for that exact
+# release, and a mismatch fails at launch. It cannot be templated from `env`
+# because `container.image` is evaluated before the env context exists.
+env:
+  NODE_VERSION: '20'
+  TEST_API_TOKEN: fretline-ci-token
+
+jobs:
+  qualite:
+    name: Qualité & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Vérification des types
+        run: npm run typecheck
+
+      - name: Build de production
+        run: npm run build
+
+      # The application is built once and shared with every test job. Rebuilding
+      # it six times would add minutes to the pipeline and, worse, let the jobs
+      # disagree about what they are testing.
+      - name: Publier le build
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-build
+          path: app/.next
+          retention-days: 1
+          include-hidden-files: true
+
+  tests-api:
+    name: Tests API
+    needs: qualite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: app/.next
+
+      # No browser is involved: the API project only uses the request fixture,
+      # which is why this job reports in well under a minute.
+      #
+      # Each job also names its own blob file. Playwright defaults to
+      # `report.zip` for an unsharded run, so several jobs merging into one
+      # directory would silently overwrite each other and the consolidated
+      # report would be missing whole suites.
+      - name: Suite API
+        working-directory: e2e
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-api.zip
+        run: npx playwright test --project=api
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-api
+          path: e2e/blob-report
+          retention-days: 7
+
+  tests-ui:
+    name: UI ${{ matrix.project }}${{ matrix.shard && format(' ({0}/{1})', matrix.shard, matrix.shards) || '' }}
+    needs: qualite
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Chromium carries the full regression, sharded three ways.
+          - project: chromium
+            shard: 1
+            shards: 3
+            grep: ''
+          - project: chromium
+            shard: 2
+            shards: 3
+            grep: ''
+          - project: chromium
+            shard: 3
+            shards: 3
+            grep: ''
+          # Firefox and WebKit run the smoke set only. They exist to catch
+          # engine-specific breakage — and they have already earned their place:
+          # a hydration race and an aborted navigation only ever showed up here.
+          - project: firefox
+            grep: '--grep @smoke'
+          - project: webkit
+            grep: '--grep @smoke'
+          - project: mobile-chrome
+            grep: ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: app/.next
+
+      - name: Suite UI
+        working-directory: e2e
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-${{ matrix.project }}-${{ matrix.shard || 'all' }}.zip
+          # Firefox refuses to start as root when $HOME belongs to someone else,
+          # and the container's default $HOME (/github/home) is owned by pwuser.
+          # Chromium and WebKit do not care; Firefox fails at launch, before a
+          # single test runs.
+          HOME: /root
+        run: |
+          npx playwright test --project=${{ matrix.project }} ${{ matrix.grep }} \
+            ${{ matrix.shard && format('--shard={0}/{1}', matrix.shard, matrix.shards) || '' }}
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-ui-${{ matrix.project }}-${{ matrix.shard || 'all' }}
+          path: e2e/blob-report
+          retention-days: 7
+
+      # Traces are the reason a failure can be diagnosed without reproducing it
+      # locally — and a flaky test is precisely the one that will not reproduce.
+      # Uploading only on failure throws away the evidence for every test that
+      # passed on retry, which is how a race survives three pipelines in a row.
+      # `test-results` only holds artifacts for runs that failed at least once,
+      # so a fully green job uploads nothing.
+      - name: Publier les traces (échecs et instables)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: traces-${{ matrix.project }}-${{ matrix.shard || 'all' }}
+          path: e2e/test-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+  tests-a11y:
+    name: Accessibilité
+    needs: qualite
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: app/.next
+
+      - name: Scans axe-core (WCAG 2.1 AA)
+        working-directory: e2e
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-a11y.zip
+          HOME: /root
+        run: npx playwright test --project=a11y
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-a11y
+          path: e2e/blob-report
+          retention-days: 7
+
+  tests-visual:
+    name: Régression visuelle
+    needs: qualite
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: app/.next
+
+      - name: Comparaison aux baselines
+        working-directory: e2e
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-visual.zip
+          HOME: /root
+        run: npx playwright test --project=visual
+
+      # The diff images are the whole point of a failed visual run: without them
+      # the reviewer has a percentage and no way to judge it.
+      - name: Publier les différences visuelles
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diffs-visuels
+          path: e2e/test-results
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-visual
+          path: e2e/blob-report
+          retention-days: 7
+
+  perf-smoke:
+    name: Performance (smoke)
+    needs: qualite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: app/.next
+
+      - uses: grafana/setup-k6-action@v1
+
+      - name: Démarrer l’application
+        run: |
+          E2E_TEST_MODE=1 npm run start -w app &
+          for _ in $(seq 1 60); do
+            curl -sf http://localhost:3000/api/health >/dev/null && exit 0
+            sleep 1
+          done
+          echo "L’application n’a pas répondu dans le délai imparti." >&2
+          exit 1
+
+      - name: Smoke de charge (10 VU / 30 s)
+        run: k6 run perf/smoke.js
+
+      - name: Ajouter le résumé au job
+        if: ${{ !cancelled() }}
+        run: cat perf/results/smoke.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: perf-smoke
+          path: perf/results
+          retention-days: 7
+
+  demo-defauts:
+    name: Démonstration — détection des défauts
+    needs: qualite
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --user root
+    # The *step* is expected to fail here, not the job: this runs the
+    # application with its three seeded defects enabled and asserts that the
+    # suite still catches them. The job goes green when detection works, which
+    # makes it a real gate on coverage rather than decoration.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      # Rebuilt on purpose: one of the three defects lives in a client component,
+      # so it is baked in at build time through NEXT_PUBLIC_SEED_BUGS.
+      - name: Build avec les défauts activés
+        env:
+          SEED_BUGS: '1'
+          NEXT_PUBLIC_SEED_BUGS: '1'
+        run: npm run build -w app
+
+      - name: La suite doit détecter les trois défauts
+        id: detection
+        continue-on-error: true
+        working-directory: e2e
+        env:
+          SEED_BUGS: '1'
+          NEXT_PUBLIC_SEED_BUGS: '1'
+          HOME: /root
+        run: npx playwright test --project=chromium --grep @known-bug
+
+      - name: Vérifier que la détection a bien eu lieu
+        run: |
+          if [ "${{ steps.detection.outcome }}" = "failure" ]; then
+            {
+              echo "## ✅ Défauts détectés"
+              echo ""
+              echo "La suite a échoué comme prévu sur le build \`SEED_BUGS=1\` : les trois défauts délibérés sont bien détectés."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "## ❌ Défauts non détectés"
+              echo ""
+              echo "La suite est passée au vert sur le build bogué : la couverture a régressé."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+  rapport:
+    name: Rapport consolidé
+    needs: [tests-api, tests-ui, tests-a11y, tests-visual]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Récupérer les rapports partiels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: blob-*
+          path: e2e/all-blobs
+          merge-multiple: true
+
+      # Every shard and project emits a blob; merging them is what turns eight
+      # partial runs into one report a human can read.
+      #
+      # `-c merge.config.ts` is not optional: half these blobs come from the
+      # container (checkout at /__w/...) and half from the runner host
+      # (/home/runner/work/...), and merge-reports refuses two testDirs unless
+      # a config names the canonical one.
+      - name: Fusionner en un rapport unique
+        working-directory: e2e
+        run: npx playwright merge-reports -c merge.config.ts ./all-blobs
+
+      - name: Publier le rapport HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-playwright
+          path: e2e/reports/html
+          retention-days: 30

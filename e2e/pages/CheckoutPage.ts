@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test';
 
 import { BasePage } from '@/pages/BasePage';
 import type { Address } from '@/data/builders/AddressBuilder';
+import { fillOnceHydrated } from '@/utils/forms';
 
 export class CheckoutPage extends BasePage {
   readonly heading: Locator;
@@ -90,14 +91,14 @@ export class CheckoutPage extends BasePage {
   }
 
   async fillShipping(address: Address, email?: string): Promise<void> {
-    if (email !== undefined) await this.emailField.fill(email);
-    await this.firstNameField.fill(address.firstName);
-    await this.lastNameField.fill(address.lastName);
-    await this.line1Field.fill(address.line1);
-    if (address.line2) await this.line2Field.fill(address.line2);
-    await this.postalCodeField.fill(address.postalCode);
-    await this.cityField.fill(address.city);
-    if (address.phone) await this.phoneField.fill(address.phone);
+    if (email !== undefined) await fillOnceHydrated(this.emailField, email);
+    await fillOnceHydrated(this.firstNameField, address.firstName);
+    await fillOnceHydrated(this.lastNameField, address.lastName);
+    await fillOnceHydrated(this.line1Field, address.line1);
+    if (address.line2) await fillOnceHydrated(this.line2Field, address.line2);
+    await fillOnceHydrated(this.postalCodeField, address.postalCode);
+    await fillOnceHydrated(this.cityField, address.city);
+    if (address.phone) await fillOnceHydrated(this.phoneField, address.phone);
   }
 
   async selectPaymentMethod(method: 'carte' | 'virement' | 'paypal'): Promise<void> {
