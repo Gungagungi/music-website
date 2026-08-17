@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { HydrationMarker } from '@/components/HydrationMarker';
 
 import './globals.css';
 
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
         <Footer />
+        <HydrationMarker />
       </body>
     </html>
   );

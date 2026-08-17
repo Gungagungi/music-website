@@ -27,7 +27,26 @@ export abstract class BasePage {
       for (const entry of Array.isArray(value) ? value : [value]) search.append(key, entry);
     }
     const suffix = search.toString() ? `?${search}` : '';
-    return this.page.goto(`${this.path()}${suffix}`);
+    const response = await this.page.goto(`${this.path()}${suffix}`);
+    await this.waitForHydration();
+    return response;
+  }
+
+  /**
+   * Blocks until the page is actually interactive.
+   *
+   * `load` and `domcontentloaded` both fire on server-rendered markup whose
+   * event handlers are not attached yet and whose controlled inputs will be
+   * reset by React's first render. Acting inside that window is how a coupon
+   * form submitted an empty code on WebKit while the field visibly held the
+   * value a moment earlier — the check passed, hydration landed, the state won.
+   *
+   * The application publishes an explicit readiness attribute for this, so the
+   * wait is on a real signal rather than on a duration guessed to be long
+   * enough on the machine it was written on.
+   */
+  async waitForHydration(): Promise<void> {
+    await this.page.locator('html[data-hydrated="true"]').waitFor({ state: 'attached' });
   }
 
   get currentUrl(): URL {
