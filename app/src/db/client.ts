@@ -32,6 +32,21 @@ function connectionString(): string {
       'DATABASE_URL est absent. Lancez `npm run db:up`, puis copiez .env.example vers .env.',
     );
   }
+
+  // Le pilote parse cette chaîne comme une URL et, en cas d'échec, lève un
+  // « Invalid URL » dont il masque l'entrée — par prudence, puisqu'elle contient
+  // un mot de passe. Le message ne désigne alors rien du tout. La cause est
+  // presque toujours la même : un mot de passe généré en base64, dont le `/`
+  // termine la section d'autorité.
+  try {
+    new URL(url);
+  } catch {
+    throw new Error(
+      'DATABASE_URL est mal formée. Cause la plus fréquente : un caractère `/`, `@` ou `?` ' +
+        'dans le mot de passe, qui coupe l’URL. Générer un mot de passe sans : openssl rand -hex 32.',
+    );
+  }
+
   return url;
 }
 

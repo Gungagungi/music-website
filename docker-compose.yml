@@ -14,6 +14,13 @@
 # gardes qui rendent /api/test/{reset,seed,state} inatteignables : sans
 # E2E_TEST_MODE, ces routes répondent 404 avant même de regarder le jeton.
 
+# Nom de projet explicite. Sans lui, Compose le dérive du dossier — le même pour
+# les deux fichiers de ce dépôt — et rapproche les services par leur nom : le
+# `db` de production venait alors recréer le conteneur PostgreSQL de
+# développement, en silence, à la première commande. Deux noms distincts donnent
+# deux jeux de conteneurs, de volumes et de réseaux qui s'ignorent.
+name: fretline
+
 x-app: &app
   build:
     context: .

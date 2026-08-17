@@ -7,6 +7,10 @@
 #   docker compose -f docker-compose.dev.yml up -d --wait
 #   npm run db:migrate && npm run db:seed
 
+# Voir docker-compose.yml : les deux fichiers doivent porter des noms de projet
+# distincts, sans quoi Compose confond leurs services `db`.
+name: fretline-dev
+
 services:
   db:
     image: postgres:17-alpine

@@ -28,6 +28,12 @@ The three variables have no defaults and the stack refuses to start without them
 deliberate: a silent default for a database password or a signing key is worse than no
 default, because it works.
 
+Generate `POSTGRES_PASSWORD` with `openssl rand -hex 32`, not `-base64`. It is interpolated
+into `DATABASE_URL`, and base64's `/` terminates a URL's authority section: the driver reads
+a truncated host and fails with `Invalid URL`, redacting the input as it goes, so the error
+names nothing. Roughly two generated passwords in five hit it. `prod:env` produces URL-safe
+values and refuses a hand-written one that is not.
+
 `AUTH_SECRET` in particular is enforced twice. Compose refuses to interpolate it if it is
 empty, and the application refuses to start if it is absent *or* still set to the demo value
 checked into this repository — that value is public, so anyone could mint a session for any

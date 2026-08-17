@@ -30,7 +30,23 @@ const nom = production ? '.env.production' : '.env';
 const modele = production ? '.env.production.example' : '.env.example';
 const cible = join(repoRoot, nom);
 
-const secret = (octets) => randomBytes(octets).toString('base64');
+/**
+ * `base64url`, pas `base64`.
+ *
+ * POSTGRES_PASSWORD finit dans DATABASE_URL, et l'alphabet base64 contient `/`,
+ * qui termine la section d'autorité d'une URL : le pilote lit alors un hôte
+ * tronqué et échoue sur « Invalid URL ». Trente-neuf pour cent des tirages de
+ * 24 octets contenaient un `/` — un déploiement sur trois échouait, au hasard,
+ * sur une erreur qui ne désigne rien. `base64url` (A-Za-z0-9-_) traverse une URL
+ * sans encodage, à entropie identique.
+ */
+const secret = (octets) => randomBytes(octets).toString('base64url');
+
+/** Le sous-ensemble qui traverse une URL de connexion sans encodage. */
+const traverseUneUrl = (valeur) => /^[A-Za-z0-9._~-]+$/.test(valeur);
+
+const valeurDe = (contenu, variable) =>
+  contenu.match(new RegExp(String.raw`^[ \t]*${variable}[ \t]*=[ \t]*(.+?)[ \t]*$`, 'm'))?.[1];
 
 /**
  * True si la variable est présente ET renseignée.
@@ -66,6 +82,20 @@ if (production) {
 
   remplir('POSTGRES_PASSWORD', secret(24));
   remplir('AUTH_SECRET', secret(36));
+
+  // Un mot de passe écrit à la main, lui, peut venir d'un `openssl rand -base64`
+  // et rapporter le problème que la génération vient d'éviter. Autant le dire
+  // ici plutôt que de laisser le conteneur échouer sur « Invalid URL ».
+  const motDePasse = valeurDe(contenu, 'POSTGRES_PASSWORD');
+  if (motDePasse !== undefined && !traverseUneUrl(motDePasse)) {
+    console.error(
+      `\nPOSTGRES_PASSWORD contient un caractère que DATABASE_URL ne supporte pas.\n` +
+        'Le mot de passe est injecté dans une URL de connexion ; `/` y termine\n' +
+        "l'autorité, et le pilote échoue sur « Invalid URL ».\n\n" +
+        `  openssl rand -hex 32   puis recopier dans ${nom}`,
+    );
+    process.exit(1);
+  }
   // Seule variable que le script ne devine pas — il faut la lui donner.
   remplir('FRETLINE_DOMAIN', domaine);
 
