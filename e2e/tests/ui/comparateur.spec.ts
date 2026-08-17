@@ -60,7 +60,7 @@ test.describe('Comparateur', () => {
     'retirer un produit met à jour le comparateur',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-143', 'Retrait du comparateur')],
+      annotation: [testCase('TC-143', 'Retrait du comparateur'), covers('REQ-CMP-01')],
     },
     async ({ comparePage, page }) => {
       await comparePage.compare([PRODUCTS.inStock.slug, PRODUCTS.leftHanded.slug]);
@@ -76,7 +76,7 @@ test.describe('Comparateur', () => {
     'le comparateur vide explique comment y ajouter des produits',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-144', 'Comparateur vide')],
+      annotation: [testCase('TC-144', 'Comparateur vide'), covers('REQ-CMP-04')],
     },
     async ({ comparePage }) => {
       await comparePage.open();

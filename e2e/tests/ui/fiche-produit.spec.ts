@@ -93,7 +93,7 @@ test.describe('Fiche produit', () => {
     'un modèle gaucher porte son badge',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-065', 'Badge gaucher')],
+      annotation: [testCase('TC-065', 'Badge gaucher'), covers('REQ-PDP-02')],
     },
     async ({ productPage }) => {
       await productPage.openProduct(PRODUCTS.leftHanded.slug);

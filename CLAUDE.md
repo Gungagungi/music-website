@@ -125,4 +125,6 @@ Contraintes CI à connaître avant de toucher aux workflows :
 - Imports de type explicites (`consistent-type-imports`, erreur dans `e2e`).
 - Français pour l'interface, les commentaires, les messages d'erreur API, les noms de tests et les messages de commit (`feat|fix|test|ci(scope): …`). Identifiants de code en anglais.
 - Les commentaires du dépôt expliquent *pourquoi* une décision a été prise, souvent en citant le défaut concret qui l'a motivée. Conserver ce registre plutôt que de paraphraser le code.
-- `docs/test-cases/` et `docs/bug-reports/` sont référencés par les commentaires et les annotations mais **n'existent pas encore** : les créer plutôt que de retirer les références.
+- Documentation QA en anglais (`docs/`, `README.md`), tout le reste en français. C'est un arbitrage assumé : le dépôt sert de portfolio, la doc doit être lisible par un recruteur anglophone.
+- `docs/traceability-matrix.md` et `docs/test-cases/test-cases.csv` sont **générés** par `npm run trace -w e2e` depuis les annotations `testCase()` / `covers()`. Ne jamais les éditer à la main : le job `qualite` lance `trace:check` et échoue si le committé diverge du code. Toute nouvelle spec doit donc porter ses annotations, et la régénération doit être committée dans le même changement.
+- Un identifiant `TC-xxx` couvre **une** vérification. Un cas paramétré donne un identifiant par scénario, sinon la matrice ment (une ligne prétendrait couvrir trois vérifications, et en supprimer une passerait inaperçu).

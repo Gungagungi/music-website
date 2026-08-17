@@ -105,7 +105,7 @@ test.describe('Recherche', () => {
     'la page de recherche sans terme invite à saisir une requête',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-056', 'Recherche vide')],
+      annotation: [testCase('TC-056', 'Recherche vide'), covers('REQ-SEARCH-05')],
     },
     async ({ searchPage }) => {
       await searchPage.open();

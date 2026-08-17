@@ -64,7 +64,7 @@ test.describe('Catalogue — tri et pagination', () => {
     'revenir à « pertinence » retire le paramètre de tri de l’URL',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-043', 'Retour au tri par défaut')],
+      annotation: [testCase('TC-043', 'Retour au tri par défaut'), covers('REQ-SORT-01')],
     },
     async ({ catalogPage }) => {
       await catalogPage.sortBy('prix-asc');
@@ -102,12 +102,22 @@ test.describe('Catalogue — tri et pagination', () => {
       await catalogPage.sortBy('prix-asc');
 
       const firstPage = await catalogPage.displayedSlugs();
+      const firstPrices = await catalogPage.displayedPricesCents();
       await catalogPage.goToPage(2);
       const secondPage = await catalogPage.displayedSlugs();
+      const secondPrices = await catalogPage.displayedPricesCents();
 
       const all = [...firstPage, ...secondPage];
       expect(new Set(all).size, 'Un produit apparaît sur les deux pages.').toBe(all.length);
       expect(all.length).toBe(TOTAL_ELECTRIC_GUITARS);
+
+      // Set integrity alone would miss the ordering defect entirely: sorting each
+      // page after slicing keeps every product exactly once, and each page still
+      // looks perfectly sorted on its own. Only the concatenation exposes it.
+      const prices = [...firstPrices, ...secondPrices];
+      expect(prices, 'La séquence complète n’est pas ordonnée par prix croissant.').toEqual(
+        [...prices].sort((a, b) => a - b),
+      );
     },
   );
 
@@ -149,7 +159,7 @@ test.describe('Catalogue — tri et pagination', () => {
     'la pagination disparaît quand les résultats tiennent sur une page',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-048', 'Pagination masquée')],
+      annotation: [testCase('TC-048', 'Pagination masquée'), covers('REQ-PAGE-01')],
     },
     async ({ catalogPage }) => {
       await catalogPage.facets.selectBrand('Gibson');

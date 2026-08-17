@@ -1,2 +1,325 @@
-# music-website
-A fake music website inspired by Thomann
+# Fretline — QA automation portfolio
+
+[![CI](https://github.com/Gungagungi/music-website/actions/workflows/ci.yml/badge.svg)](https://github.com/Gungagungi/music-website/actions/workflows/ci.yml)
+[![Nightly](https://github.com/Gungagungi/music-website/actions/workflows/nightly.yml/badge.svg)](https://github.com/Gungagungi/music-website/actions/workflows/nightly.yml)
+
+A fictional guitar and bass shop, and the test framework that holds it to account.
+
+The shop is not the point. It exists to give the suite something realistic to break — faceted
+search, sorting across pagination, a cart with coupons and VAT, a three-step checkout,
+authentication, stock that actually runs out. Every application design decision was arbitrated by
+testability and determinism, which is why the whole thing runs offline with `npm install && npm test`
+and no database, no Docker, and no native module to compile.
+
+**175 automated test cases · 129 requirements · 0 untraced · 0 flaky.**
+
+---
+
+## Contents
+
+- [What is covered](#what-is-covered)
+- [Stack](#stack)
+- [Architecture](#architecture)
+- [Running it](#running-it)
+- [Framework design](#framework-design)
+- [Test data](#test-data)
+- [Reporting](#reporting)
+- [Continuous integration](#continuous-integration)
+- [Does any of it catch anything?](#does-any-of-it-catch-anything)
+- [Three problems worth reading about](#three-problems-worth-reading-about)
+- [Documentation](#documentation)
+- [Known limitations](#known-limitations)
+
+---
+
+## What is covered
+
+| Suite | Cases | Runtime | Scope |
+| --- | ---: | ---: | --- |
+| **API** | 64 | ~10 s | Every endpoint, response contracts validated with strict Zod schemas, error codes, pagination, negatives, security |
+| **UI** | 88 | ~5 min | Catalogue and facets, sorting, pagination, search, product page, cart, coupons, checkout, authentication, comparator |
+| **Accessibility** | 13 | ~1 min 30 | axe-core WCAG 2.1 A/AA across 8 pages and the checkout funnel, skip link, keyboard-only journey, text alternatives |
+| **Visual** | 10 | ~40 s | Component baselines captured in the CI container |
+| **Performance** | 2 scripts | 30 s / 4 min | k6 smoke on every PR, load test nightly |
+
+Tags: `@smoke` 36 · `@regression` 122 · `@critical` 54 · `@contract` 19 · `@security` 18 ·
+`@known-bug` 3.
+
+Browsers: Chromium carries the full regression across three shards; Firefox and WebKit run
+`@smoke` only; mobile Chrome covers the responsive viewport. That split is not laziness — Firefox
+and WebKit have each already caught an engine-specific defect the others never surfaced. But
+running 88 tests three times to find two bugs a year is a bad trade.
+
+## Stack
+
+| | |
+| --- | --- |
+| **Test framework** | Playwright 1.62 (TypeScript) — UI, API, accessibility, visual |
+| **Application under test** | Next.js 16 (App Router), React 19, Tailwind 4, TypeScript |
+| **Contract validation** | Zod 4, every response schema `.strict()` |
+| **Accessibility** | axe-core via `@axe-core/playwright` |
+| **Performance** | k6 |
+| **CI** | GitHub Actions — sharding, containers, blob-report merging |
+
+TypeScript on both sides on purpose: one toolchain, one linter, one type-checker, and the test
+suite can import the application's own money helpers rather than reimplementing them slightly
+differently.
+
+## Architecture
+
+```
+music-website/
+├── app/                    # System under test — Next.js + REST API
+│   ├── src/lib/            # money.ts, cart.ts, catalog.ts, db.ts, auth.ts, api.ts
+│   ├── src/app/api/        # REST endpoints + guarded test hooks
+│   └── src/data/           # 73 products, 9 categories, deterministic seed
+├── e2e/                    # The framework
+│   ├── playwright.config.ts
+│   ├── fixtures/           # Typed fixtures — POMs, API clients, auth, cart arrangement
+│   ├── pages/              # Page objects — locators and actions, no assertions
+│   ├── api/                # Typed API client + strict Zod schemas
+│   ├── data/               # Seed mirror + builders
+│   ├── utils/              # Custom matchers, money parsing, a11y helpers
+│   ├── reporters/          # Markdown summary → GitHub job summary
+│   ├── scripts/            # Traceability generator
+│   └── tests/              # ui/ api/ a11y/ visual/
+├── perf/                   # k6 — smoke.js, load.js
+├── docs/                   # QA documentation
+└── .github/workflows/      # ci · nightly · visual baselines · pages
+```
+
+## Running it
+
+```bash
+git clone https://github.com/Gungagungi/music-website.git
+cd music-website
+npm install
+npx playwright install --with-deps chromium
+
+npm run build      # required — the suite serves the production build
+npm test           # everything
+```
+
+Three commands after the clone. That is a deliberate design constraint, not a coincidence: a suite
+that needs a database container and a `.env` file is a suite that gets run by CI and by nobody
+else.
+
+### Targeted runs
+
+```bash
+npm run test:api            # 64 API tests, ~10 s, no browser
+npm run test:smoke          # the @smoke set
+npm run test:ui             # UI on Chromium
+npm run test:a11y           # accessibility scans
+npm run report              # open the HTML report
+npm run perf:smoke          # k6 (k6 must be installed)
+
+cd e2e
+npx playwright test tests/ui/panier.spec.ts --project=chromium
+npx playwright test --project=chromium -g "modifier la quantité" --headed
+npx playwright test --project=chromium --debug
+```
+
+> **`npm run test:visual` fails on a workstation. That is expected.** Baselines belong to the CI
+> container — see [ADR-004](docs/adr/004-visual-baselines.md).
+
+## Framework design
+
+**Page objects expose locators and actions, never assertions.** Expectations stay in the specs.
+The alternative grows one method per assertion and produces failure messages that point three
+files away from the test's intent.
+
+**Fixtures compose the arrangement.** `cartWith([{ sku, quantity }])` arranges a cart through the
+API and hands it to the browser; `registeredUser` builds an account unique to the worker;
+`signInAs` reuses a stored session. A checkout spec spends its first line arranging and the rest
+verifying.
+
+**Domain matchers state the business fact.**
+
+```ts
+await expect(cartPage.discount).toShowPrice(-826);
+await expect(catalogPage.prices).toBeSortedByPrice('asc');
+```
+
+The alternative — read the text, strip four kinds of Unicode space, parse a French decimal,
+compare — states the plumbing and buries the intent underneath it. Both matchers poll through
+`toPass`, because **`expect.extend` matchers do not inherit the auto-retry of built-in
+assertions** — a fact that cost two flaky tests to learn.
+
+**Money is integer cents everywhere.** VAT is extracted from a VAT-inclusive total, never added on
+top. A test that computed expected totals in floating point would agree with a buggy
+implementation about as often as with a correct one.
+
+**Every API response is validated against a `.strict()` schema.** Strictness is the point: a
+permissive schema happily accepts a response that leaked `passwordHash` alongside the fields you
+asked for.
+
+**Traceability is generated, not maintained.** Specs declare `testCase('TC-110', …)` and
+`covers('REQ-COUPON-01')`; a script derives the matrix and the CSV, and CI fails if the committed
+copies drift. It also rejects duplicate identifiers — which is how `TC-271` was found covering
+three distinct coupon-rejection scenarios at once.
+
+## Test data
+
+**The database is reset once per run, never per test.** This is the most counter-intuitive
+decision in the project and the most important. The store is global to the server process, so a
+`beforeEach(reset)` issued by one worker would delete the cart another worker is halfway through
+checking out — producing non-deterministic failures that land on whichever test was unlucky and
+point nowhere near the cause. This is the kind of design mistake that gets diagnosed as
+"Playwright is flaky".
+
+Isolation comes from making the **data** unique instead of the **database** empty:
+
+| Kind | Mechanism |
+| --- | --- |
+| Stable facts a test only reads | `e2e/data/seed.ts` — `PRODUCTS.outOfStock`, `COUPONS.expired`, `RULES.freeShippingThresholdCents` |
+| Anything a test creates | Builders + faker, unique per worker and timestamp |
+| Finite resources (stock) | `STOCK_TOP_UP` in the setup project, plus a product reserved for the stock-decrement assertion |
+
+That last row is the honest part: order specs consume real stock, and a full run once produced 25
+`OUT_OF_STOCK` failures in whichever projects happened to run last — a failure that looks like a
+product bug and is not. The mitigation is stated in one place rather than worked around test by
+test. See [ADR-002](docs/adr/002-test-data-isolation.md).
+
+Test hooks (`/api/test/reset`, `/seed`, `/state`) are doubly guarded: invisible without
+`E2E_TEST_MODE=1`, then refused without a valid `x-test-token`. `REQ-SEC-12` asserts the guard,
+because a test hook reachable in production is a vulnerability, not a convenience.
+
+## Reporting
+
+| Artefact | Where |
+| --- | --- |
+| Merged HTML report — all shards and projects in one | `rapport-playwright` artifact, 30 days |
+| Markdown summary — per project, failures **and flakes** | GitHub job summary |
+| Traces — failures **and flakes** | `traces-*` artifacts, 7 days |
+| Visual diffs | `diffs-visuels` artifact |
+| k6 results (JSON + Markdown) | `perf-*` artifacts |
+| JUnit XML | `e2e/reports/junit.xml` |
+
+Two choices worth explaining.
+
+**Flaky tests get their own section in the summary.** A green pipeline that quietly retried its
+way past a race is how a suite stops being believed. Naming them keeps the debt visible.
+
+**Traces are kept for flaky tests too**, not just failures. A test that passes on retry is
+precisely the one that will not reproduce locally, so its trace is the only evidence there is.
+This was learned the hard way: diagnosing the hydration race meant extracting an error context
+from the internals of a blob report, because the job was green and the upload was gated on
+`if: failure()`.
+
+## Continuous integration
+
+**`ci.yml`** — every push and pull request, ~6 minutes wall clock:
+
+| Job | Content |
+| --- | --- |
+| `qualite` | ESLint, `tsc --noEmit`, production build — **published as an artifact** |
+| `tests-api` | 64 API tests, no browser |
+| `tests-ui` | Chromium ×3 shards (full regression) + Firefox/WebKit `@smoke` + mobile |
+| `tests-a11y` · `tests-visual` | axe-core scans, baseline comparison |
+| `perf-smoke` | k6, 10 VU / 30 s, `p95 < 500 ms` |
+| `demo-defauts` | Rebuild with the seeded defects and **assert the suite fails** |
+| `rapport` | Merge blob reports into one HTML report + job summary |
+
+The application is built **once** and downloaded by every test job. Seven jobs each building their
+own copy is seven jobs that can disagree about what they are testing.
+
+**`nightly.yml`** — full regression on all three engines (two shards each) and a real load test to
+50 VU. Everything the PR pipeline trims for speed. A two-hour feedback loop on a pull request is a
+feedback loop nobody uses.
+
+**`baselines-visuelles.yml`** — regenerates visual baselines inside the CI container and commits
+them, with the PNGs also published for review.
+
+**`pages.yml`** — delivered ready but inert. GitHub Pages is unavailable on a private repository
+under the Free plan, so a guard prevents it running and a companion job writes the reason into the
+job summary rather than leaving a red workflow with no explanation.
+
+## Does any of it catch anything?
+
+A green pipeline proves nothing about a suite's ability to detect. Three defects sit in the
+codebase behind `SEED_BUGS=1`, chosen for being hard to catch rather than easy to demonstrate:
+
+| Defect | Why this one | Caught by |
+| --- | --- | ---: |
+| [BUG-001](docs/bug-reports/BUG-001-coupon-rounding.md) — discount truncated to whole euros | Wrong by cents; a smoke test that checks "a discount appeared" passes on it | 5 tests |
+| [BUG-002](docs/bug-reports/BUG-002-sort-after-pagination.md) — sort applied after pagination | Every page looks correctly sorted; only the concatenation reveals it | 2 tests |
+| [BUG-003](docs/bug-reports/BUG-003-missing-form-labels.md) — form field with no label | The most common real accessibility defect | 11 tests |
+
+```bash
+SEED_BUGS=1 NEXT_PUBLIC_SEED_BUGS=1 npm run build -w app
+SEED_BUGS=1 npm run start -w app
+npm run test:bugs -w e2e
+```
+
+The specs assert the **correct** behaviour, so they are green on a normal build and red on a
+bugged one — rather than asserting a bug is still present, which is an assertion you have to
+delete the day it gets fixed.
+
+The `demo-defauts` CI job runs this and **fails if the suite passes**, making detection a real
+gate on coverage rather than a claim in a README.
+
+## Three problems worth reading about
+
+The interesting part of this project is not the green tick. It is what the first real CI run
+exposed, none of which static validation could see.
+
+**Firefox never started.** Every one of its tests failed in ~20 ms, before a page opened. Firefox
+refuses to run as root when `$HOME` belongs to another user, and the Playwright container's
+default `/github/home` belongs to `pwuser`.
+
+**The report merge refused to run.** Container jobs check out to `/__w/…` and host jobs to
+`/home/runner/work/…`; blob reports record the absolute `testDir`, Playwright sees two, and stops.
+A merge config naming the canonical path unblocks it.
+
+**Two tests were flaky, and both were framework defects.** The trace settled it: at the moment of
+failure the coupon field was empty and the page read *"Les données envoyées sont invalides"* — the
+form had been submitted with nothing in it. The cause was hydration, and the first fix was
+**wrong**: confirming the field holds the value is a snapshot, and hydration can land between the
+confirmation and the click that follows. The right fix was an explicit readiness signal —
+[ADR-003](docs/adr/003-hydration-readiness.md) records the failed attempt as well as the accepted
+one, because the failed attempt is what explains the shape of the answer.
+
+## Documentation
+
+| Document | What it answers |
+| --- | --- |
+| [Test strategy](docs/test-strategy.md) | Risk analysis, layering, data policy, how instability is handled |
+| [Test plan](docs/test-plan.md) | What runs, where, when, at what cost |
+| [Requirements](docs/requirements.md) | The 129 `REQ-*` |
+| [Test cases](docs/test-cases/) | Generated catalogue + six journeys written out in full |
+| [Traceability matrix](docs/traceability-matrix.md) | Both directions, generated, CI-verified |
+| [Bug reports](docs/bug-reports/) | Three defects with real reproduction data |
+| [ADRs](docs/adr/) | Four decisions, with what each one costs |
+
+## Known limitations
+
+Stated rather than glossed over — the boundaries are part of the design.
+
+- **No transactional or concurrency testing.** The in-memory store has no transactions to exercise
+  ([ADR-001](docs/adr/001-in-memory-database.md)).
+- **`test:visual` fails locally.** Baselines belong to the CI container
+  ([ADR-004](docs/adr/004-visual-baselines.md)).
+- **Accessibility is scanned, not certified.** axe-core catches roughly a third to a half of WCAG
+  issues. Keyboard and text-alternative checks are added on top, but passing is not a conformance
+  claim.
+- **Checkout is excluded from the load test.** It decrements real stock, and a load test that
+  empties the catalogue leaves the environment unusable for the suite that runs next.
+- **No penetration testing.** The security suite covers authorisation, isolation and input
+  handling — what a functional QA team can assert. It is not an audit.
+- **The hydration marker is a test affordance in production code.** One attribute set by a
+  component that renders nothing — small, but it exists for the suite and should be named as such.
+
+### Roadmap
+
+- Mutation testing on `lib/money.ts` and `lib/cart.ts` — the arithmetic where a surviving mutant
+  would mean real money
+- Contract tests generated from an OpenAPI spec rather than hand-written schemas
+- Trend reporting across runs (duration, flake rate) rather than per-run snapshots
+- Publish the report to GitHub Pages once the repository goes public — the workflow is written and
+  waiting
+
+---
+
+Demonstration project. No product is actually sold; every brand name is used to make the catalogue
+plausible.

@@ -73,7 +73,7 @@ test.describe('Catalogue — filtres à facettes', () => {
     'décocher une marque la retire du filtre et de l’URL',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-023', 'Retrait d’un filtre marque')],
+      annotation: [testCase('TC-023', 'Retrait d’un filtre marque'), covers('REQ-CAT-02')],
     },
     async ({ catalogPage }) => {
       await catalogPage.facets.selectBrand('Fender');

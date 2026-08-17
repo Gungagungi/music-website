@@ -25,6 +25,7 @@
     "test:visual": "npm run test:visual -w e2e",
     "report": "npm run report -w e2e",
     "perf:smoke": "k6 run perf/smoke.js",
-    "perf:load": "k6 run perf/load.js"
+    "perf:load": "k6 run perf/load.js",
+    "trace": "npm run trace -w e2e"
   }
 }

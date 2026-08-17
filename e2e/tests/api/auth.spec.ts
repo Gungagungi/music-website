@@ -82,7 +82,7 @@ test.describe('API — authentification', () => {
     'la fixture registeredUser fournit un compte authentifié isolé',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-204', 'Isolation des comptes de test')],
+      annotation: [testCase('TC-204', 'Isolation des comptes de test'), covers('REQ-SEC-15')],
     },
     async ({ authedApi, authedUser }) => {
       const profile = await authedApi.expectOk(await authedApi.me(), publicUserSchema);
