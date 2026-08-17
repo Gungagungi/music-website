@@ -114,8 +114,8 @@ request pipeline trims for speed. A two-hour feedback loop on a PR is a feedback
 ### On demand
 
 - `baselines-visuelles.yml` — regenerate screenshots in the container and commit them
-- `pages.yml` — publish the report to GitHub Pages; delivered ready but inert, since Pages is
-  unavailable on a private repository under the Free plan
+- `pages.yml` — publish the report to <https://gungagungi.github.io/music-website/>; also runs
+  daily at 02:30 UTC
 
 ## 6. Performance criteria
 

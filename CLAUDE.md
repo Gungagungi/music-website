@@ -111,7 +111,7 @@ Les baselines (`e2e/tests/visual/__screenshots__/`) sont capturées dans **le co
 - **`ci.yml`** — garde chaque push/PR. `qualite` (lint, typecheck, build) publie `app/.next` en artifact ; tous les jobs de test le téléchargent, l'application n'est buildée qu'une fois. Chromium porte la régression complète en 3 shards, Firefox et WebKit seulement `@smoke` (ils ont déjà attrapé une course d'hydratation et une navigation avortée). Chaque job nomme son propre blob (`PLAYWRIGHT_BLOB_OUTPUT_FILE`), sinon plusieurs `report.zip` s'écrasent silencieusement à la fusion.
 - **`nightly.yml`** — le run exhaustif : régression complète sur les trois moteurs, vrai test de charge.
 - **`baselines-visuelles.yml`** — régénération manuelle des captures (voir ci-dessus).
-- **`pages.yml`** — prêt mais inerte : GitHub Pages n'est pas disponible sur dépôt privé en plan Free, une garde `if` sur la visibilité l'en empêche.
+- **`pages.yml`** — publie le rapport sur https://gungagungi.github.io/music-website/, tous les jours à 02:30 UTC et à la demande. Il relance sa propre suite au lieu de réutiliser le rapport du nightly : dépendre d'un artifact produit ailleurs ferait échouer la publication chaque fois que le nightly échoue, alors qu'un rapport rouge est exactement ce qu'on veut publier.
 
 Contraintes CI à connaître avant de toucher aux workflows :
 

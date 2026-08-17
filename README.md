@@ -231,9 +231,11 @@ feedback loop nobody uses.
 **`baselines-visuelles.yml`** — regenerates visual baselines inside the CI container and commits
 them, with the PNGs also published for review.
 
-**`pages.yml`** — delivered ready but inert. GitHub Pages is unavailable on a private repository
-under the Free plan, so a guard prevents it running and a companion job writes the reason into the
-job summary rather than leaving a red workflow with no explanation.
+**`pages.yml`** — publishes the merged report to
+**<https://gungagungi.github.io/music-website/>**, daily at 02:30 UTC and on demand. It runs its
+own suite rather than reusing the nightly's report: depending on an artifact produced by another
+workflow would break publication every time the nightly fails — and a red report is exactly what
+you want published.
 
 ## Does any of it catch anything?
 
@@ -316,8 +318,8 @@ Stated rather than glossed over — the boundaries are part of the design.
   would mean real money
 - Contract tests generated from an OpenAPI spec rather than hand-written schemas
 - Trend reporting across runs (duration, flake rate) rather than per-run snapshots
-- Publish the report to GitHub Pages once the repository goes public — the workflow is written and
-  waiting
+- Serve the QA docs as rendered HTML on Pages rather than raw Markdown — they read better on
+  GitHub today
 
 ---
 
