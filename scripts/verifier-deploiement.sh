@@ -18,10 +18,39 @@ BASE_URL="${BASE_URL%/}"
 
 echecs=0
 
+# Attente bornée avant de commencer.
+#
+# Lancé juste après `docker compose up -d`, le script tirait dans une pile en
+# cours de démarrage : conteneurs qui n'écoutent pas encore, certificat pas
+# encore obtenu. Huit échecs qui ne disent rien de la conformité du déploiement —
+# le pire résultat possible pour une vérification, puisqu'il ressemble à une
+# vraie alerte. Bornée, en revanche : au-delà, l'absence de réponse *est* le
+# résultat.
+attendre_la_pile() {
+  local limite="${ATTENTE_MAX:-60}" ecoule=0
+
+  until curl -sS -o /dev/null --max-time 5 "${BASE_URL}/api/health" 2>/dev/null; do
+    if (( ecoule >= limite )); then
+      echo "  Aucune réponse de ${BASE_URL} après ${limite} s." >&2
+      echo "  Journaux : docker compose --env-file .env.production logs --tail=50" >&2
+      return 1
+    fi
+    sleep 2
+    ecoule=$((ecoule + 2))
+  done
+
+  (( ecoule > 0 )) && echo "  (la pile a répondu après ${ecoule} s)"
+  return 0
+}
+
 verifier() {
   local libelle="$1" chemin="$2" attendu="$3" methode="${4:-GET}"
   local obtenu
-  obtenu=$(curl -sS -o /dev/null -w '%{http_code}' -X "$methode" "${BASE_URL}${chemin}" || echo '000')
+  # `-w` écrit déjà 000 quand la requête n'aboutit pas ; le `|| echo 000` d'avant
+  # en ajoutait un second, et le rapport affichait un « 000000 » qui n'existe pas.
+  obtenu=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 \
+    -X "$methode" "${BASE_URL}${chemin}" 2>/dev/null || true)
+  obtenu=${obtenu:-000}
 
   if [[ "$obtenu" == "$attendu" ]]; then
     printf '  ok    %-46s %s\n' "$libelle" "$obtenu"
@@ -32,6 +61,8 @@ verifier() {
 }
 
 echo "Vérification de ${BASE_URL}"
+
+attendre_la_pile || exit 1
 
 verifier "page d'accueil"                    /                  200
 verifier "catalogue"           /c/guitares-electriques        200
