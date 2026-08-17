@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { fillOnceHydrated } from '@/utils/forms';
 
 /** Site header: search, account entry point and the cart badge. */
 export class HeaderComponent {
@@ -25,7 +26,7 @@ export class HeaderComponent {
   }
 
   async search(term: string): Promise<void> {
-    await this.searchInput.fill(term);
+    await fillOnceHydrated(this.searchInput, term);
     await this.searchSubmit.click();
   }
 

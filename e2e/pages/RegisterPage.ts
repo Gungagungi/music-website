@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test';
 
 import { BasePage } from '@/pages/BasePage';
 import type { NewUser } from '@/data/builders/UserBuilder';
+import { fillOnceHydrated } from '@/utils/forms';
 
 export class RegisterPage extends BasePage {
   readonly heading: Locator;
@@ -28,10 +29,10 @@ export class RegisterPage extends BasePage {
   }
 
   async register(user: NewUser): Promise<void> {
-    await this.firstNameField.fill(user.firstName);
-    await this.lastNameField.fill(user.lastName);
-    await this.emailField.fill(user.email);
-    await this.passwordField.fill(user.password);
+    await fillOnceHydrated(this.firstNameField, user.firstName);
+    await fillOnceHydrated(this.lastNameField, user.lastName);
+    await fillOnceHydrated(this.emailField, user.email);
+    await fillOnceHydrated(this.passwordField, user.password);
     await this.submit.click();
   }
 

@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
 
 import { BasePage } from '@/pages/BasePage';
+import { fillOnceHydrated } from '@/utils/forms';
 
 /** Scopes one row of the cart table. */
 export class CartLine {
@@ -21,7 +22,7 @@ export class CartLine {
   }
 
   async setQuantity(value: number): Promise<void> {
-    await this.quantity.fill(String(value));
+    await fillOnceHydrated(this.quantity, String(value));
     // The input fires on change and the row re-renders from the API response;
     // waiting for the field to settle avoids racing the refresh.
     await this.quantity.blur();
@@ -80,7 +81,7 @@ export class CartPage extends BasePage {
   }
 
   async applyCoupon(code: string): Promise<void> {
-    await this.couponInput.fill(code);
+    await fillOnceHydrated(this.couponInput, code);
     await this.couponSubmit.click();
   }
 

@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
 
 import { BasePage } from '@/pages/BasePage';
+import { fillOnceHydrated } from '@/utils/forms';
 
 export class LoginPage extends BasePage {
   readonly heading: Locator;
@@ -25,8 +26,8 @@ export class LoginPage extends BasePage {
   }
 
   async login(email: string, password: string): Promise<void> {
-    await this.emailField.fill(email);
-    await this.passwordField.fill(password);
+    await fillOnceHydrated(this.emailField, email);
+    await fillOnceHydrated(this.passwordField, password);
     await this.submit.click();
   }
 

@@ -1,8 +1,8 @@
-import { expect } from '@playwright/test';
 import type { Locator, Page, Response } from '@playwright/test';
 
 import { BasePage } from '@/pages/BasePage';
 import { ProductCardComponent } from '@/pages/components/ProductCardComponent';
+import { fillOnceHydrated } from '@/utils/forms';
 
 export class ProductPage extends BasePage {
   readonly root: Locator;
@@ -80,14 +80,10 @@ export class ProductPage extends BasePage {
   async addToCart(options: { quantity?: number; color?: string } = {}): Promise<'success' | 'error'> {
     if (options.color) await this.colorSelect.selectOption(options.color);
 
-    if (options.quantity) {
-      await this.quantityInput.fill(String(options.quantity));
-      // The quantity input is React-controlled. If hydration lands just after
-      // the fill, React re-renders from its own state and silently discards the
-      // typed value — the cart then receives quantity 1. Observed on WebKit;
-      // confirming the committed value closes the race on every engine.
-      await expect(this.quantityInput).toHaveValue(String(options.quantity));
-    }
+    // Controlled input: a fill that lands before hydration is discarded, and
+    // the cart silently receives quantity 1. See `fillOnceHydrated` — asserting
+    // the value is not enough, the write itself has to be retried.
+    if (options.quantity) await fillOnceHydrated(this.quantityInput, String(options.quantity));
 
     await this.addToCartButton.click();
     await this.page.locator('[data-testid="add-to-cart-status"]:not([data-status="idle"])').waitFor();
