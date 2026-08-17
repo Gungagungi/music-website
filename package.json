@@ -35,6 +35,7 @@
     "db:setup": "npm run db:env && npm run db:up && npm run db:migrate && npm run db:seed",
     "perf:smoke": "k6 run perf/smoke.js",
     "perf:load": "k6 run perf/load.js",
-    "trace": "npm run trace -w e2e"
+    "trace": "npm run trace -w e2e",
+    "db:purge": "npm run db:purge -w app"
   }
 }

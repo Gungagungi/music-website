@@ -1,6 +1,6 @@
 import { created, fail, parseBody } from '@/lib/api';
 import { MAX_QUANTITY_PER_LINE, addItem } from '@/lib/cart';
-import { resolveCart } from '@/lib/cart-session';
+import { resolveCartForWrite } from '@/lib/cart-session';
 import { getProductById, getProductBySku } from '@/lib/catalog';
 import { addItemSchema } from '@/lib/schemas';
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     ]);
   }
 
-  const cart = await resolveCart(request);
+  const cart = await resolveCartForWrite(request);
   const result = await addItem(cart, product.id, quantity, color ?? null);
 
   if (!result.ok) {

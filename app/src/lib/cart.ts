@@ -1,6 +1,7 @@
 import { applyPercent, shippingFor, vatIncludedIn } from '@/lib/money';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-constants';
 import {
+  EPHEMERAL_CART_ID,
   claimCart,
   deleteCartItem,
   deleteCartItems,
@@ -44,6 +45,24 @@ export type Categories = Map<string, string>;
 
 export function emptyTotals(): CartTotals {
   return { subtotal: 0, discount: 0, shipping: 0, vat: 0, total: 0, itemCount: 0 };
+}
+
+/**
+ * A cart that exists only for the duration of the response.
+ *
+ * Handed to visitors who have not put anything in a basket yet. It carries the
+ * nil uuid, so any query it is passed to matches nothing rather than failing —
+ * see EPHEMERAL_CART_ID.
+ */
+export function emptyCart(): Cart {
+  return {
+    id: EPHEMERAL_CART_ID,
+    userId: null,
+    items: [],
+    couponCode: null,
+    totals: emptyTotals(),
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 export type CouponRejection =
