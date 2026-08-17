@@ -1,5 +1,6 @@
-import { randomUUID, scryptSync, randomBytes } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 
+import { hashPassword, verifyPassword } from '@/lib/password';
 import productsSeed from '@/data/products.json';
 import { COUPONS } from '@/data/coupons';
 import { SEED_USERS } from '@/data/users';
@@ -31,20 +32,10 @@ export interface Database {
 
 const PRODUCTS = productsSeed as unknown as Product[];
 
-export function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString('hex');
-  const derived = scryptSync(password, salt, 64).toString('hex');
-  return `${salt}:${derived}`;
-}
-
-export function verifyPassword(password: string, stored: string): boolean {
-  const [salt, expected] = stored.split(':');
-  if (!salt || !expected) return false;
-  const derived = scryptSync(password, salt, 64).toString('hex');
-  // Length-safe comparison; the demo does not need constant-time semantics but
-  // the equality shape should still not leak on differing lengths.
-  return derived.length === expected.length && derived === expected;
-}
+// Re-exported so existing callers keep working while the migration to PostgreSQL
+// lands lot by lot. The implementations moved to lib/password.ts, which outlives
+// this module.
+export { hashPassword, verifyPassword };
 
 function buildSeedDatabase(): Database {
   const users: User[] = SEED_USERS.map((seed) => ({

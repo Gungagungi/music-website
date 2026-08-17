@@ -67,6 +67,25 @@ jobs:
     name: Tests API
     needs: qualite
     runs-on: ubuntu-latest
+    # Job sur le runner hôte : le service publie son port, on l'atteint par
+    # localhost. Les jobs conteneurisés plus bas passent au contraire par le nom
+    # du service — c'est la différence à ne pas confondre.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@localhost:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -79,6 +98,10 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       # No browser is involved: the API project only uses the request fixture,
       # which is why this job reports in well under a minute.
@@ -107,6 +130,23 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    # Job conteneurisé : il partage le réseau des services, donc il joint la base
+    # par le nom du service (`postgres`) et non par localhost, qui désignerait ici
+    # le conteneur du job lui-même.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     strategy:
       fail-fast: false
       matrix:
@@ -145,6 +185,10 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Suite UI
         working-directory: e2e
@@ -188,6 +232,20 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -200,6 +258,10 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Scans axe-core (WCAG 2.1 AA)
         working-directory: e2e
@@ -222,6 +284,20 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -234,6 +310,10 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Comparaison aux baselines
         working-directory: e2e
@@ -263,6 +343,22 @@ jobs:
     name: Performance (smoke)
     needs: qualite
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@localhost:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -275,6 +371,13 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      # Ce job ne lance pas le projet `setup-db`, donc rien ne repassera derrière
+      # pour charger le catalogue : les graines posées ici sont celles que k6
+      # mesure.
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - uses: grafana/setup-k6-action@v1
 
@@ -309,6 +412,20 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     # The *step* is expected to fail here, not the job: this runs the
     # application with its three seeded defects enabled and asserts that the
     # suite still catches them. The job goes green when detection works, which
@@ -328,6 +445,10 @@ jobs:
           SEED_BUGS: '1'
           NEXT_PUBLIC_SEED_BUGS: '1'
         run: npm run build -w app
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: La suite doit détecter les trois défauts
         id: detection

@@ -1,0 +1,39 @@
+# PostgreSQL seul, pour le développement et la suite de tests en local.
+#
+# L'application tourne nativement (`npm run dev` ou `npm run start -w app`) : la
+# reconstruire dans un conteneur à chaque modification coûterait bien plus que ce
+# que l'isolation apporte ici. Le déploiement complet est dans docker-compose.yml.
+#
+#   docker compose -f docker-compose.dev.yml up -d --wait
+#   npm run db:migrate && npm run db:seed
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: fretline-db-dev
+    environment:
+      POSTGRES_USER: fretline
+      POSTGRES_PASSWORD: fretline
+      POSTGRES_DB: fretline
+      # Les données sont jetables et rechargées par les graines : on échange la
+      # durabilité contre la vitesse, ce qui rend `db:reset` sensiblement plus
+      # rapide. À ne jamais reprendre en production.
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+    command: >
+      postgres
+      -c fsync=off
+      -c synchronous_commit=off
+      -c full_page_writes=off
+    ports:
+      - '5432:5432'
+    volumes:
+      - fretline-pgdata-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U fretline -d fretline']
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+
+volumes:
+  fretline-pgdata-dev:
