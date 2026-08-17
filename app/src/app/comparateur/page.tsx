@@ -24,9 +24,12 @@ export default async function ComparePage({
     .filter(Boolean)
     .slice(0, MAX_COMPARED);
 
-  const products = slugs
-    .map((slug) => getProductBySlug(slug))
-    .filter((product): product is NonNullable<typeof product> => Boolean(product));
+  // Fetched in parallel, then the unknown slugs are dropped — the comparator is
+  // reached by hand-edited URLs, so a stale reference must narrow the table
+  // rather than fail the page.
+  const products = (await Promise.all(slugs.map((slug) => getProductBySlug(slug)))).filter(
+    (product): product is NonNullable<typeof product> => Boolean(product),
+  );
 
   // The union of every spec key, so rows line up even when models describe
   // themselves with different attributes.

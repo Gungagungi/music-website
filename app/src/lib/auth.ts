@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
 
-import { getDb } from '@/lib/db';
+import { findUserById } from '@/lib/repositories/users';
 import type { PublicUser, User } from '@/lib/types';
 
 export const AUTH_COOKIE = 'fretline_token';
@@ -58,7 +58,7 @@ export async function currentUserFromRequest(request: Request): Promise<User | n
   if (!token) return null;
   const payload = await verifyToken(token);
   if (!payload) return null;
-  return getDb().users.find((user) => user.id === payload.sub) ?? null;
+  return (await findUserById(payload.sub)) ?? null;
 }
 
 /** Server-component variant: cookie only, no request object available. */
@@ -67,7 +67,7 @@ export async function currentUser(): Promise<User | null> {
   if (!token) return null;
   const payload = await verifyToken(token);
   if (!payload) return null;
-  return getDb().users.find((user) => user.id === payload.sub) ?? null;
+  return (await findUserById(payload.sub)) ?? null;
 }
 
 export async function currentCartId(): Promise<string | null> {

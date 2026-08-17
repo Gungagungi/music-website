@@ -11,6 +11,6 @@ export async function GET(request: Request) {
   const { brand, ...rest } = parsed.data;
   const brands = brand === undefined ? undefined : Array.isArray(brand) ? brand : [brand];
 
-  const result = queryProducts({ ...rest, brands });
+  const result = await queryProducts({ ...rest, brands });
   return ok(result);
 }

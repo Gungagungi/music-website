@@ -19,7 +19,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   return {
     title: product ? `${product.brand} ${product.name}` : 'Produit introuvable',
     description: product?.description,
@@ -28,12 +28,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   const category = CATEGORY_BY_SLUG.get(product.category);
-  const reviews = reviewsForProduct(product.id);
-  const related = queryProducts({ category: product.category, limit: 5 }).items
+  const [reviews, sameCategory] = await Promise.all([
+    reviewsForProduct(product.id),
+    queryProducts({ category: product.category, limit: 5 }),
+  ]);
+  // Five fetched to keep four after dropping the product being viewed.
+  const related = sameCategory.items
     .filter((candidate) => candidate.id !== product.id)
     .slice(0, 4);
 

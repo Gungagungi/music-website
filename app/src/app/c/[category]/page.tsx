@@ -33,9 +33,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   const raw = await searchParams;
   const query = { ...parseCatalogParams(raw), category: definition.slug };
-  const result = queryProducts(query);
-  const brands = listBrands(definition.slug);
-  const priceBounds = priceRangeFor(definition.slug);
+  // The shelf and its two facets do not depend on each other — one round trip.
+  const [result, brands, priceBounds] = await Promise.all([
+    queryProducts(query),
+    listBrands(definition.slug),
+    priceRangeFor(definition.slug),
+  ]);
   const filterCount = activeFilterCount(query);
 
   const baseParams: RawSearchParams = { ...raw };

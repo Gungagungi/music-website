@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: 'Panier' };
 
 export default async function CartPage() {
   const cartId = await currentCartId();
-  const cart: Cart = getCart(cartId) ?? {
+  const cart: Cart = (await getCart(cartId)) ?? {
     id: 'nouveau',
     userId: null,
     items: [],

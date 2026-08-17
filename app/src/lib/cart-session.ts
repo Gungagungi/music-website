@@ -13,7 +13,7 @@ const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 export async function resolveCart(request: Request): Promise<Cart> {
   const user = await currentUserFromRequest(request);
   const requestedId = await cartIdFromRequest(request);
-  const cart = getOrCreateCart(requestedId, user?.id ?? null);
+  const cart = await getOrCreateCart(requestedId, user?.id ?? null);
 
   if (cart.id !== requestedId) {
     (await cookies()).set(CART_COOKIE, cart.id, {

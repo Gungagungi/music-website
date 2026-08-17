@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   if (!parsed.ok) return parsed.response;
 
   const { productId, sku, quantity, color } = parsed.data;
-  const product = productId ? getProductById(productId) : getProductBySku(sku!);
+  const product = productId ? await getProductById(productId) : await getProductBySku(sku!);
   if (!product) return fail('NOT_FOUND', 'Produit introuvable.');
 
   if (color && !product.colors.includes(color)) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   }
 
   const cart = await resolveCart(request);
-  const result = addItem(cart, product.id, quantity, color ?? null);
+  const result = await addItem(cart, product.id, quantity, color ?? null);
 
   if (!result.ok) {
     if (result.reason === 'out_of_stock') {

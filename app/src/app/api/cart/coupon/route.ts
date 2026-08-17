@@ -1,5 +1,6 @@
 import { fail, ok, parseBody } from '@/lib/api';
 import { evaluateCoupon, recalc } from '@/lib/cart';
+import { setCartCoupon } from '@/lib/repositories/carts';
 import { resolveCart } from '@/lib/cart-session';
 import { formatPrice } from '@/lib/money';
 import { couponSchema } from '@/lib/schemas';
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
   if (!parsed.ok) return parsed.response;
 
   const cart = await resolveCart(request);
-  const evaluated = evaluateCoupon(parsed.data.code, cart.items);
+  const evaluated = await evaluateCoupon(parsed.data.code, cart.items);
 
   if (!evaluated.ok) {
     switch (evaluated.reason) {
@@ -29,12 +30,12 @@ export async function POST(request: Request) {
     }
   }
 
-  cart.couponCode = evaluated.coupon.code;
-  return ok(recalc(cart));
+  await setCartCoupon(cart.id, evaluated.coupon.code);
+  return ok(await recalc(cart));
 }
 
 export async function DELETE(request: Request) {
   const cart = await resolveCart(request);
-  cart.couponCode = null;
-  return ok(recalc(cart));
+  await setCartCoupon(cart.id, null);
+  return ok(await recalc(cart));
 }

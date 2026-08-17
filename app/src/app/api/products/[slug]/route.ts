@@ -5,9 +5,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) {
     return fail('NOT_FOUND', `Aucun produit ne correspond à la référence « ${slug} ».`);
   }
-  return ok({ ...product, reviews: reviewsForProduct(product.id) });
+  return ok({ ...product, reviews: await reviewsForProduct(product.id) });
 }

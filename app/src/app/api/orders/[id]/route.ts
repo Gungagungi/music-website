@@ -1,6 +1,6 @@
 import { fail, ok } from '@/lib/api';
 import { currentUserFromRequest } from '@/lib/auth';
-import { getDb } from '@/lib/db';
+import { findOrderByIdOrReference } from '@/lib/repositories/orders';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,9 +11,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const order = getDb().orders.find(
-    (candidate) => candidate.id === id || candidate.reference === id,
-  );
+  const order = await findOrderByIdOrReference(id);
   if (!order) return fail('NOT_FOUND', 'Commande introuvable.');
 
   const providedToken = request.headers.get('x-order-token');

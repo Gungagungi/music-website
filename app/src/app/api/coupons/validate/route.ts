@@ -1,5 +1,5 @@
 import { fail, ok, parseBody } from '@/lib/api';
-import { discountFor, evaluateCoupon } from '@/lib/cart';
+import { discountFor, evaluateCouponWith, pricingInputs } from '@/lib/cart';
 import { resolveCart } from '@/lib/cart-session';
 import { formatPrice } from '@/lib/money';
 import { couponSchema } from '@/lib/schemas';
@@ -12,7 +12,10 @@ export async function POST(request: Request) {
   if (!parsed.ok) return parsed.response;
 
   const cart = await resolveCart(request);
-  const evaluated = evaluateCoupon(parsed.data.code, cart.items);
+  // Loaded once and reused for both the verdict and the amount, so the dry run
+  // costs the same round trips as applying the coupon for real.
+  const { coupon, categories } = await pricingInputs(cart.items, parsed.data.code);
+  const evaluated = evaluateCouponWith(coupon, cart.items, categories);
 
   if (!evaluated.ok) {
     switch (evaluated.reason) {
@@ -33,6 +36,6 @@ export async function POST(request: Request) {
   return ok({
     code: evaluated.coupon.code,
     description: evaluated.coupon.description,
-    discount: discountFor(cart.items, evaluated.coupon),
+    discount: discountFor(cart.items, evaluated.coupon, categories),
   });
 }

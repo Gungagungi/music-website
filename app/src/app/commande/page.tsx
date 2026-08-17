@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: 'Commande' };
 
 export default async function CheckoutPage() {
   const [user, cartId] = await Promise.all([currentUser(), currentCartId()]);
-  const cart = getCart(cartId);
+  const cart = await getCart(cartId);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
