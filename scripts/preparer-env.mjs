@@ -4,6 +4,10 @@
  *
  *   node scripts/preparer-env.mjs               → .env, depuis .env.example
  *   node scripts/preparer-env.mjs --production  → .env.production, depuis .env.production.example
+ *   ... --production --domain=:80               → renseigne aussi FRETLINE_DOMAIN
+ *
+ * Rien n'est jamais écrasé : une variable déjà renseignée est laissée telle
+ * quelle, quel que soit le nombre de passages.
  *
  * Le hasard est le point : une clé de signature en clair dans un fichier
  * d'exemple finirait un jour recopiée sur un serveur, et personne ne s'en
@@ -20,6 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const production = process.argv.includes('--production');
+const domaine = process.argv.find((argument) => argument.startsWith('--domain='))?.slice(9);
 
 const nom = production ? '.env.production' : '.env';
 const modele = production ? '.env.production.example' : '.env.example';
@@ -48,29 +53,40 @@ if (production) {
   // sont de purs secrets n'ont aucune raison de demander une décision humaine :
   // on les remplit ici. FRETLINE_DOMAIN, si.
   const remplies = [];
-  for (const [variable, octets] of [
-    ['POSTGRES_PASSWORD', 24],
-    ['AUTH_SECRET', 36],
-  ]) {
-    if (renseignee(contenu, variable)) continue;
+
+  /** Renseigne une variable déclarée vide par le modèle, sans jamais écraser. */
+  function remplir(variable, valeur) {
+    if (valeur === undefined || renseignee(contenu, variable)) return;
     contenu = contenu.replace(
       new RegExp(String.raw`^[ \t]*${variable}[ \t]*=.*$`, 'm'),
-      `${variable}=${secret(octets)}`,
+      `${variable}=${valeur}`,
     );
     remplies.push(variable);
   }
+
+  remplir('POSTGRES_PASSWORD', secret(24));
+  remplir('AUTH_SECRET', secret(36));
+  // Seule variable que le script ne devine pas — il faut la lui donner.
+  remplir('FRETLINE_DOMAIN', domaine);
+
   if (remplies.length > 0) writeFileSync(cible, contenu);
 
-  if (creation) console.log(`${nom} créé depuis ${modele}, mot de passe et clé tirés au hasard`);
+  if (creation) console.log(`${nom} créé depuis ${modele} — ${remplies.join(', ')}`);
   else if (remplies.length > 0) console.log(`${nom} complété : ${remplies.join(', ')}`);
   else console.log(`${nom} existe déjà — inchangé`);
 
+  // Sortie en échec, et non un simple avertissement : `prod:up` enchaîne sur
+  // `docker compose` avec `&&`. Un code 0 laissait la commande suivante
+  // s'exécuter et échouer sur une erreur d'interpolation — le dernier message à
+  // l'écran étant alors celui qui aide le moins.
   if (!renseignee(contenu, 'FRETLINE_DOMAIN')) {
-    console.log(
-      `\nÀ renseigner à la main dans ${nom} :\n` +
-        '  FRETLINE_DOMAIN=exemple.fr   (nom de domaine public — Caddy obtient le certificat)\n' +
-        '  FRETLINE_DOMAIN=:80          (essai local, sans TLS)',
+    console.error(
+      `\nIl reste FRETLINE_DOMAIN à renseigner dans ${nom}. Le donner ici :\n\n` +
+        '  npm run prod:env -- --domain=:80           essai local, en clair, sans certificat\n' +
+        '  npm run prod:env -- --domain=exemple.fr    domaine public — Caddy obtient le certificat\n\n' +
+        '  puis : npm run prod:up',
     );
+    process.exit(1);
   }
 } else {
   // Un `.env` existant est laissé tel quel, à une exception près : la clé de

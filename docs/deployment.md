@@ -43,18 +43,22 @@ business being there.
 `--env-file` replaces the default without touching it, and the `prod:*` scripts wrap that:
 
 ```bash
-npm run prod:env      # writes .env.production, password and signing key generated
-$EDITOR .env.production   # FRETLINE_DOMAIN=:80  → plain HTTP, no certificate requested
-npm run prod:up       # build + up, through --env-file .env.production
+npm run prod:env -- --domain=:80   # .env.production: password and key generated, HTTP only
+npm run prod:up                    # build + up, through --env-file .env.production
 ./scripts/verifier-deploiement.sh http://localhost
 
 npm run prod:logs
-npm run prod:down     # or prod:nuke to drop the volumes too
+npm run prod:down                  # or prod:nuke to drop the volumes too
 ```
 
-`FRETLINE_DOMAIN` is the one value the script leaves blank. A password and a signing key are
-pure secrets with no human decision behind them; a domain is a decision, and defaulting it to
-`:80` would mean a server quietly serving plain HTTP because somebody skipped a step.
+`--domain` is the one value the script will not invent. A password and a signing key are pure
+secrets with no human decision behind them; a domain is a decision, and defaulting it to `:80`
+would mean a server quietly serving plain HTTP because somebody skipped a step. Omit it and
+the script exits non-zero with the command to run — which is why `prod:up` stops there instead
+of handing you a Compose interpolation error.
+
+Nothing is ever overwritten: a variable that already has a value survives any number of runs,
+`--domain` included.
 
 If ports 80 or 443 are taken locally, set `FRETLINE_HTTP_PORT` / `FRETLINE_HTTPS_PORT`.
 "The port was busy" is a poor reason not to exercise a stack before deploying it.
