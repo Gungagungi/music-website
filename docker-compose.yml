@@ -6,6 +6,10 @@
 #   docker compose up -d --build
 #   ./scripts/verifier-deploiement.sh https://exemple.fr
 #
+# Sur une machine de développement, ce `.env` entrerait en collision avec celui
+# de la suite de tests. Utiliser alors `npm run prod:up`, qui passe
+# `--env-file .env.production` — voir docs/deployment.md.
+#
 # Aucune variable de mode test n'est définie ici, et c'est la première des trois
 # gardes qui rendent /api/test/{reset,seed,state} inatteignables : sans
 # E2E_TEST_MODE, ces routes répondent 404 avant même de regarder le jeton.
@@ -82,10 +86,13 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    # Ports d'hôte configurables : sur un serveur ce sont 80 et 443, mais un essai
+    # local se heurte à tout ce qui les occupe déjà, et « le port est pris » est
+    # une raison stupide de ne pas éprouver sa pile avant de la déployer.
     ports:
-      - '80:80'
-      - '443:443'
-      - '443:443/udp'
+      - '${FRETLINE_HTTP_PORT:-80}:80'
+      - '${FRETLINE_HTTPS_PORT:-443}:443'
+      - '${FRETLINE_HTTPS_PORT:-443}:443/udp'
     environment:
       FRETLINE_DOMAIN: ${FRETLINE_DOMAIN:?FRETLINE_DOMAIN est obligatoire}
     volumes:

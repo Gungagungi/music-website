@@ -33,6 +33,35 @@ empty, and the application refuses to start if it is absent *or* still set to th
 checked into this repository — that value is public, so anyone could mint a session for any
 account with it. Generate one with `openssl rand -base64 48`.
 
+## Trying the stack on a workstation
+
+A development machine already has a `.env` — the one `npm run db:setup` writes for the test
+suite. Compose reads that same file, so pointing the production stack at it means either
+clobbering the development one or watching interpolation fail on a variable that has no
+business being there.
+
+`--env-file` replaces the default without touching it, and the `prod:*` scripts wrap that:
+
+```bash
+npm run prod:env      # writes .env.production, password and signing key generated
+$EDITOR .env.production   # FRETLINE_DOMAIN=:80  → plain HTTP, no certificate requested
+npm run prod:up       # build + up, through --env-file .env.production
+./scripts/verifier-deploiement.sh http://localhost
+
+npm run prod:logs
+npm run prod:down     # or prod:nuke to drop the volumes too
+```
+
+`FRETLINE_DOMAIN` is the one value the script leaves blank. A password and a signing key are
+pure secrets with no human decision behind them; a domain is a decision, and defaulting it to
+`:80` would mean a server quietly serving plain HTTP because somebody skipped a step.
+
+If ports 80 or 443 are taken locally, set `FRETLINE_HTTP_PORT` / `FRETLINE_HTTPS_PORT`.
+"The port was busy" is a poor reason not to exercise a stack before deploying it.
+
+On a server, none of this applies: the file is `.env` and the command is plain
+`docker compose`.
+
 ## What happens on `up`
 
 | Service | Role |

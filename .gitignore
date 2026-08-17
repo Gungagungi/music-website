@@ -33,6 +33,9 @@ perf/results/*
 .env
 .env.local
 .env*.local
+# Environnement de la pile de production, quand on l'essaie depuis un poste qui a
+# déjà un .env de développement. Les .example, eux, sont versionnés.
+.env.production
 
 # OS / editors
 .DS_Store
