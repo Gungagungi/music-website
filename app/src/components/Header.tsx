@@ -7,7 +7,7 @@ import { SearchBar } from '@/components/SearchBar';
 
 export async function Header() {
   const [user, cartId] = await Promise.all([currentUser(), currentCartId()]);
-  const cart = getCart(cartId);
+  const cart = await getCart(cartId);
   const itemCount = cart?.totals.itemCount ?? 0;
 
   return (

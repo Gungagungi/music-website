@@ -11,7 +11,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ it
   if (!parsed.ok) return parsed.response;
 
   const cart = await resolveCart(request);
-  const result = updateItemQuantity(cart, itemId, parsed.data.quantity);
+  const result = await updateItemQuantity(cart, itemId, parsed.data.quantity);
 
   if (!result.ok) {
     if (result.reason === 'out_of_stock') return fail('OUT_OF_STOCK', 'Stock insuffisant.');
@@ -27,7 +27,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ it
 export async function DELETE(request: Request, { params }: { params: Promise<{ itemId: string }> }) {
   const { itemId } = await params;
   const cart = await resolveCart(request);
-  const result = removeItem(cart, itemId);
+  const result = await removeItem(cart, itemId);
   if (!result.ok) return fail('NOT_FOUND', 'Ligne de panier introuvable.');
   return ok(result.cart);
 }

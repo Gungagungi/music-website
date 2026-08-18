@@ -220,6 +220,32 @@ export const healthSchema = z
   })
   .strict();
 
+/** `GET /api/test/state` — server state no UI exposes. */
+export const serverStateSchema = z
+  .object({
+    products: z.number().int().nonnegative(),
+    users: z.number().int().nonnegative(),
+    carts: z.number().int().nonnegative(),
+    orders: z.number().int().nonnegative(),
+    reviews: z.number().int().nonnegative(),
+    counters: z
+      .object({
+        order: z.number().int().nonnegative(),
+        user: z.number().int().nonnegative(),
+      })
+      .strict(),
+  })
+  .strict();
+
+/** `POST /api/test/purge` — what the retention policy deleted, by rule. */
+export const purgeSummarySchema = z
+  .object({
+    emptyCarts: z.number().int().nonnegative(),
+    guestCarts: z.number().int().nonnegative(),
+    dormantAccountCarts: z.number().int().nonnegative(),
+  })
+  .strict();
+
 export const couponPreviewSchema = z
   .object({
     code: z.string().min(1),

@@ -89,6 +89,45 @@ export const PRODUCTS = {
     sku: 'IBA-RG550G-007',
     brand: 'Ibanez',
   },
+  /**
+   * Reserved for the concurrency specs, which force the stock to an exact value
+   * and then assert on what two simultaneous orders did to it.
+   *
+   * One product per spec, and used by nothing else. `fullyParallel` means two
+   * specs arranging the stock of the same product would each see the other's
+   * number, and the failure would read as a race in the application — the very
+   * thing these specs exist to detect. A dedicated product is what keeps a red
+   * run meaningful.
+   */
+  lastUnitRace: {
+    slug: 'gibson-sg-standard',
+    sku: 'GIB-SGSTAN-004',
+    brand: 'Gibson',
+  },
+  /** Reserved for the "never below zero" spec. */
+  stockFloor: {
+    slug: 'epiphone-les-paul-classic',
+    sku: 'EPI-LESPAU-005',
+    brand: 'Epiphone',
+  },
+  /** Reserved for the checkout atomicity spec — the line that must survive. */
+  atomicityIntact: {
+    slug: 'squier-classic-vibe-60s-stratocaster',
+    sku: 'SQU-CLASSI-006',
+    brand: 'Squier',
+  },
+  /** Reserved for the checkout atomicity spec — the line that must fail. */
+  atomicityBlocked: {
+    slug: 'prs-se-custom-24',
+    sku: 'PRS-SECUST-009',
+    brand: 'PRS',
+  },
+  /** Reserved for the retention specs, which need an item that never runs out. */
+  retention: {
+    slug: 'esp-ltd-ec-256',
+    sku: 'ESP-LTDEC2-011',
+    brand: 'ESP',
+  },
 } as const;
 
 /**
@@ -104,6 +143,7 @@ export const STOCK_TOP_UP = [
   { slug: PRODUCTS.inStock.slug, quantity: 999 },
   { slug: PRODUCTS.cheap.slug, quantity: 999 },
   { slug: PRODUCTS.strings.slug, quantity: 999 },
+  { slug: PRODUCTS.retention.slug, quantity: 999 },
 ] as const;
 
 export const CATEGORIES = {
@@ -113,6 +153,30 @@ export const CATEGORIES = {
 } as const;
 
 export const CATALOG_TOTAL_PRODUCTS = 73;
+
+/**
+ * The identity of a cart that was never stored.
+ *
+ * `GET /api/cart` hands this back to a visitor who has no cart, instead of
+ * writing a row for every request that so much as looks at one. It is therefore
+ * also how a spec recognises a cart the retention policy has deleted: the id it
+ * held comes back as the nil uuid. Mirrors EPHEMERAL_CART_ID in
+ * `app/src/lib/repositories/carts.ts`.
+ */
+export const EPHEMERAL_CART_ID = '00000000-0000-0000-0000-000000000000';
+
+/**
+ * Cart retention windows. Mirrors `app/src/lib/retention.ts`.
+ *
+ * The specs age a cart to just inside and just outside each window rather than
+ * reading the threshold and asserting on it — an assertion derived from the same
+ * constant would agree with a broken policy as readily as with a correct one.
+ */
+export const RETENTION = {
+  emptyCartHours: 24,
+  guestCartDays: 30,
+  accountCartDays: 365,
+} as const;
 
 /** Business rules the suite asserts against. Mirrors `app/src/lib/money.ts`. */
 export const RULES = {

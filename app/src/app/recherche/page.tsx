@@ -22,7 +22,9 @@ export default async function SearchPage({
   const raw = await searchParams;
   const query = parseCatalogParams(raw);
   const term = query.q ?? '';
-  const result = term ? queryProducts(query) : { items: [], page: 1, limit: 12, total: 0, totalPages: 1 };
+  const result = term
+    ? await queryProducts(query)
+    : { items: [], page: 1, limit: 12, total: 0, totalPages: 1 };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">

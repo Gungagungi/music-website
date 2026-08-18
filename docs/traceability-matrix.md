@@ -10,10 +10,13 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements covered | 129 |
-| Automated test cases | 175 |
+| Requirements declared | 139 |
+| — covered by this suite | 138 |
+| — verified outside it | 1 |
+| — not covered | 0 |
+| Automated test cases | 185 |
 | — Accessibility | 13 |
-| — API | 64 |
+| — API | 74 |
 | — UI | 88 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
@@ -99,6 +102,15 @@ if the committed copy differs.
 | `REQ-COUPON-03` | `TC-112`, `TC-113` | UI | @regression |
 | `REQ-COUPON-04` | `TC-114` | UI | @regression |
 | `REQ-COUPON-05` | `TC-115` | UI | @critical @regression |
+| `REQ-DATA-01` | `TC-400` | API | @critical @regression |
+| `REQ-DATA-02` | `TC-401` | API | @critical @regression |
+| `REQ-DATA-03` | `TC-402`, `TC-403` | API | @critical @regression |
+| `REQ-DATA-04` | `TC-404` | API | @regression @security |
+| `REQ-DATA-10` | `TC-420` | API | @critical @regression |
+| `REQ-DATA-11` | `TC-421` | API | @regression |
+| `REQ-DATA-12` | `TC-422` | API | @critical @regression |
+| `REQ-DATA-13` | `TC-423` | API | @critical @regression |
+| `REQ-DATA-14` | `TC-424` | API | @regression |
 | `REQ-HOME-01` | `TC-010` | UI | @critical @smoke |
 | `REQ-NAV-01` | `TC-012` | UI | @smoke |
 | `REQ-NAV-02` | `TC-062` | UI | @regression |
@@ -331,3 +343,17 @@ if the committed copy differs.
 | `TC-350` | Arrondi de la remise | `REQ-COUPON-01` | `ui/bugs-connus.spec.ts` |
 | `TC-351` | Portée du tri en pagination | `REQ-PAGE-02` | `ui/bugs-connus.spec.ts` |
 | `TC-352` | Libellés de formulaire | `REQ-A11Y-03` | `ui/bugs-connus.spec.ts` |
+| `TC-400` | Course sur la dernière unité en stock | `REQ-DATA-01` | `api/concurrence.spec.ts` |
+| `TC-401` | Le stock ne passe jamais sous zéro | `REQ-DATA-02` | `api/concurrence.spec.ts` |
+| `TC-402` | Atomicité du paiement | `REQ-DATA-03` | `api/concurrence.spec.ts` |
+| `TC-403` | Aucune commande partielle | `REQ-DATA-03` | `api/concurrence.spec.ts` |
+| `TC-404` | Course sur l’unicité de l’adresse e-mail | `REQ-DATA-04` | `api/concurrence.spec.ts` |
+| `TC-420` | Le panier n’est matérialisé qu’au premier ajout | `REQ-DATA-10` | `api/retention.spec.ts` |
+| `TC-421` | Rétention des paniers vides | `REQ-DATA-11` | `api/retention.spec.ts` |
+| `TC-422` | Rétention des paniers invités | `REQ-DATA-12` | `api/retention.spec.ts` |
+| `TC-423` | Exemption des paniers d’un compte | `REQ-DATA-13` | `api/retention.spec.ts` |
+| `TC-424` | Balayage des comptes dormants | `REQ-DATA-14` | `api/retention.spec.ts` |
+
+## Verified outside the automated suite
+
+- `REQ-DATA-05` — `scripts/verifier-persistance.sh`

@@ -6,11 +6,17 @@ import { bestSellers, categoryCounts, hotDeals, newArrivals } from '@/lib/catalo
 
 export const dynamic = 'force-dynamic';
 
-export default function HomePage() {
-  const counts = new Map(categoryCounts().map((entry) => [entry.slug, entry.count]));
-  const sellers = bestSellers(8);
-  const arrivals = newArrivals(8);
-  const deals = hotDeals(8);
+export default async function HomePage() {
+  // Four independent shelves: issued together, not one after the other. Awaiting
+  // them in sequence would turn one page render into four round trips to the
+  // database for no reason.
+  const [categories, sellers, arrivals, deals] = await Promise.all([
+    categoryCounts(),
+    bestSellers(8),
+    newArrivals(8),
+    hotDeals(8),
+  ]);
+  const counts = new Map(categories.map((entry) => [entry.slug, entry.count]));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">

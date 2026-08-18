@@ -18,11 +18,26 @@ export const options = {
   vus: 10,
   duration: '30s',
   thresholds: {
-    // A smoke run on an idle server: anything slower than this is a regression,
-    // not load.
-    http_req_duration: ['p(95)<500', 'p(99)<1000'],
+    // Calibrated on measurement, not on hope.
+    //
+    // Reference run, 2026-08-18, application and PostgreSQL on the same VPS,
+    // production build, over three runs: median 5–7 ms, p(95) 13–36 ms,
+    // p(99) 36–113 ms; the Catalogue group at p(95) 32 ms.
+    //
+    // The previous values — p(95) < 500, p(99) < 1000 — were inherited from the
+    // in-memory store and left in place after the migration. They passed with
+    // fourteen times the headroom, which means the endpoint could have got ten
+    // times slower without anyone hearing about it. A threshold nothing can
+    // cross is not a threshold.
+    //
+    // These sit at roughly five times the measured p(95). Wide enough that a
+    // shared CI runner, which is slower and noisier than the reference machine,
+    // does not go red on variance alone; narrow enough that the regressions this
+    // test exists for — an N+1, a lost index, a synchronous hash on a hot path —
+    // land the wrong side of it by an order of magnitude rather than a hair.
+    http_req_duration: ['p(95)<250', 'p(99)<600'],
     http_req_failed: ['rate<0.01'],
-    'group_duration{group:::Catalogue}': ['p(95)<800'],
+    'group_duration{group:::Catalogue}': ['p(95)<300'],
   },
   summaryTrendStats: ['med', 'p(95)', 'p(99)', 'max'],
 };

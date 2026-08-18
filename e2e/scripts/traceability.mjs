@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const E2E_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DOCS_DIR = resolve(E2E_DIR, '..', 'docs');
+const REQUIREMENTS_FILE = resolve(DOCS_DIR, 'requirements.md');
 
 // One project per axis. Listing every browser would triple every row without
 // adding a single new fact: the same spec is the same requirement coverage
@@ -78,6 +79,33 @@ function listSpecs() {
   return rows.sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
 }
 
+/**
+ * Reads the declared requirements out of `docs/requirements.md`.
+ *
+ * Without this the matrix only ever checked one direction — spec → requirement —
+ * which catches a test nobody linked and misses the two failures that actually
+ * matter. A requirement with no test looked identical to one that was covered,
+ * because a requirement nothing points at simply never appears. And a typo in
+ * `covers('REQ-CART-99')` produced a confident row for a requirement that does
+ * not exist. Both were silent, in a file whose whole purpose is to not be.
+ *
+ * A requirement whose acceptance criteria says «verified by `<path>`» is
+ * deliberately not automated in this suite — the restart case cannot be, since
+ * Playwright cannot stop the server it is talking to. Saying so in the document
+ * is what keeps that an explicit decision rather than an omission.
+ */
+function readDeclaredRequirements() {
+  const declared = new Map();
+
+  for (const line of readFileSync(REQUIREMENTS_FILE, 'utf8').split('\n')) {
+    const match = /^\|\s*`(REQ-[A-Z0-9]+-\d+)`\s*\|/.exec(line);
+    if (!match) continue;
+    declared.set(match[1], /verified by\s+`([^`]+)`/.exec(line)?.[1] ?? null);
+  }
+
+  return declared;
+}
+
 function splitAnnotation(value) {
   const [id, ...rest] = value.split(' — ');
   return [id ?? '', rest.join(' — ')];
@@ -126,7 +154,7 @@ function requirementKey(id) {
   return [family, Number.parseInt(number, 10) || 0];
 }
 
-function buildMatrix(rows) {
+function buildMatrix(rows, declared) {
   const byRequirement = new Map();
   for (const row of rows) {
     for (const requirement of row.requirements) {
@@ -142,6 +170,17 @@ function buildMatrix(rows) {
   });
 
   const untraced = rows.filter((row) => row.requirements.length === 0);
+
+  const external = [...declared.entries()]
+    .filter(([id, by]) => by !== null && !byRequirement.has(id))
+    .map(([id]) => id)
+    .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+  const uncovered = [...declared.keys()]
+    .filter((id) => !byRequirement.has(id) && declared.get(id) === null)
+    .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+  const undeclared = requirements
+    .filter((id) => !declared.has(id))
+    .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
   const counts = rows.reduce((acc, row) => acc.set(row.suite, (acc.get(row.suite) ?? 0) + 1), new Map());
 
   const out = [
@@ -157,7 +196,10 @@ function buildMatrix(rows) {
     '',
     '| | |',
     '| --- | ---: |',
-    `| Requirements covered | ${requirements.length} |`,
+    `| Requirements declared | ${declared.size} |`,
+    `| — covered by this suite | ${requirements.length} |`,
+    `| — verified outside it | ${external.length} |`,
+    `| — not covered | ${uncovered.length} |`,
     `| Automated test cases | ${rows.length} |`,
     ...[...counts.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
@@ -184,13 +226,28 @@ function buildMatrix(rows) {
     out.push(`| \`${row.id}\` | ${row.name} | ${requirements} | \`${row.file}\` |`);
   }
 
+  if (external.length > 0) {
+    out.push('', '## Verified outside the automated suite', '');
+    for (const id of external) out.push(`- \`${id}\` — \`${declared.get(id)}\``);
+  }
+
   if (untraced.length > 0) {
     out.push('', '## ⚠️ Test cases with no requirement', '');
     for (const row of untraced) out.push(`- \`${row.id}\` — ${row.name} (\`${row.file}\`)`);
   }
 
+  if (uncovered.length > 0) {
+    out.push('', '## ⚠️ Requirements with no coverage', '');
+    for (const id of uncovered) out.push(`- \`${id}\``);
+  }
+
+  if (undeclared.length > 0) {
+    out.push('', '## ⚠️ Requirements referenced but never declared', '');
+    for (const id of undeclared) out.push(`- \`${id}\``);
+  }
+
   out.push('');
-  return out.join('\n');
+  return { markdown: out.join('\n'), uncovered, undeclared };
 }
 
 function write(path, content, check) {
@@ -224,10 +281,30 @@ if (rows.length === 0) {
   process.exit(1);
 }
 
+const declared = readDeclaredRequirements();
+const matrix = buildMatrix(rows, declared);
+
 const ok = [
   write('test-cases/test-cases.csv', buildCsv(rows), check),
-  write('traceability-matrix.md', buildMatrix(rows), check),
+  write('traceability-matrix.md', matrix.markdown, check),
 ].every(Boolean);
+
+// Both directions are fatal, and for the same reason: a matrix that reports a
+// gap without failing is a matrix nobody reads twice.
+if (matrix.undeclared.length > 0) {
+  console.error(
+    `✗ Exigences citées par une spec mais absentes de requirements.md : ${matrix.undeclared.join(', ')}`,
+  );
+  process.exit(1);
+}
+
+if (matrix.uncovered.length > 0) {
+  console.error(
+    `✗ Exigences déclarées et non couvertes : ${matrix.uncovered.join(', ')}\n` +
+      '  Écrire la spec, ou déclarer dans requirements.md par quoi elle est vérifiée : «verified by `chemin`».',
+  );
+  process.exit(1);
+}
 
 // A duplicated identifier makes the matrix lie: one row would claim to cover
 // several distinct verifications, and deleting one of them would go unnoticed.

@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { LogoutButton } from '@/components/LogoutButton';
 import { currentUser } from '@/lib/auth';
-import { getDb } from '@/lib/db';
+import { ordersForUser } from '@/lib/repositories/orders';
 import { formatPrice } from '@/lib/money';
 
 export const dynamic = 'force-dynamic';
@@ -24,9 +24,7 @@ export default async function OrdersPage() {
   const user = await currentUser();
   if (!user) redirect('/compte/connexion?redirect=/compte/commandes');
 
-  const orders = getDb()
-    .orders.filter((order) => order.userId === user.id)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const orders = await ordersForUser(user.id);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">

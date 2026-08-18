@@ -38,18 +38,19 @@ of application internals, and accessibility is scanned rather than certified.
 
 | Suite | Test cases | Runtime | Browser |
 | --- | ---: | ---: | --- |
-| API | 64 | ~10 s | none |
+| API | 74 | ~15 s | none |
 | UI | 88 | ~5 min | Chromium (full), Firefox + WebKit (`@smoke`), mobile Chrome |
 | Accessibility | 13 | ~1 min 30 | Chromium |
 | Visual | 10 | ~40 s | Chromium |
-| **Total** | **175** | **~15 min cumulative** | |
+| **Total** | **185** | **~15 min cumulative** | |
 
-175 test cases against 129 requirements, 0 without a requirement — see the
+185 test cases against 139 requirements, 0 without a requirement and 0 requirement without
+coverage — see the
 [traceability matrix](traceability-matrix.md), which is generated from the annotations and
 verified in CI.
 
-Tag distribution: `@smoke` 36 · `@regression` 122 · `@critical` 54 · `@contract` 19 ·
-`@security` 18 · `@known-bug` 3.
+Tag distribution: `@smoke` 42 · `@regression` 134 · `@critical` 61 · `@contract` 21 ·
+`@security` 19 · `@known-bug` 3.
 
 ## 3. Environments
 

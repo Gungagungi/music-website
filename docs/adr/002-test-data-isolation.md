@@ -8,10 +8,17 @@ Tests run with `fullyParallel` across several workers. Each needs a predictable 
 without seeing the others' data.
 
 The reflex answer is `beforeEach(() => resetDatabase())`. It is wrong here, and dangerously so:
-the store is global to the server process ([ADR-001](001-in-memory-database.md)), so a reset
-issued by worker 2 deletes the cart worker 1 is halfway through checking out. The resulting
-failures are non-deterministic, land on whichever test was unlucky, and point nowhere near the
-cause. This is the kind of design mistake that gets diagnosed as "Playwright is flaky".
+the store is shared by every worker, so a reset issued by worker 2 deletes the cart worker 1 is
+halfway through checking out. The resulting failures are non-deterministic, land on whichever test
+was unlucky, and point nowhere near the cause. This is the kind of design mistake that gets
+diagnosed as "Playwright is flaky".
+
+This decision survived the move from an in-memory store to PostgreSQL
+([ADR-005](005-persistent-postgres.md)) unchanged, and gained a second reason. It used to hold
+because the store was a single object in the server process; it now holds because `TRUNCATE` from
+one worker empties tables the others are using. The reset also stopped being free — roughly 90 ms
+against the previous O(1) — which makes per-test resets worse on a second count, though the first
+was always the one that mattered.
 
 ## Decision
 

@@ -1,0 +1,126 @@
+# Déploiement complet : PostgreSQL, l'application, un reverse proxy et la purge
+# des paniers. Prévu pour un VPS unique.
+#
+#   cp .env.production.example .env
+#   $EDITOR .env                    # au minimum FRETLINE_DOMAIN, POSTGRES_PASSWORD, AUTH_SECRET
+#   docker compose up -d --build
+#   ./scripts/verifier-deploiement.sh https://exemple.fr
+#
+# Sur une machine de développement, ce `.env` entrerait en collision avec celui
+# de la suite de tests. Utiliser alors `npm run prod:up`, qui passe
+# `--env-file .env.production` — voir docs/deployment.md.
+#
+# Aucune variable de mode test n'est définie ici, et c'est la première des trois
+# gardes qui rendent /api/test/{reset,seed,state} inatteignables : sans
+# E2E_TEST_MODE, ces routes répondent 404 avant même de regarder le jeton.
+
+# Nom de projet explicite. Sans lui, Compose le dérive du dossier — le même pour
+# les deux fichiers de ce dépôt — et rapproche les services par leur nom : le
+# `db` de production venait alors recréer le conteneur PostgreSQL de
+# développement, en silence, à la première commande. Deux noms distincts donnent
+# deux jeux de conteneurs, de volumes et de réseaux qui s'ignorent.
+name: fretline
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: fretline-app:latest
+  environment:
+    DATABASE_URL: postgresql://${POSTGRES_USER:-fretline}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire}@db:5432/${POSTGRES_DB:-fretline}
+    AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET est obligatoire — openssl rand -base64 48}
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fretline}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire}
+      POSTGRES_DB: ${POSTGRES_DB:-fretline}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Aucun port publié : seuls les conteneurs du réseau compose atteignent la
+    # base. Les sauvegardes passent par `docker compose exec`, pas par le réseau.
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-fretline} -d ${POSTGRES_DB:-fretline}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Service à usage unique : migre, puis charge le catalogue si la base est
+  # vierge. L'application attend qu'il ait terminé avec succès. Les migrations ne
+  # tournent pas au démarrage de l'app, sinon deux répliques les appliqueraient
+  # en concurrence le jour où il y en a deux.
+  migrate:
+    <<: *app
+    command: ['node', 'app/dist/db/bootstrap.mjs']
+    restart: 'no'
+    # Le HEALTHCHECK de l'image interroge le serveur HTTP, que ce conteneur ne
+    # lance pas. Sans cette exclusion il resterait éternellement `unhealthy` — un
+    # état faux qui apprend à ne plus regarder la colonne, et qui ferait tourner
+    # `docker compose up --wait` jusqu'à son délai.
+    healthcheck:
+      disable: true
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    <<: *app
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    expose:
+      - '3000'
+
+  # Applique la politique de rétention des paniers (app/src/lib/retention.ts).
+  #
+  # Une boucle plutôt que pg_cron : l'extension n'est pas fournie par l'image
+  # officielle et imposerait une image Postgres maison plus un
+  # shared_preload_libraries, pour un travail qui n'a rien de spécifique à la
+  # base. Une boucle dans l'image applicative existante se relit en trois lignes,
+  # redémarre avec le reste et fait tourner exactement le code que la suite teste.
+  purge:
+    <<: *app
+    command:
+      - sh
+      - -c
+      - 'while true; do node app/dist/db/purge.mjs || true; sleep "${PURGE_INTERVAL_SECONDS:-86400}"; done'
+    # Même raison que pour `migrate` : pas de serveur HTTP dans ce conteneur.
+    healthcheck:
+      disable: true
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    # Ports d'hôte configurables : sur un serveur ce sont 80 et 443, mais un essai
+    # local se heurte à tout ce qui les occupe déjà, et « le port est pris » est
+    # une raison stupide de ne pas éprouver sa pile avant de la déployer.
+    ports:
+      - '${FRETLINE_HTTP_PORT:-80}:80'
+      - '${FRETLINE_HTTPS_PORT:-443}:443'
+      - '${FRETLINE_HTTPS_PORT:-443}:443/udp'
+    environment:
+      FRETLINE_DOMAIN: ${FRETLINE_DOMAIN:?FRETLINE_DOMAIN est obligatoire}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Les certificats obtenus vivent ici. Sans ce volume, chaque redéploiement
+      # redemande un certificat et finit par heurter les quotas de Let's Encrypt.
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  caddy-data:
+  caddy-config:

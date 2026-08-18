@@ -1,0 +1,35 @@
+# Reverse proxy et terminaison TLS.
+#
+# Caddy obtient et renouvelle le certificat tout seul dès que FRETLINE_DOMAIN est
+# un nom de domaine public pointant vers ce serveur. Pour un essai local, mettre
+# FRETLINE_DOMAIN=:80 dans .env : Caddy sert alors en clair sans rien demander à
+# Let's Encrypt.
+#
+# Traefik ferait la même chose, mais en exposant le socket Docker au proxy ; ça ne
+# se rentabilise qu'à partir d'une dizaine de services à découvrir dynamiquement.
+
+{$FRETLINE_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		# HSTS : Caddy sert déjà en HTTPS, autant interdire la version en clair
+		# pour les visites suivantes.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Pas de X-Frame-Options : `frame-ancestors` le remplace et couvre plus
+		# de cas.
+		Content-Security-Policy "frame-ancestors 'none'"
+		-Server
+	}
+
+	reverse_proxy app:3000 {
+		health_uri /api/health
+		health_interval 15s
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

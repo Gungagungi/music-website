@@ -67,6 +67,25 @@ jobs:
     name: Tests API
     needs: qualite
     runs-on: ubuntu-latest
+    # Job sur le runner hôte : le service publie son port, on l'atteint par
+    # localhost. Les jobs conteneurisés plus bas passent au contraire par le nom
+    # du service — c'est la différence à ne pas confondre.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@localhost:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -79,6 +98,10 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       # No browser is involved: the API project only uses the request fixture,
       # which is why this job reports in well under a minute.
@@ -107,6 +130,23 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    # Job conteneurisé : il partage le réseau des services, donc il joint la base
+    # par le nom du service (`postgres`) et non par localhost, qui désignerait ici
+    # le conteneur du job lui-même.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     strategy:
       fail-fast: false
       matrix:
@@ -145,6 +185,10 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Suite UI
         working-directory: e2e
@@ -188,6 +232,20 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -200,6 +258,10 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Scans axe-core (WCAG 2.1 AA)
         working-directory: e2e
@@ -222,6 +284,20 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -234,6 +310,10 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Comparaison aux baselines
         working-directory: e2e
@@ -263,6 +343,22 @@ jobs:
     name: Performance (smoke)
     needs: qualite
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@localhost:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -275,6 +371,13 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      # Ce job ne lance pas le projet `setup-db`, donc rien ne repassera derrière
+      # pour charger le catalogue : les graines posées ici sont celles que k6
+      # mesure.
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - uses: grafana/setup-k6-action@v1
 
@@ -309,6 +412,20 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     # The *step* is expected to fail here, not the job: this runs the
     # application with its three seeded defects enabled and asserts that the
     # suite still catches them. The job goes green when detection works, which
@@ -328,6 +445,10 @@ jobs:
           SEED_BUGS: '1'
           NEXT_PUBLIC_SEED_BUGS: '1'
         run: npm run build -w app
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: La suite doit détecter les trois défauts
         id: detection
@@ -355,6 +476,67 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
+
+  deploiement:
+    name: Image et pile de production
+    runs-on: ubuntu-latest
+    # Indépendant de `qualite` : ce job ne consomme aucun artifact, il rebuild
+    # tout dans l'image. C'est le seul endroit où le Dockerfile, le compose et le
+    # Caddyfile sont exécutés avant un déploiement réel — sans lui, ils
+    # pourrissent en silence et on ne l'apprend qu'un soir de mise en ligne.
+    steps:
+      - uses: actions/checkout@v4
+
+      # Par le générateur du dépôt, et non par un `openssl rand` recopié ici.
+      # La première version l'avait recopié en base64, dont l'alphabet contient
+      # `/` : ce caractère termine la section d'autorité de DATABASE_URL, et le
+      # job échouait environ une fois sur trois. La règle « ce mot de passe doit
+      # traverser une URL » vit dans un seul fichier ; ce job doit la lire là.
+      - name: Configurer la pile
+        run: |
+          node scripts/preparer-env.mjs --production --domain=:80
+          cp .env.production .env
+
+      - name: Construire l’image et démarrer la pile
+        run: docker compose up -d --build
+
+      - name: Attendre que le site réponde
+        run: |
+          for _ in $(seq 1 90); do
+            curl -sf http://localhost/api/health >/dev/null && exit 0
+            sleep 2
+          done
+          echo "La pile n’a pas répondu dans le délai imparti." >&2
+          exit 1
+
+      # Les mêmes vérifications que celles lancées après un déploiement réel, sur
+      # les mêmes artefacts. La plus importante est que /api/test/* réponde 404 :
+      # ces routes effacent la base, et rien dans l'interface ne signale qu'elles
+      # sont ouvertes.
+      - name: Vérifications post-déploiement
+        run: ./scripts/verifier-deploiement.sh http://localhost
+
+      # La commande est celle du service `migrate`, relancée à la main : elle doit
+      # être rejouable sans effet, sinon toute mise à jour du site est un pari.
+      - name: La préparation de base doit être rejouable
+        run: |
+          docker compose run --rm migrate 2>&1 | tee /tmp/rejeu.log
+          grep -q 'base déjà peuplée' /tmp/rejeu.log
+
+      # REQ-DATA-05. La seule vérification que la suite Playwright ne peut pas
+      # porter — elle ne peut pas redémarrer le serveur auquel elle parle — et
+      # celle qui justifie toute la migration : une commande passée avant l'arrêt
+      # doit se relire après.
+      - name: Les données doivent survivre à un arrêt complet
+        run: ./scripts/verifier-persistance.sh http://localhost
+
+      - name: Journaux de la pile
+        if: failure()
+        run: docker compose logs --no-color --tail=200
+
+      - name: Arrêter la pile
+        if: always()
+        run: docker compose down --volumes
 
   rapport:
     name: Rapport consolidé

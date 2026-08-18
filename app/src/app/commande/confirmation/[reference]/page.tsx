@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { currentUser } from '@/lib/auth';
-import { getDb } from '@/lib/db';
+import { findOrderByReference } from '@/lib/repositories/orders';
 import { formatPrice } from '@/lib/money';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export default async function ConfirmationPage({
   const { reference } = await params;
   const { token } = await searchParams;
 
-  const order = getDb().orders.find((candidate) => candidate.reference === reference);
+  const order = await findOrderByReference(reference);
   if (!order) notFound();
 
   // Mirrors the API rule: the owner, or whoever holds the one-time access token.

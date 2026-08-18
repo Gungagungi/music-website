@@ -10,5 +10,5 @@ export async function GET(request: Request) {
 
 export async function DELETE(request: Request) {
   const cart = await resolveCart(request);
-  return ok(clearCart(cart));
+  return ok(await clearCart(cart));
 }

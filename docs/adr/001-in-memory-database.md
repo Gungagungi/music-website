@@ -1,6 +1,12 @@
 # ADR-001 — An in-memory store, resettable in O(1)
 
-**Status**: Accepted · **Date**: 2026-08 · **Scope**: application under test
+**Status**: Superseded by [ADR-005](005-persistent-postgres.md) · **Date**: 2026-08 · **Scope**:
+application under test
+
+> **Superseded.** The store now runs on PostgreSQL, in the suite as well as in production —
+> [ADR-005](005-persistent-postgres.md). This record is kept because the paragraph it ends on is
+> the reason: the cost written down here as acceptable is precisely the one that was later judged
+> too high, and ADR-005 is that argument continued rather than reversed.
 
 ## Context
 

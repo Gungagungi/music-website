@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 
 import { created, fail, parseBody } from '@/lib/api';
 import { AUTH_COOKIE, TOKEN_TTL_SECONDS, signToken, toPublicUser } from '@/lib/auth';
-import { getDb, hashPassword, nextUserId } from '@/lib/db';
+import { createUser } from '@/lib/repositories/users';
 import { registerSchema } from '@/lib/schemas';
 
 export const dynamic = 'force-dynamic';
@@ -11,22 +11,13 @@ export async function POST(request: Request) {
   const parsed = await parseBody(request, registerSchema);
   if (!parsed.ok) return parsed.response;
 
-  const db = getDb();
-  const { email, password, firstName, lastName } = parsed.data;
-
-  if (db.users.some((user) => user.email === email)) {
+  // `undefined` covers both the plain "address already taken" case and the race
+  // where two registrations arrive together — the unique index settles it, and
+  // the loser gets this same answer rather than a 500.
+  const user = await createUser(parsed.data);
+  if (!user) {
     return fail('CONFLICT', 'Un compte existe déjà avec cette adresse e-mail.');
   }
-
-  const user = {
-    id: nextUserId(),
-    email,
-    firstName,
-    lastName,
-    passwordHash: hashPassword(password),
-    createdAt: new Date().toISOString(),
-  };
-  db.users.push(user);
 
   const token = await signToken(user);
   (await cookies()).set(AUTH_COOKIE, token, {

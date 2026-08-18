@@ -97,7 +97,7 @@ function silhouette(category: CategorySlug, accent: string): string {
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   const category: CategorySlug = product?.category ?? 'accessoires';
   const [from, to, defaultAccent] = CATEGORY_PALETTE[category];
