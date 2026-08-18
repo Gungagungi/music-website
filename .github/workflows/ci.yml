@@ -59,14 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-build
-          # `standalone/` est exclu : c'est une copie autonome de l'application
-          # avec ses dépendances tracées, ~70 Mo dont l'image de production est la
-          # seule consommatrice. Les jobs de test lancent `next start`, qui lit
-          # `.next` directement — les embarquer ferait payer ces 70 Mo à un
-          # téléchargement près de dix fois par pipeline, pour rien.
-          path: |
-            app/.next
-            !app/.next/standalone
+          path: app/.next
           retention-days: 1
           include-hidden-files: true
 
@@ -527,6 +520,13 @@ jobs:
         run: |
           docker compose run --rm migrate 2>&1 | tee /tmp/rejeu.log
           grep -q 'base déjà peuplée' /tmp/rejeu.log
+
+      # REQ-DATA-05. La seule vérification que la suite Playwright ne peut pas
+      # porter — elle ne peut pas redémarrer le serveur auquel elle parle — et
+      # celle qui justifie toute la migration : une commande passée avant l'arrêt
+      # doit se relire après.
+      - name: Les données doivent survivre à un arrêt complet
+        run: ./scripts/verifier-persistance.sh http://localhost
 
       - name: Journaux de la pile
         if: failure()

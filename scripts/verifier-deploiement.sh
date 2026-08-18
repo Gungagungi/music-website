@@ -84,6 +84,7 @@ verifier "API catalogue"                     /api/products      200
 # vérification échouerait — en disant exactement ce qui ne va pas.
 verifier "endpoint de test /reset injoignable" /api/test/reset  404 POST
 verifier "endpoint de test /seed injoignable"  /api/test/seed   404 POST
+verifier "endpoint de test /purge injoignable" /api/test/purge  404 POST
 verifier "endpoint de test /state injoignable" /api/test/state  404 GET
 
 # Le mode test se voit aussi dans la réponse de /api/health, qui l'expose

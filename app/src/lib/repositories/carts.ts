@@ -148,6 +148,25 @@ export async function deleteCartItems(cartId: string, executor: DbOrTx = db) {
   await touchCart(cartId, executor);
 }
 
+/**
+ * Backdates a cart, for the retention specs.
+ *
+ * The policy is entirely a function of how long ago a cart was last touched, so
+ * the only way to exercise it is to have a cart that is genuinely old. Waiting
+ * thirty-one days is not a test, and reading the thresholds back from the same
+ * constants the code uses would assert nothing. Moving the clock on one row
+ * leaves the rule itself untouched — which is the part under test.
+ *
+ * Only reachable through `POST /api/test/seed`, behind the same two guards as
+ * everything else there.
+ */
+export async function backdateCart(cartId: string, hours: number, executor: DbOrTx = db) {
+  await executor
+    .update(carts)
+    .set({ updatedAt: sql`now() - make_interval(hours => ${hours})` })
+    .where(sql`${carts.id}::text = ${cartId}`);
+}
+
 export async function countCarts(executor: DbOrTx = db): Promise<number> {
   const [row] = await executor.select({ count: sql<number>`count(*)::int` }).from(carts);
   return row?.count ?? 0;

@@ -247,10 +247,18 @@ export class ApiClient {
   seed(payload: {
     users?: { email: string; password: string; firstName: string; lastName: string }[];
     stock?: { slug: string; quantity: number }[];
+    carts?: { id: string; ageHours: number }[];
   }): Promise<APIResponse> {
     return this.request.post('/api/test/seed', {
       headers: { 'x-test-token': TEST_API_TOKEN },
       data: payload,
+    });
+  }
+
+  /** Runs the cart retention policy — the same function the `purge` service runs. */
+  purgeCarts(): Promise<APIResponse> {
+    return this.request.post('/api/test/purge', {
+      headers: { 'x-test-token': TEST_API_TOKEN },
     });
   }
 

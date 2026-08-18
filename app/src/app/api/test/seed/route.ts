@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { created, fail, parseBody, testEndpointsEnabled, testTokenValid } from '@/lib/api';
 import { toPublicUser } from '@/lib/auth';
+import { backdateCart } from '@/lib/repositories/carts';
 import { setProductStock } from '@/lib/repositories/products';
 import { createUser } from '@/lib/repositories/users';
 
@@ -20,6 +21,11 @@ const seedSchema = z.object({
     .optional(),
   stock: z
     .array(z.object({ slug: z.string().min(1), quantity: z.number().int().min(0) }))
+    .optional(),
+  // Ages a cart so the retention policy can be exercised without waiting a
+  // month. See backdateCart() for why the clock is moved rather than the rule.
+  carts: z
+    .array(z.object({ id: z.string().min(1), ageHours: z.number().int().min(0) }))
     .optional(),
 });
 
@@ -52,5 +58,11 @@ export async function POST(request: Request) {
     updatedStock.push({ slug: product.slug, stock: product.stock });
   }
 
-  return created({ users: createdUsers, stock: updatedStock });
+  const agedCarts = [];
+  for (const entry of parsed.data.carts ?? []) {
+    await backdateCart(entry.id, entry.ageHours);
+    agedCarts.push({ id: entry.id, ageHours: entry.ageHours });
+  }
+
+  return created({ users: createdUsers, stock: updatedStock, carts: agedCarts });
 }

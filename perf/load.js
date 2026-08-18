@@ -29,9 +29,21 @@ export const options = {
     { duration: '30s', target: 0 },
   ],
   thresholds: {
-    http_req_duration: ['p(95)<800', 'p(99)<1500'],
+    // Reference run, 2026-08-18, 50 VU, same VPS: median 5 ms, p(95) 17 ms,
+    // p(99) 28 ms, max 90 ms; adding to the cart at p(95) 26 ms, p(99) 47 ms.
+    //
+    // Faster than the smoke run, which is not a paradox: by the time the ramp
+    // reaches fifty users the connection pool is warm and the query plans are
+    // cached, whereas the smoke run pays for both in its first seconds. It is
+    // also why these thresholds are not simply the smoke ones scaled up — at
+    // this level of load the machine is not the bottleneck, so what they watch
+    // for is the same class of regression, not saturation.
+    //
+    // See smoke.js for why the previous values (p(95) < 800 with a measured 17)
+    // were replaced rather than kept.
+    http_req_duration: ['p(95)<400', 'p(99)<800'],
     http_req_failed: ['rate<0.02'],
-    cart_add_duration: ['p(95)<600'],
+    cart_add_duration: ['p(95)<300'],
     journey_failed: ['rate<0.02'],
   },
   summaryTrendStats: ['med', 'p(95)', 'p(99)', 'max'],

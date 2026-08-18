@@ -34,9 +34,15 @@ COPY package.json package-lock.json ./
 COPY e2e/package.json e2e/package.json
 COPY app ./app
 
+# `BUILD_STANDALONE=1` est ce qui déclenche la sortie autonome — voir
+# next.config.ts : elle n'a de sens que pour cette image, et un build qui la
+# porte ne peut plus être servi par `next start`, dont dépendent la suite et la
+# CI.
+#
 # Aucune base n'est nécessaire : toutes les routes sont dynamiques (`ƒ` dans la
 # sortie de `next build`), et `db/client.ts` n'ouvre son pool qu'à la première
 # requête. Si une page devenait prérendue, le build échouerait ici — c'est voulu.
+ENV BUILD_STANDALONE=1
 RUN npm run build -w app \
  && node app/scripts/build-db-cli.mjs
 

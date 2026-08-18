@@ -178,6 +178,35 @@ undocumented extra field fails the test rather than passing unnoticed.
 product one: distinguishing "you sent me something that is not JSON" from "you sent me JSON I do
 not accept" is what lets a client tell a transport bug from a validation bug.
 
+## Data integrity and persistence
+
+Everything in this section became reachable only when the shop moved from an in-memory store to
+PostgreSQL (ADR-005). A single process mutating a plain object has no transactions, no isolation
+level and no interleaving to get wrong: these defects could not occur, and therefore could not be
+tested for. They are what the migration was for.
+
+| ID | Requirement | Acceptance criteria |
+| --- | --- | --- |
+| `REQ-DATA-01` | Two customers cannot buy the same last unit | Simultaneous checkouts on a stock of one yield exactly one order and one `OUT_OF_STOCK`; stock ends at zero |
+| `REQ-DATA-02` | Stock never goes negative | A cart larger than the remaining stock is refused, and the refusal consumes nothing |
+| `REQ-DATA-03` | Checkout is all or nothing | A checkout refused on one line decrements no other line, writes no order, and leaves the cart intact |
+| `REQ-DATA-04` | An address can be registered once | Simultaneous registrations of the same address yield one account and one `CONFLICT` |
+| `REQ-DATA-05` | Data survives a restart | An order placed before a full stop is readable after it, with its lines, totals and stock movement — verified by `scripts/verifier-persistance.sh` |
+| `REQ-DATA-10` | A cart is created only when something is put in it | Reading the cart, or validating a coupon, writes no row |
+| `REQ-DATA-11` | Empty carts are short-lived | Kept for a plausible browsing session, deleted after a day |
+| `REQ-DATA-12` | Guest carts outlive their cookie by nothing | Deleted once the `fretline_cart` cookie can no longer address them |
+| `REQ-DATA-13` | A cart attached to an account is exempt from the guest window | Same age as a deleted guest cart, and it is kept |
+| `REQ-DATA-14` | Dormant account carts are eventually swept | Deleted after a year — data protection, not housekeeping |
+
+`REQ-DATA-13` is the one that carries the policy. `REQ-DATA-11` and `REQ-DATA-12` would both pass
+against a purge that simply deleted everything old enough; only the exemption distinguishes a
+retention policy from a `DELETE ... WHERE updated_at <`.
+
+`REQ-DATA-05` is verified against the deployed stack rather than in the Playwright suite, which
+cannot restart the server it is talking to. `scripts/verifier-persistance.sh` places an order,
+stops the containers, brings them back and re-reads it; the `deploiement` CI job runs it on every
+push.
+
 ## Security
 
 | ID | Requirement | Acceptance criteria |

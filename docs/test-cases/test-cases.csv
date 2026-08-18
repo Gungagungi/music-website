@@ -174,3 +174,13 @@ TC-339,Baseline — pied de page,Visual,Régression visuelle,pied de page,visual
 TC-350,Arrondi de la remise,UI,Défauts connus — preuve de détection,la remise en pourcentage est calculée au centime près,ui/bugs-connus.spec.ts,@critical @known-bug,REQ-COUPON-01,BUG-001
 TC-351,Portée du tri en pagination,UI,Défauts connus — preuve de détection,"le tri par prix s’applique à l’ensemble du rayon, pas page par page",ui/bugs-connus.spec.ts,@critical @known-bug,REQ-PAGE-02,BUG-002
 TC-352,Libellés de formulaire,UI,Défauts connus — preuve de détection,tous les champs de formulaire portent un libellé programmatique,ui/bugs-connus.spec.ts,@known-bug,REQ-A11Y-03,BUG-003
+TC-400,Course sur la dernière unité en stock,API,API — concurrence et atomicité,deux commandes simultanées sur la dernière unité : une seule aboutit,api/concurrence.spec.ts,@critical @regression,REQ-DATA-01,
+TC-401,Le stock ne passe jamais sous zéro,API,API — concurrence et atomicité,un panier devenu trop grand pour le stock est refusé sans le décrémenter,api/concurrence.spec.ts,@critical @regression,REQ-DATA-02,
+TC-402,Atomicité du paiement,API,API — concurrence et atomicité,une commande refusée sur une ligne n’en décrémente aucune autre,api/concurrence.spec.ts,@critical @regression,REQ-DATA-03,
+TC-403,Aucune commande partielle,API,API — concurrence et atomicité,la commande refusée n’a laissé aucune trace,api/concurrence.spec.ts,@critical @regression,REQ-DATA-03,
+TC-404,Course sur l’unicité de l’adresse e-mail,API,API — concurrence et atomicité,deux inscriptions simultanées avec la même adresse : une seule aboutit,api/concurrence.spec.ts,@regression @security,REQ-DATA-04,
+TC-420,Le panier n’est matérialisé qu’au premier ajout,API,API — rétention des paniers,consulter un panier inexistant n’en crée aucun,api/retention.spec.ts,@critical @regression,REQ-DATA-10,
+TC-421,Rétention des paniers vides,API,API — rétention des paniers,un panier vide survit à quelques heures et pas à la journée,api/retention.spec.ts,@regression,REQ-DATA-11,
+TC-422,Rétention des paniers invités,API,API — rétention des paniers,un panier invité garni suit la durée de vie de son cookie,api/retention.spec.ts,@critical @regression,REQ-DATA-12,
+TC-423,Exemption des paniers d’un compte,API,API — rétention des paniers,un panier rattaché à un compte échappe à la fenêtre invité,api/retention.spec.ts,@critical @regression,REQ-DATA-13,
+TC-424,Balayage des comptes dormants,API,API — rétention des paniers,un panier d’un compte dormant depuis plus d’un an est purgé,api/retention.spec.ts,@regression,REQ-DATA-14,
