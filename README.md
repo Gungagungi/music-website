@@ -11,7 +11,7 @@ authentication, stock that actually runs out. Every application design decision 
 testability and determinism — including the one to put it on a real PostgreSQL, because two
 checkouts racing for the last unit in stock is not a defect an in-memory store can have.
 
-**175 automated test cases · 129 requirements · 0 untraced · 0 flaky.**
+**185 automated test cases · 139 requirements · 0 untraced · 0 flaky.**
 
 ---
 
@@ -36,19 +36,19 @@ checkouts racing for the last unit in stock is not a defect an in-memory store c
 
 | Suite | Cases | Runtime | Scope |
 | --- | ---: | ---: | --- |
-| **API** | 65 | ~10 s | Every endpoint, response contracts validated with strict Zod schemas, error codes, pagination, negatives, security |
-| **UI** | 90 | ~5 min | Catalogue and facets, sorting, pagination, search, product page, cart, coupons, checkout, authentication, comparator |
-| **Accessibility** | 15 | ~1 min 30 | axe-core WCAG 2.1 A/AA across 8 pages and the checkout funnel, skip link, keyboard-only journey, text alternatives |
-| **Visual** | 11 | ~40 s | Component baselines captured in the CI container |
+| **API** | 74 | ~15 s | Every endpoint, response contracts validated with strict Zod schemas, error codes, pagination, negatives, security |
+| **UI** | 88 | ~5 min | Catalogue and facets, sorting, pagination, search, product page, cart, coupons, checkout, authentication, comparator |
+| **Accessibility** | 13 | ~1 min 30 | axe-core WCAG 2.1 A/AA across 8 pages and the checkout funnel, skip link, keyboard-only journey, text alternatives |
+| **Visual** | 10 | ~40 s | Component baselines captured in the CI container |
 | **Performance** | 2 scripts | 30 s / 4 min | k6 smoke on every PR, load test nightly |
 
-Tags: `@smoke` 36 · `@regression` 122 · `@critical` 54 · `@contract` 19 · `@security` 18 ·
+Tags: `@smoke` 42 · `@regression` 134 · `@critical` 61 · `@contract` 21 · `@security` 19 ·
 `@known-bug` 3.
 
 Browsers: Chromium carries the full regression across three shards; Firefox and WebKit run
 `@smoke` only; mobile Chrome covers the responsive viewport. That split is not laziness — Firefox
 and WebKit have each already caught an engine-specific defect the others never surfaced. But
-running 90 tests three times to find two bugs a year is a bad trade.
+running 88 tests three times to find two bugs a year is a bad trade.
 
 ## Stack
 
@@ -116,7 +116,7 @@ about ten seconds.
 ### Targeted runs
 
 ```bash
-npm run test:api            # 65 API tests, ~10 s, no browser
+npm run test:api            # 74 API tests, ~15 s, no browser
 npm run test:smoke          # the @smoke set
 npm run test:ui             # UI on Chromium
 npm run test:a11y           # accessibility scans
@@ -168,6 +168,13 @@ asked for.
 copies drift. It also rejects duplicate identifiers — which is how `TC-271` was found covering
 three distinct coupon-rejection scenarios at once.
 
+It checks **both directions**, and each caught something the other could not. A requirement nobody
+wrote a spec for used to be indistinguishable from a covered one, because a requirement nothing
+points at simply never appeared in the matrix. And a typo in `covers()` produced a confident row
+for a requirement that does not exist. A requirement deliberately verified outside the suite says
+so in its own line — `REQ-DATA-05` needs the server restarted, which Playwright cannot do to the
+server it is talking to.
+
 ## Test data
 
 **The database is reset once per run, never per test.** This is the most counter-intuitive
@@ -190,9 +197,19 @@ That last row is the honest part: order specs consume real stock, and a full run
 product bug and is not. The mitigation is stated in one place rather than worked around test by
 test. See [ADR-002](docs/adr/002-test-data-isolation.md).
 
-Test hooks (`/api/test/reset`, `/seed`, `/state`) are doubly guarded: invisible without
+**The store runs on PostgreSQL, in the suite as well as in production.** One code path, so the
+suite exercises what is deployed — and a class of defect that an in-memory store cannot have
+becomes testable: two checkouts racing for the last unit, a payment that fails halfway, two
+accounts registering the same address at the same instant. That is what
+[ADR-005](docs/adr/005-persistent-postgres.md) bought, and what it cost is stated there too:
+`npm test` now needs Docker, which ADR-001 had called the single biggest factor in whether anyone
+runs a suite at all.
+
+Test hooks (`/api/test/reset`, `/seed`, `/state`, `/purge`) are doubly guarded: invisible without
 `E2E_TEST_MODE=1`, then refused without a valid `x-test-token`. `REQ-SEC-12` asserts the guard,
-because a test hook reachable in production is a vulnerability, not a convenience.
+because a test hook reachable in production is a vulnerability, not a convenience — and it now
+truncates a database that matters. A third layer checks it from outside after every deployment,
+including in CI: `scripts/verifier-deploiement.sh`.
 
 ## Reporting
 
@@ -223,7 +240,7 @@ from the internals of a blob report, because the job was green and the upload wa
 | Job | Content |
 | --- | --- |
 | `qualite` | ESLint, `tsc --noEmit`, production build — **published as an artifact** |
-| `tests-api` | 65 API tests, no browser |
+| `tests-api` | 74 API tests, no browser |
 | `tests-ui` | Chromium ×3 shards (full regression) + Firefox/WebKit `@smoke` + mobile |
 | `tests-a11y` · `tests-visual` | axe-core scans, baseline comparison |
 | `perf-smoke` | k6, 10 VU / 30 s, `p95 < 500 ms` |
@@ -297,19 +314,22 @@ one, because the failed attempt is what explains the shape of the answer.
 | --- | --- |
 | [Test strategy](docs/test-strategy.md) | Risk analysis, layering, data policy, how instability is handled |
 | [Test plan](docs/test-plan.md) | What runs, where, when, at what cost |
-| [Requirements](docs/requirements.md) | The 129 `REQ-*` |
+| [Requirements](docs/requirements.md) | The 139 `REQ-*` |
 | [Test cases](docs/test-cases/) | Generated catalogue + six journeys written out in full |
 | [Traceability matrix](docs/traceability-matrix.md) | Both directions, generated, CI-verified |
 | [Bug reports](docs/bug-reports/) | Three defects with real reproduction data |
-| [ADRs](docs/adr/) | Four decisions, with what each one costs |
+| [ADRs](docs/adr/) | Five decisions, with what each one costs |
 | [Deployment](docs/deployment.md) | Docker Compose on a VPS, backups, and the post-deployment check |
 
 ## Known limitations
 
 Stated rather than glossed over — the boundaries are part of the design.
 
-- **No transactional or concurrency testing.** The in-memory store has no transactions to exercise
-  ([ADR-001](docs/adr/001-in-memory-database.md)).
+- **`ON DELETE RESTRICT` is asserted by the schema and nothing else.** The application has no way
+  to delete a product, so a suite that speaks only HTTP cannot reach the constraint. Testing it
+  would mean giving the suite a SQL connection or inventing an endpoint that exists to be tested;
+  neither is worth it. Named in [ADR-005](docs/adr/005-persistent-postgres.md) rather than left to
+  be discovered.
 - **`test:visual` fails locally.** Baselines belong to the CI container
   ([ADR-004](docs/adr/004-visual-baselines.md)).
 - **Accessibility is scanned, not certified.** axe-core catches roughly a third to a half of WCAG
@@ -317,6 +337,10 @@ Stated rather than glossed over — the boundaries are part of the design.
   claim.
 - **Checkout is excluded from the load test.** It decrements real stock, and a load test that
   empties the catalogue leaves the environment unusable for the suite that runs next.
+- **Performance thresholds are calibrated on one machine.** They sit at roughly five times a
+  measured baseline, wide enough that a shared CI runner does not go red on variance — which means
+  they detect the class of regression they were written for (an N+1, a lost index) and not a 20 %
+  slowdown.
 - **No penetration testing.** The security suite covers authorisation, isolation and input
   handling — what a functional QA team can assert. It is not an audit.
 - **The hydration marker is a test affordance in production code.** One attribute set by a
@@ -326,6 +350,8 @@ Stated rather than glossed over — the boundaries are part of the design.
 
 - Mutation testing on `lib/money.ts` and `lib/cart.ts` — the arithmetic where a surviving mutant
   would mean real money
+- A performance baseline measured on the CI runner itself, so the thresholds stop being a
+  multiple of somebody's laptop
 - Contract tests generated from an OpenAPI spec rather than hand-written schemas
 - Trend reporting across runs (duration, flake rate) rather than per-run snapshots
 - Serve the QA docs as rendered HTML on Pages rather than raw Markdown — they read better on

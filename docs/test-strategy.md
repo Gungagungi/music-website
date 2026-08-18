@@ -87,8 +87,31 @@ is achieved by making the *data* unique, not by making the *database* empty.
 
 The trade-off is real and worth stating: tests that consume finite resources (stock) can starve
 later tests. The mitigation is explicit rather than accidental — `STOCK_TOP_UP` in the setup
-project restocks the three products the order specs consume, and the stock-decrement assertion
-uses a product reserved for it.
+project restocks the products the order specs consume, and every spec that asserts on a stock
+level uses a product reserved for it and used by nothing else. The concurrency specs need that
+guarantee most of all: two specs arranging the stock of the same item in parallel would read each
+other's numbers, and the failure would look exactly like the race being hunted.
+
+**The database is PostgreSQL, in the suite as much as in production.** The alternative — a fast
+in-memory store for tests, a real database for the server — is tempting and wrong: it means the
+suite never executes the code that runs on the server, and the bug you ship is by construction in
+the half nobody tested. One code path costs the suite a Docker dependency, which
+[ADR-005](adr/005-persistent-postgres.md) argues for and does not pretend is free.
+
+What it buys is a class of test that did not previously exist. Overselling the last unit, a
+checkout that decrements stock and then fails, two accounts on the same address — the defects an
+e-commerce site is most likely to have and least likely to notice, because they fail rarely, under
+load, and leave inconsistent data instead of an error message. `REQ-DATA-01` to `REQ-DATA-04`
+cover them by racing two real requests against a real transaction.
+
+**Retention is data policy, and it is tested.** Persisted carts accumulate, so they are deleted on
+a schedule: 24 hours for an empty cart, 30 days for a guest cart with items, exempt for a cart
+attached to an account, a year for a dormant one. A rule that runs at night and deletes rows is
+exactly the kind nobody notices is wrong until the rows are gone. The specs age a real cart to
+either side of each window and run the real purge, rather than reading the thresholds back — an
+assertion derived from the same constant agrees with a broken policy as readily as with a correct
+one. `REQ-DATA-13` is the one that carries the policy: the other windows would all pass against a
+purge that simply deleted everything old enough.
 
 ## 4. Handling instability
 

@@ -8,11 +8,11 @@ decision cost what it cost.
 | --- | --- |
 | [Test strategy](test-strategy.md) | Why the suite is shaped this way — risk analysis, layering, data policy, how instability is handled |
 | [Test plan](test-plan.md) | What runs, where, when, and what it costs |
-| [Requirements](requirements.md) | The 129 `REQ-*` the suite is written against |
-| [Test cases](test-cases/) | 175 cases — generated catalogue plus six journeys written out in full |
+| [Requirements](requirements.md) | The 139 `REQ-*` the suite is written against |
+| [Test cases](test-cases/) | 185 cases — generated catalogue plus six journeys written out in full |
 | [Traceability matrix](traceability-matrix.md) | Requirement ↔ test case, both ways — **generated**, verified in CI |
 | [Bug reports](bug-reports/) | The three seeded defects, with real reproduction data |
-| [Architecture decisions](adr/) | Four ADRs, including one fix that was wrong and why |
+| [Architecture decisions](adr/) | Five ADRs, including one fix that was wrong and one decision later overturned |
 | [Deployment](deployment.md) | Running it for real — Docker Compose, backups, and the post-deployment check that is not decoration |
 
 ## Where to start
@@ -21,8 +21,8 @@ decision cost what it cost.
 [ADR-003](adr/003-hydration-readiness.md) — it records a real diagnosis, an insufficient fix, and
 the reasoning that led to the right one.
 
-**Looking for coverage?** [Traceability matrix](traceability-matrix.md) — 129 requirements, 175
-test cases, zero untraced.
+**Looking for coverage?** [Traceability matrix](traceability-matrix.md) — 139 requirements, 185
+test cases, zero untraced, and both directions checked.
 
 **Wondering whether any of it catches anything?** [Bug reports](bug-reports/). Three defects sit
 behind a flag, and a CI job fails if the suite stops detecting them.
