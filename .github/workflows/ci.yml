@@ -49,6 +49,12 @@ jobs:
         working-directory: e2e
         run: npm run trace:check
 
+      # Une facette vide ne rend pas la suite rouge, elle la rend vide : TC-215
+      # itère sur les résultats du filtre, ce qui est vrai de toute liste vide.
+      # Le test resterait vert avec zéro couverture.
+      - name: Vérifier les invariants du catalogue
+        run: npm run check:catalog
+
       - name: Build de production
         run: npm run build
 

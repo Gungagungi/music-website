@@ -8,6 +8,7 @@
     "start": "next start --port 3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "check:catalog": "node scripts/check-catalog.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/cli/migrate.ts",
     "db:bootstrap": "tsx src/db/cli/bootstrap.ts",
