@@ -59,6 +59,12 @@ services:
     <<: *app
     command: ['node', 'app/dist/db/bootstrap.mjs']
     restart: 'no'
+    # Le HEALTHCHECK de l'image interroge le serveur HTTP, que ce conteneur ne
+    # lance pas. Sans cette exclusion il resterait éternellement `unhealthy` — un
+    # état faux qui apprend à ne plus regarder la colonne, et qui ferait tourner
+    # `docker compose up --wait` jusqu'à son délai.
+    healthcheck:
+      disable: true
     depends_on:
       db:
         condition: service_healthy
@@ -86,6 +92,9 @@ services:
       - sh
       - -c
       - 'while true; do node app/dist/db/purge.mjs || true; sleep "${PURGE_INTERVAL_SECONDS:-86400}"; done'
+    # Même raison que pour `migrate` : pas de serveur HTTP dans ce conteneur.
+    healthcheck:
+      disable: true
     depends_on:
       migrate:
         condition: service_completed_successfully
