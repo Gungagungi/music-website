@@ -6,67 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Fretline** — boutique fictive de guitares et basses, doublée d'un framework d'automatisation QA complet. Le site n'est pas la finalité : il existe pour donner à la suite de tests une application réaliste à éprouver (facettes, tri, pagination, panier, coupons, commande, authentification). Tout choix d'architecture côté application est donc arbitré par la testabilité et le déterminisme.
 
-Monorepo npm workspaces, deux paquets :
-
-- `app/` — `@fretline/app` : Next.js 16 (App Router, React 19, Tailwind 4), PostgreSQL 17 via Drizzle, API REST.
-- `e2e/` — `@fretline/e2e` : Playwright (UI multi-navigateurs, contrats API, accessibilité axe-core, régression visuelle).
-- `perf/` — scripts k6 (hors workspaces, exécutés depuis la racine).
-
-Node ≥ 20.9 (`.nvmrc` : 20).
-
 ## Commandes
 
-Depuis la racine (les scripts délèguent aux workspaces) :
+Les scripts sont dans `package.json` (racine et workspaces). Ce que leurs noms ne disent pas :
 
-```bash
-npm install                # installe les deux workspaces
-npm run db:setup           # .env, PostgreSQL dans Docker, migrations, graines
-npm run dev                # Next.js en dev sur :3000
-npm run build              # build de production (requis avant les tests)
-npm run lint               # eslint app + e2e
-npm run typecheck          # tsc --noEmit sur les deux workspaces
-npm test                   # suite Playwright complète (tous les projets)
-npm run test:smoke         # --grep @smoke
-npm run test:api           # projet api seul (aucun navigateur lancé, ~10 s)
-npm run test:a11y          # scans axe-core
-npm run test:visual        # comparaison aux baselines — échoue hors container CI (voir plus bas)
-npm run report             # ouvre le rapport HTML
-npm run perf:smoke         # k6, 10 VU / 30 s (k6 doit être installé)
-npm run perf:load          # k6, montée en charge
-```
-
-Base de données (Docker requis — voir ADR-005) :
-
-```bash
-npm run db:up              # PostgreSQL seul, docker-compose.dev.yml
-npm run db:migrate         # applique le prélude puis les migrations
-npm run db:seed            # graines, idempotent
-npm run db:reset           # TRUNCATE + rejeu — même chemin que POST /api/test/reset
-npm run db:purge           # applique la politique de rétention des paniers
-npm run db:generate        # drizzle-kit generate, après modification du schéma
-npm run db:nuke            # supprime le volume
-```
-
-Pile de production, depuis un poste qui a déjà un `.env` de développement :
-
-```bash
-npm run prod:env -- --domain=:80   # .env.production, secrets tirés au hasard
-npm run prod:up                    # build de l'image + docker compose up
-npm run prod:verifier              # /api/test/* doivent répondre 404
-npm run prod:persistance           # REQ-DATA-05 : commande, arrêt, relecture
-npm run prod:logs / prod:down / prod:nuke
-```
-
-Depuis `e2e/` pour un ciblage fin :
-
-```bash
-npx playwright test tests/ui/panier.spec.ts --project=chromium
-npx playwright test --project=chromium -g "modifier la quantité"
-npx playwright test --project=chromium --headed        # ou --debug
-npx playwright test --project=firefox --grep @smoke
-npm run test:bugs                                      # SEED_BUGS=1, --grep @known-bug
-npx playwright test --project=visual --update-snapshots
-```
+- `npm run build` est requis avant les tests.
+- `npm run test:api` ne lance aucun navigateur (~10 s).
+- `npm run test:visual` échoue hors container CI (voir plus bas).
+- `npm run db:reset` emprunte le même chemin que `POST /api/test/reset` ; `db:generate` après toute modification du schéma.
+- `npm run perf:*` exige k6 installé ; `npm run prod:*` exige un `.env` de développement présent.
+- Depuis `e2e/` : `npm run test:bugs` = `SEED_BUGS=1`, `--grep @known-bug`.
 
 Le `webServer` de Playwright lance `npm run start -w app` (build de production, **pas** le serveur de dev, dont les délais de compilation rendent la première navigation imprévisible) et réutilise un serveur déjà présent hors CI. Il faut donc avoir buildé au préalable, et avoir une base joignable via `DATABASE_URL`. Il injecte `E2E_TEST_MODE=1` et `TEST_API_TOKEN`.
 
@@ -106,26 +55,6 @@ Trois pièges à connaître avant de toucher à cette couche :
 
 **Marqueur d'hydratation** (`app/src/components/HydrationMarker.tsx`). Pose `data-hydrated="true"` sur `<html>` après le premier effet. Inerte en production, c'est le signal d'attente explicite dont dépend `BasePage.waitForHydration()`.
 
-## Architecture de la suite E2E
-
-**Topologie par projets** (`e2e/playwright.config.ts`). Deux axes : *quoi* (api, ui, a11y, visual) et *où* (chromium/firefox/webkit/mobile-chrome). `setup-db` réinitialise la base, `setup-auth` en dépend et produit un `storageState` authentifié ; tous les autres projets dépendent de l'un des deux, donc aucune spec ne court après le reset. `mobile-chrome` ne prend que `@smoke` : un viewport mobile est un risque de mise en page, pas de logique.
-
-**Isolation.** Le reset est fait **une fois par run**, jamais par test — la base est globale au processus, un reset depuis un worker effacerait les données d'un autre. La stratégie inverse est appliquée : chaque spec crée ses propres données via les fixtures `registeredUser` (compte unique) et `cartWith` (panier arrangé par API puis remis au navigateur), ce qui rend `fullyParallel` sûr. Le setup recharge aussi le stock de trois produits (`STOCK_TOP_UP`) car les specs de commande le consomment réellement.
-
-**Page objects** (`e2e/pages/`) : locators et actions, **aucune assertion**. Les attentes restent dans les specs, sinon chaque page object gagne une méthode par assertion et les messages d'échec pointent trois fichiers plus loin. `BasePage.open()` attend l'hydratation avant de rendre la main.
-
-**Matchers métier** (`e2e/utils/matchers.ts`) : `toShowPrice(cents)`, `toBeSortedByPrice('asc')`. Point non négociable — un matcher créé via `expect.extend` **n'hérite pas** de l'auto-retry des assertions natives ; la scrutation est donc déléguée à `toPass`, et la condition d'arrêt tient compte de `this.isNot`. Sans cela l'assertion lit le montant d'avant re-rendu et passe au retry, ce qui se présente comme un test instable alors que c'est un défaut du framework.
-
-**`e2e/data/seed.ts` est le contrat** entre l'app et la suite : miroir des graines (utilisateurs, coupons, produits choisis pour une propriété précise, `CATALOG_TOTAL_PRODUCTS`, `RULES`). Toute modification de `app/src/data/` ou de `lib/money.ts` doit y être répercutée. Ce qui doit être unique est construit à l'exécution (`e2e/data/builders/`, faker).
-
-**`e2e/config/env.ts` est le seul point de lecture de `process.env`** côté suite, avec des valeurs par défaut telles que `npx playwright test` fonctionne sans configuration.
-
-**Tags et traçabilité** (`e2e/utils/tags.ts`). `@smoke` garde chaque push, `@regression` tourne la nuit, `@known-bug` marque les specs qui n'échouent que sous `SEED_BUGS=1`. Les annotations `testCase('TC-xxx')`, `covers('REQ-xxx')`, `knownBug('BUG-xxx')` relient une spec à sa documentation. Reprendre ce format pour toute nouvelle spec.
-
-Le générateur vérifie **les deux sens** et échoue sur l'un comme sur l'autre : une exigence de `docs/requirements.md` que rien ne couvre, et une exigence citée par `covers()` qui n'est déclarée nulle part. Une exigence vérifiée hors de la suite se déclare dans sa ligne de `requirements.md` par « verified by `chemin` » — c'est le cas de `REQ-DATA-05`, qui demande de redémarrer le serveur.
-
-**Sélecteurs** : `testIdAttribute: 'data-testid'`, locale `fr-FR`, timezone `Europe/Paris`. Privilégier les rôles ARIA, puis `data-testid`.
-
 ## Défauts semés — `SEED_BUGS=1`
 
 Trois défauts délibérés, chacun documenté en commentaire à son emplacement, activés seulement par la variable :
@@ -147,30 +76,8 @@ Les baselines (`e2e/tests/visual/__screenshots__/`) sont capturées dans **le co
 - Après un changement d'interface assumé : Actions → *Régénérer les baselines visuelles* → choisir la branche. Le workflow régénère dans le container et recommite. Relire le diff des PNG.
 - `snapshotPathTemplate` épingle le nom de plateforme : une capture macOS ne matchera jamais une capture Linux.
 
-## CI
-
-- **`ci.yml`** — garde chaque push/PR. `qualite` (lint, typecheck, build) publie `app/.next` en artifact ; tous les jobs de test le téléchargent, l'application n'est buildée qu'une fois. Chromium porte la régression complète en 3 shards, Firefox et WebKit seulement `@smoke` (ils ont déjà attrapé une course d'hydratation et une navigation avortée). Chaque job nomme son propre blob (`PLAYWRIGHT_BLOB_OUTPUT_FILE`), sinon plusieurs `report.zip` s'écrasent silencieusement à la fusion.
-- **`nightly.yml`** — le run exhaustif : régression complète sur les trois moteurs, vrai test de charge.
-- **`baselines-visuelles.yml`** — régénération manuelle des captures (voir ci-dessus).
-- **`pages.yml`** — publie le rapport sur https://gungagungi.github.io/music-website/, tous les jours à 02:30 UTC et à la demande. Il relance sa propre suite au lieu de réutiliser le rapport du nightly : dépendre d'un artifact produit ailleurs ferait échouer la publication chaque fois que le nightly échoue, alors qu'un rapport rouge est exactement ce qu'on veut publier.
-
-Le job **`deploiement`** de `ci.yml` construit l'image et monte la pile complète à chaque push, puis lance `verifier-deploiement.sh` et `verifier-persistance.sh`. C'est le seul endroit où le Dockerfile, le compose et le Caddyfile sont exécutés avant une mise en ligne réelle — sans lui, ils pourrissent en silence et on l'apprend un soir de déploiement. Il porte aussi `REQ-DATA-05`, que la suite Playwright ne peut pas couvrir.
-
-Chaque job de test a besoin d'une base : un service `postgres`, puis l'action composite `.github/actions/preparer-base` (attente, migrations, graines).
-
-Contraintes CI à connaître avant de toucher aux workflows :
-
-- Un job **avec** `container:` joint la base par **le nom du service** (`postgres:5432`) ; un job sur le runner hôte doit publier le port et passer par `localhost`. `DATABASE_URL` diffère donc d'un job à l'autre — c'est la confusion la plus coûteuse de ce fichier.
-- `output: 'standalone'` est conditionné à `BUILD_STANDALONE=1`, posé par le seul Dockerfile. Un build qui le porte ne peut plus être servi par `next start`, dont dépendent le `webServer` de Playwright et tous les jobs de test.
-
-- Le tag du container Playwright doit correspondre exactement à `@playwright/test` dans `e2e/package.json` (binaires navigateurs liés à la version). Il n'est pas templatable depuis `env` : `container.image` est évalué avant l'existence du contexte `env`.
-- `HOME: /root` est nécessaire dans les jobs conteneurisés : Firefox refuse de démarrer en root si `$HOME` (par défaut `/github/home`, propriété de `pwuser`) appartient à un autre utilisateur. Chromium et WebKit s'en moquent.
-- La fusion des rapports exige `npx playwright merge-reports -c merge.config.ts` : les blobs viennent de deux `testDir` différents (checkout container `/__w/...` vs hôte `/home/runner/work/...`) et `merge-reports` refuse l'ambiguïté sans config.
-
 ## Conventions
 
-- Alias `@/*` : vers `app/src/*` dans `app`, vers `e2e/*` dans `e2e`. Les deux workspaces sont en `strict`, et `e2e` ajoute `noUncheckedIndexedAccess` et `noUnusedLocals/Parameters`.
-- Imports de type explicites (`consistent-type-imports`, erreur dans `e2e`).
 - Français pour l'interface, les commentaires, les messages d'erreur API, les noms de tests et les messages de commit (`feat|fix|test|ci(scope): …`). Identifiants de code en anglais.
 - Les commentaires du dépôt expliquent *pourquoi* une décision a été prise, souvent en citant le défaut concret qui l'a motivée. Conserver ce registre plutôt que de paraphraser le code.
 - Documentation QA en anglais (`docs/`, `README.md`), tout le reste en français. C'est un arbitrage assumé : le dépôt sert de portfolio, la doc doit être lisible par un recruteur anglophone.
