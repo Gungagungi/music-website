@@ -487,13 +487,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Par le générateur du dépôt, et non par un `openssl rand` recopié ici.
+      # La première version l'avait recopié en base64, dont l'alphabet contient
+      # `/` : ce caractère termine la section d'autorité de DATABASE_URL, et le
+      # job échouait environ une fois sur trois. La règle « ce mot de passe doit
+      # traverser une URL » vit dans un seul fichier ; ce job doit la lire là.
       - name: Configurer la pile
         run: |
-          cat > .env <<EOF
-          FRETLINE_DOMAIN=:80
-          POSTGRES_PASSWORD=$(openssl rand -base64 24)
-          AUTH_SECRET=$(openssl rand -base64 48)
-          EOF
+          node scripts/preparer-env.mjs --production --domain=:80
+          cp .env.production .env
 
       - name: Construire l’image et démarrer la pile
         run: docker compose up -d --build
