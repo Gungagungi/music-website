@@ -109,12 +109,16 @@ jobs:
         working-directory: e2e
         run: npx playwright merge-reports -c merge.config.ts ./blob-report
 
+      # Le rapport Playwright à la racine, la documentation QA rendue sous /docs.
+      # Elle était copiée en Markdown brut : le navigateur la télécharge ou
+      # l'affiche en texte selon le type MIME deviné, et un tableau de
+      # traçabilité de 139 lignes y devient illisible — précisément le document
+      # qu'un lecteur extérieur vient voir.
       - name: Assembler le site
         run: |
           mkdir -p site
           cp -r e2e/reports/html/* site/
-          mkdir -p site/docs
-          cp -r docs/* site/docs/ 2>/dev/null || true
+          node scripts/rendre-docs.mjs site/docs
 
       - uses: actions/configure-pages@v5
 

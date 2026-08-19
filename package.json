@@ -27,6 +27,7 @@
     "test:a11y": "npm run test:a11y -w e2e",
     "test:visual": "npm run test:visual -w e2e",
     "report": "npm run report -w e2e",
+    "docs:html": "node scripts/rendre-docs.mjs",
     "db:up": "docker compose -f docker-compose.dev.yml up -d --wait",
     "db:down": "docker compose -f docker-compose.dev.yml down",
     "db:nuke": "docker compose -f docker-compose.dev.yml down -v",
@@ -49,5 +50,8 @@
     "perf:smoke": "k6 run perf/smoke.js",
     "perf:load": "k6 run perf/load.js",
     "trace": "npm run trace -w e2e"
+  },
+  "devDependencies": {
+    "marked": "^18.0.10"
   }
 }
