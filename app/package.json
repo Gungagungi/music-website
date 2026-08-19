@@ -8,6 +8,8 @@
     "start": "next start --port 3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:mutation": "stryker run",
     "check:catalog": "node scripts/check-catalog.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/cli/migrate.ts",
@@ -27,6 +29,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/vitest-runner": "^9.6.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20.19.0",
     "@types/pg": "^8.21.0",
@@ -38,6 +42,7 @@
     "eslint-config-next": "16.3.1",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
   }
 }

@@ -12,6 +12,12 @@ Les scripts sont dans `package.json` (racine et workspaces). Ce que leurs noms n
 
 - `npm run build` est requis avant les tests.
 - `npm run test:api` ne lance aucun navigateur (~10 s).
+- `npm run test:unit` (Vitest, ~2 s) ne lance ni navigateur ni base : c'est le seul endroit du
+  dépôt où un test parle directement à une fonction. Périmètre volontairement étroit — `money.ts`
+  et les fonctions pures de `cart.ts`. Tout ce qui touche la base reste couvert par la suite d'API,
+  contre un vrai PostgreSQL plutôt que contre une doublure.
+- `npm run test:mutation` (Stryker, ~45 s) éprouve ces tests-là. Seuil à 100 % sur le périmètre :
+  le job CI échoue dès qu'un mutant survit.
 - `npm run test:visual` échoue hors container CI (voir plus bas).
 - `npm run db:reset` emprunte le même chemin que `POST /api/test/reset` ; `db:generate` après toute modification du schéma.
 - `npm run perf:*` exige k6 installé ; `npm run prod:*` exige un `.env` de développement présent.
@@ -35,7 +41,7 @@ Trois pièges à connaître avant de toucher à cette couche :
 
 **Commandes de base et image de production.** Les entrées en ligne de commande sont dans `app/src/db/cli/` et **ne font rien à l'import** ; les modules qui travaillent (`migrate.ts`, `seed.ts`, `bootstrap.ts`) n'ont aucun effet de bord. Ce n'est pas de la propreté : `scripts/build-db-cli.mjs` les bundle avec esbuild pour l'image, et un garde `import.meta.url === process.argv[1]` devient vrai partout à la fois dans un bundle — `bootstrap` lançait les migrations trois fois en parallèle sur le même pool. Voir `app/src/db/cli/run.ts`.
 
-**Montants en centimes entiers, partout** (`app/src/lib/money.ts`). Les prix affichés sont TTC (convention française) : la TVA est *extraite* du total, jamais ajoutée par-dessus. Arrondi au demi supérieur en valeur absolue. Ne jamais introduire de flottant dans un calcul monétaire, ni côté app ni côté test.
+**Montants en centimes entiers, partout** (`app/src/lib/money.ts`). Les prix affichés sont TTC (convention française) : la TVA est *extraite* du total, jamais ajoutée par-dessus. Arrondi au demi supérieur en valeur absolue. Ne jamais introduire de flottant dans un calcul monétaire, ni côté app ni côté test. Cette arithmétique est tenue par des tests de mutation à 100 % : toute modification doit être accompagnée du test qui tuerait le mutant correspondant, sinon `npm run test:mutation` rougit. Deux mutants sont marqués `// Stryker disable next-line` avec la démonstration de leur équivalence — ne pas en ajouter sans la même démonstration, et ne jamais abaisser le seuil pour absorber un survivant.
 
 **Enveloppe d'erreur unique** (`app/src/lib/api.ts`). Toute erreur renvoie `{ error: { code, message, details? } }`, le code HTTP étant dérivé du `ApiErrorCode` via `STATUS_BY_CODE`. C'est ce qui permet aux specs d'asserter `body.error.code === 'OUT_OF_STOCK'` au lieu de matcher une chaîne. Les helpers `parseBody`/`parseQuery` (Zod) distinguent délibérément JSON malformé (`INVALID_JSON`, 400) et violation de schéma (`VALIDATION_ERROR`, 422).
 
