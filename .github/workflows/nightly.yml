@@ -43,6 +43,23 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    # Job conteneurisé : il partage le réseau des services, donc il joint la base
+    # par le nom du service (`postgres`) et non par localhost, qui désignerait ici
+    # le conteneur du job lui-même.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     strategy:
       fail-fast: false
       matrix:
@@ -60,6 +77,10 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Suite complète
         working-directory: e2e
@@ -92,6 +113,22 @@ jobs:
     name: Test de charge (50 VU)
     needs: build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@localhost:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -104,6 +141,13 @@ jobs:
         with:
           name: app-build
           path: app/.next
+
+      # Ce job ne lance pas le projet `setup-db`, donc rien ne repassera derrière
+      # pour charger le catalogue : les graines posées ici sont celles que k6
+      # mesure.
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - uses: grafana/setup-k6-action@v1
 
