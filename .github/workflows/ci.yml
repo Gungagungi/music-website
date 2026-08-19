@@ -19,7 +19,7 @@ concurrency:
 # release, and a mismatch fails at launch. It cannot be templated from `env`
 # because `container.image` is evaluated before the env context exists.
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
   TEST_API_TOKEN: fretline-ci-token
 
 jobs:
