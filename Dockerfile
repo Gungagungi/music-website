@@ -10,7 +10,7 @@
 # le point d'entrée est `app/server.js`, les dépendances sont un cran au-dessus.
 # D'où la mise en place à `/srv` plutôt qu'à `/srv/app`.
 
-ARG NODE_VERSION=20-alpine
+ARG NODE_VERSION=22-alpine
 
 # --- Dépendances ------------------------------------------------------------
 FROM node:${NODE_VERSION} AS deps
