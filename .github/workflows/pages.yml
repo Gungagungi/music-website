@@ -64,11 +64,50 @@ jobs:
         with:
           database-url: ${{ env.DATABASE_URL }}
 
-      - name: Suite complète (chromium + API + a11y)
+      # Une exécution par projet, et non les trois d'un coup.
+      #
+      # Les trois partagent une base — la même, puisqu'un seul service tourne
+      # pour le job. Lancés ensemble, les commandes passées par la suite API
+      # consomment du stock réel pendant que les specs UI le comptent : TC-025
+      # attend 11 guitares électriques disponibles et en trouve 8. `ci.yml` ne
+      # rencontre pas le défaut parce qu'il donne un job — donc une base — à
+      # chaque projet.
+      #
+      # Séparer les exécutions rejoue `setup-db` à chaque fois, donc repart des
+      # graines. Chacune nomme son blob : sans quoi les trois `report.zip`
+      # s'écrasent et la fusion ne voit que le dernier.
+      - name: Suite API
         working-directory: e2e
+        continue-on-error: true
         env:
           HOME: /root
-        run: npx playwright test --project=api --project=chromium --project=a11y
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-api.zip
+        run: npx playwright test --project=api
+
+      - name: Suite UI (chromium)
+        working-directory: e2e
+        continue-on-error: true
+        env:
+          HOME: /root
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-chromium.zip
+        run: npx playwright test --project=chromium
+
+      - name: Suite accessibilité
+        working-directory: e2e
+        continue-on-error: true
+        env:
+          HOME: /root
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-a11y.zip
+        run: npx playwright test --project=a11y
+
+      # `continue-on-error` sur les trois suites, et c'est le fond du workflow :
+      # il existe pour publier le rapport, rouge compris. Un échec de suite qui
+      # interrompt la publication produit exactement ce que l'en-tête de ce
+      # fichier dit vouloir éviter — plus de rapport le jour où il y aurait le
+      # plus à lire dedans.
+      - name: Fusionner en un rapport unique
+        working-directory: e2e
+        run: npx playwright merge-reports -c merge.config.ts ./blob-report
 
       - name: Assembler le site
         run: |
