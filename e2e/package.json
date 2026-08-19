@@ -17,6 +17,8 @@
     "codegen": "playwright codegen http://localhost:3000",
     "report": "playwright show-report reports/html",
     "trace": "node scripts/traceability.mjs",
+    "openapi": "tsx scripts/openapi.ts",
+    "openapi:check": "tsx scripts/openapi.ts --check",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "trace:check": "node scripts/traceability.mjs --check"
@@ -26,6 +28,7 @@
     "@eslint/js": "^9.39.0",
     "@faker-js/faker": "^10.5.0",
     "@playwright/test": "^1.62.1",
+    "@readme/openapi-parser": "^7.0.1",
     "@types/node": "^20.19.0",
     "axe-core": "^4.13.0",
     "eslint": "^9.39.0",

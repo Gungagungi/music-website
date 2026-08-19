@@ -55,6 +55,13 @@ jobs:
         working-directory: e2e
         run: npm run trace:check
 
+      # Même règle que la matrice : la spécification est dérivée des schémas que
+      # la suite d'API valide, jamais rédigée à côté. Une spec qu'aucun test ne
+      # traverse décrit une intention, pas une API.
+      - name: Vérifier la spécification OpenAPI
+        working-directory: e2e
+        run: npm run openapi:check
+
       # Une facette vide ne rend pas la suite rouge, elle la rend vide : TC-215
       # itère sur les résultats du filtre, ce qui est vrai de toute liste vide.
       # Le test resterait vert avec zéro couverture.

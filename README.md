@@ -36,7 +36,7 @@ checkouts racing for the last unit in stock is not a defect an in-memory store c
 
 | Suite | Cases | Runtime | Scope |
 | --- | ---: | ---: | --- |
-| **API** | 74 | ~15 s | Every endpoint, response contracts validated with strict Zod schemas, error codes, pagination, negatives, security |
+| **API** | 74 | ~15 s | Every endpoint, response contracts validated with strict Zod schemas, error codes, pagination, negatives, security — the same schemas generate [the OpenAPI spec](docs/api/openapi.json) |
 | **UI** | 88 | ~5 min | Catalogue and facets, sorting, pagination, search, product page, cart, coupons, checkout, authentication, comparator |
 | **Accessibility** | 13 | ~1 min 30 | axe-core WCAG 2.1 A/AA across 8 pages and the checkout funnel, skip link, keyboard-only journey, text alternatives |
 | **Visual** | 10 | ~40 s | Component baselines captured in the CI container |
@@ -383,7 +383,17 @@ Stated rather than glossed over — the boundaries are part of the design.
 
 ### Roadmap
 
-- Contract tests generated from an OpenAPI spec rather than hand-written schemas
+The five items this section carried are done: mutation testing on the pricing arithmetic, a
+performance baseline measured on the CI runner, trend reporting across runs, the QA docs rendered
+as HTML, and an OpenAPI spec — generated from the contract schemas rather than written beside
+them, which is the opposite of how that item was phrased and the reason it is worth reading
+[the PR](https://github.com/Gungagungi/music-website/pull/18).
+
+What is left is smaller, and one item is not mine to hide:
+
+- The workflows still run on the Node 20 **action** runtime (`actions/checkout@v4` and friends),
+  which GitHub flags on every run. The project itself is on Node 22; clearing the notice means
+  moving the actions to their current majors, which is its own change with its own breakage.
 
 ---
 

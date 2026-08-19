@@ -51,7 +51,8 @@
     "perf:smoke": "k6 run perf/smoke.js",
     "perf:load": "k6 run perf/load.js",
     "perf:baseline": "node scripts/enregistrer-baseline.mjs",
-    "trace": "npm run trace -w e2e"
+    "trace": "npm run trace -w e2e",
+    "openapi": "npm run openapi -w e2e"
   },
   "devDependencies": {
     "marked": "^18.0.10"
