@@ -2,26 +2,26 @@
   "$commentaire": "Généré par le workflow « Mesurer la baseline de performance ». Ne pas éditer à la main : une valeur écrite au jugé est un seuil qui ne mesure plus rien. Tant que `scenarios` est vide, les scripts retombent sur leurs seuils historiques.",
   "mesureLe": "2026-08-19",
   "runner": "Linux · X64 · runner GitHub hébergé",
-  "commit": "ffc3bcef01fbf0069d31d8d0f28ab0d67b572651",
+  "commit": "1e9ca24bd866cd6775bcee4a377fca873f022350",
   "scenarios": {
     "smoke": {
       "http_req_duration": {
-        "p(95)": 11.74,
-        "p(99)": 17.52
+        "p(95)": 9.22,
+        "p(99)": 16.9
       },
       "group_duration{group:::Catalogue}": {
-        "p(95)": 22.96,
-        "p(99)": 31.46
+        "p(95)": 19.12,
+        "p(99)": 28.79
       }
     },
     "load": {
       "http_req_duration": {
-        "p(95)": 8.12,
-        "p(99)": 10.94
+        "p(95)": 8.18,
+        "p(99)": 77.74
       },
       "cart_add_duration": {
-        "p(95)": 10.68,
-        "p(99)": 16.59
+        "p(95)": 85.22,
+        "p(99)": 219.56
       }
     }
   }
