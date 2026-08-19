@@ -389,11 +389,14 @@ as HTML, and an OpenAPI spec — generated from the contract schemas rather than
 them, which is the opposite of how that item was phrased and the reason it is worth reading
 [the PR](https://github.com/Gungagungi/music-website/pull/18).
 
-What is left is smaller, and one item is not mine to hide:
+The Node 20 action-runtime notice that this section carried is gone too: the workflows now run
+`checkout@v7`, `setup-node@v7`, `upload-artifact@v7`, `download-artifact@v8` and the current Pages
+trio, all on the Node 24 runtime. The upgrade was uneventful for one reason worth stating — every
+`setup-node` already passed `cache: npm` explicitly, so the automatic package-manager caching
+introduced in v5 changed nothing here, and no workflow uses `pull_request_target` or
+`workflow_run`, which is what `checkout@v7` tightened.
 
-- The workflows still run on the Node 20 **action** runtime (`actions/checkout@v4` and friends),
-  which GitHub flags on every run. The project itself is on Node 22; clearing the notice means
-  moving the actions to their current majors, which is its own change with its own breakage.
+Nothing is queued behind it.
 
 ---
 

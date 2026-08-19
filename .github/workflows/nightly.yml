@@ -26,14 +26,14 @@ jobs:
     name: Build de production
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
       - run: npm run build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: app-build
           path: app/.next
@@ -70,14 +70,14 @@ jobs:
         project: [chromium, firefox, webkit]
         shard: [1, 2]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: app-build
           path: app/.next
@@ -95,7 +95,7 @@ jobs:
           HOME: /root
         run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}/2
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: blob-${{ matrix.project }}-${{ matrix.shard }}
@@ -106,7 +106,7 @@ jobs:
       # se reproduira pas en local, donc celui dont la trace compte le plus.
       - name: Publier les traces (échecs et instables)
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: traces-${{ matrix.project }}-${{ matrix.shard }}
           path: e2e/test-results
@@ -134,14 +134,14 @@ jobs:
     env:
       DATABASE_URL: postgresql://fretline:fretline@localhost:5432/fretline
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: app-build
           path: app/.next
@@ -172,7 +172,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: cat perf/results/load.md >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: perf-load
@@ -185,14 +185,14 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: blob-*
           path: e2e/all-blobs
@@ -202,7 +202,7 @@ jobs:
         working-directory: e2e
         run: npx playwright merge-reports -c merge.config.ts ./all-blobs
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: rapport-nightly
           path: e2e/reports/html
