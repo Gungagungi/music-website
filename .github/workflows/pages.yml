@@ -109,16 +109,26 @@ jobs:
         working-directory: e2e
         run: npx playwright merge-reports -c merge.config.ts ./blob-report
 
-      # Le rapport Playwright à la racine, la documentation QA rendue sous /docs.
-      # Elle était copiée en Markdown brut : le navigateur la télécharge ou
-      # l'affiche en texte selon le type MIME deviné, et un tableau de
-      # traçabilité de 139 lignes y devient illisible — précisément le document
-      # qu'un lecteur extérieur vient voir.
+      # La tendance vient de la branche `historique-qa`, alimentée par le
+      # nightly. Absente au premier passage : la page se rend alors vide plutôt
+      # que de faire échouer la publication.
+      - name: Récupérer l’historique des runs
+        continue-on-error: true
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git fetch --depth=1 origin historique-qa && git show FETCH_HEAD:runs.jsonl > runs.jsonl
+
+      # Le rapport Playwright à la racine, la documentation QA rendue sous /docs,
+      # la tendance à côté. La documentation était copiée en Markdown brut : le
+      # navigateur la télécharge ou l'affiche en texte selon le type MIME deviné,
+      # et un tableau de traçabilité de 139 lignes y devient illisible —
+      # précisément le document qu'un lecteur extérieur vient voir.
       - name: Assembler le site
         run: |
           mkdir -p site
           cp -r e2e/reports/html/* site/
           node scripts/rendre-docs.mjs site/docs
+          node scripts/rendre-tendance.mjs runs.jsonl site/tendance.html
 
       - uses: actions/configure-pages@v5
 

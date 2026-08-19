@@ -255,7 +255,9 @@ The application is built **once** and downloaded by every test job. Seven jobs e
 own copy is seven jobs that can disagree about what they are testing.
 
 **`nightly.yml`** — full regression on all three engines (two shards each) and a real load test to
-50 VU. Everything the PR pipeline trims for speed. A two-hour feedback loop on a pull request is a
+50 VU. Each run appends one line to the `historique-qa` branch — duration, flake rate, failures —
+which the published site renders as a trend page: a per-run report says what broke, that one says
+since when. Everything the PR pipeline trims for speed. A two-hour feedback loop on a pull request is a
 feedback loop nobody uses.
 
 **`baselines-visuelles.yml`** — regenerates visual baselines inside the CI container and commits
@@ -382,7 +384,6 @@ Stated rather than glossed over — the boundaries are part of the design.
 - A performance baseline measured on the CI runner itself, so the thresholds stop being a
   multiple of somebody's laptop
 - Contract tests generated from an OpenAPI spec rather than hand-written schemas
-- Trend reporting across runs (duration, flake rate) rather than per-run snapshots
 
 ---
 
