@@ -27,9 +27,9 @@ jobs:
     name: Qualité & build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -75,7 +75,7 @@ jobs:
       # it six times would add minutes to the pipeline and, worse, let the jobs
       # disagree about what they are testing.
       - name: Publier le build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: app-build
           path: app/.next
@@ -106,14 +106,14 @@ jobs:
     env:
       DATABASE_URL: postgresql://fretline:fretline@localhost:5432/fretline
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: app-build
           path: app/.next
@@ -135,7 +135,7 @@ jobs:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-api.zip
         run: npx playwright test --project=api
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: blob-api
@@ -147,9 +147,9 @@ jobs:
     needs: qualite
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -162,7 +162,7 @@ jobs:
       - name: Mutants
         run: npm run test:mutation
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: rapport-mutation
@@ -220,14 +220,14 @@ jobs:
           - project: mobile-chrome
             grep: ''
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: app-build
           path: app/.next
@@ -249,7 +249,7 @@ jobs:
           npx playwright test --project=${{ matrix.project }} ${{ matrix.grep }} \
             ${{ matrix.shard && format('--shard={0}/{1}', matrix.shard, matrix.shards) || '' }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: blob-ui-${{ matrix.project }}-${{ matrix.shard || 'all' }}
@@ -264,7 +264,7 @@ jobs:
       # so a fully green job uploads nothing.
       - name: Publier les traces (échecs et instables)
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: traces-${{ matrix.project }}-${{ matrix.shard || 'all' }}
           path: e2e/test-results
@@ -293,14 +293,14 @@ jobs:
     env:
       DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: app-build
           path: app/.next
@@ -316,7 +316,7 @@ jobs:
           HOME: /root
         run: npx playwright test --project=a11y
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: blob-a11y
@@ -345,14 +345,14 @@ jobs:
     env:
       DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: app-build
           path: app/.next
@@ -372,13 +372,13 @@ jobs:
       # the reviewer has a percentage and no way to judge it.
       - name: Publier les différences visuelles
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: diffs-visuels
           path: e2e/test-results
           retention-days: 7
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: blob-visual
@@ -406,14 +406,14 @@ jobs:
     env:
       DATABASE_URL: postgresql://fretline:fretline@localhost:5432/fretline
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: app-build
           path: app/.next
@@ -444,7 +444,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: cat perf/results/smoke.md >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: perf-smoke
@@ -477,8 +477,8 @@ jobs:
     # suite still catches them. The job goes green when detection works, which
     # makes it a real gate on coverage rather than decoration.
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -531,7 +531,7 @@ jobs:
     # Caddyfile sont exécutés avant un déploiement réel — sans lui, ils
     # pourrissent en silence et on ne l'apprend qu'un soir de mise en ligne.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Par le générateur du dépôt, et non par un `openssl rand` recopié ici.
       # La première version l'avait recopié en base64, dont l'alphabet contient
@@ -590,15 +590,15 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
 
       - name: Récupérer les rapports partiels
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: blob-*
           path: e2e/all-blobs
@@ -616,7 +616,7 @@ jobs:
         run: npx playwright merge-reports -c merge.config.ts ./all-blobs
 
       - name: Publier le rapport HTML
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rapport-playwright
           path: e2e/reports/html
