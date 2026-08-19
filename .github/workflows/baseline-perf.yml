@@ -1,0 +1,129 @@
+name: Mesurer la baseline de performance
+
+# Les seuils appartiennent à la machine qui les compare.
+#
+# Ceux de ce dépôt ont d'abord été calés sur un VPS — celle de qui les a écrits.
+# Un runner GitHub partagé est plus lent et surtout plus variable : un seuil venu
+# d'ailleurs y devient soit trop large pour rien détecter, soit trop serré pour
+# survivre au voisinage. Le README le disait sans détour, en le rangeant parmi
+# les limites assumées.
+#
+# Ce workflow mesure sur le runner, écrit `perf/baseline.json` et le recommite —
+# le même principe que les baselines visuelles, appliqué à des millisecondes
+# plutôt qu'à des pixels.
+#
+#   Actions → Mesurer la baseline de performance → Run workflow → choisir la branche
+#
+# À relancer quand la machine change (image du runner, version de PostgreSQL),
+# pas à chaque changement de code : une baseline reprise à chaque commit
+# entérine la lenteur qu'elle est censée détecter.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: baseline-perf-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  TEST_API_TOKEN: fretline-ci-token
+
+jobs:
+  mesurer:
+    name: Mesurer et commiter
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@localhost:5432/fretline
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build de production
+        run: npm run build
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
+
+      - uses: grafana/setup-k6-action@v1
+
+      - name: Démarrer l’application
+        run: |
+          E2E_TEST_MODE=1 npm run start -w app &
+          for _ in $(seq 1 60); do
+            curl -sf http://localhost:3000/api/health >/dev/null && exit 0
+            sleep 1
+          done
+          echo "L’application n’a pas répondu dans le délai imparti." >&2
+          exit 1
+
+      # Un tour à blanc avant de mesurer. Les premières secondes d'un processus
+      # Next fraîchement démarré paient le remplissage du pool et la compilation
+      # des plans de requête ; les inclure calerait la baseline sur un état que
+      # l'application ne connaît qu'une fois.
+      - name: Préchauffer
+        run: K6_CALIBRATION=1 k6 run --vus 5 --duration 15s perf/smoke.js
+
+      - name: Mesurer le smoke
+        run: K6_CALIBRATION=1 k6 run perf/smoke.js
+
+      - name: Mesurer la montée en charge
+        run: K6_CALIBRATION=1 k6 run perf/load.js
+
+      - name: Enregistrer la baseline
+        env:
+          RUNNER_DESCRIPTION: ${{ runner.os }} · ${{ runner.arch }} · runner GitHub hébergé
+        run: node scripts/enregistrer-baseline.mjs smoke load
+
+      - name: Publier les résumés pour relecture
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-perf
+          path: perf/results
+          retention-days: 14
+
+      - name: Commiter si la baseline a changé
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add perf/baseline.json
+
+          if git diff --cached --quiet; then
+            echo "La baseline est inchangée." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          {
+            echo "## 📈 Baseline de performance mise à jour"
+            echo ""
+            echo '```diff'
+            git diff --cached -- perf/baseline.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          git commit -m "perf: mesurer la baseline sur le runner CI"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

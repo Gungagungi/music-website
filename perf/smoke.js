@@ -2,6 +2,7 @@ import { check, group, sleep } from 'k6';
 import http from 'k6/http';
 
 import { summaryHandler } from './lib/summary.js';
+import { CALIBRATION, expression, provenance } from './lib/seuils.js';
 
 /**
  * Performance smoke test — runs on every pull request.
@@ -17,28 +18,49 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
 export const options = {
   vus: 10,
   duration: '30s',
-  thresholds: {
-    // Calibrated on measurement, not on hope.
-    //
-    // Reference run, 2026-08-18, application and PostgreSQL on the same VPS,
-    // production build, over three runs: median 5–7 ms, p(95) 13–36 ms,
-    // p(99) 36–113 ms; the Catalogue group at p(95) 32 ms.
-    //
-    // The previous values — p(95) < 500, p(99) < 1000 — were inherited from the
-    // in-memory store and left in place after the migration. They passed with
-    // fourteen times the headroom, which means the endpoint could have got ten
-    // times slower without anyone hearing about it. A threshold nothing can
-    // cross is not a threshold.
-    //
-    // These sit at roughly five times the measured p(95). Wide enough that a
-    // shared CI runner, which is slower and noisier than the reference machine,
-    // does not go red on variance alone; narrow enough that the regressions this
-    // test exists for — an N+1, a lost index, a synchronous hash on a hot path —
-    // land the wrong side of it by an order of magnitude rather than a hair.
-    http_req_duration: ['p(95)<250', 'p(99)<600'],
-    http_req_failed: ['rate<0.01'],
-    'group_duration{group:::Catalogue}': ['p(95)<300'],
-  },
+  // En calibration, on mesure : garder les seuils ferait échouer le run qui sert
+  // précisément à les produire. Seul le taux d'échec reste tenu, sinon on
+  // calibrerait sur une application qui répond des erreurs très vite.
+  thresholds: CALIBRATION
+    ? {
+        http_req_failed: ['rate<0.01'],
+        // Une borne absurde, mais nécessaire : k6 ne matérialise une
+        // sous-métrique taguée que si un seuil la nomme. Sans cette ligne, le
+        // résumé de calibration ne contient pas `group_duration{Catalogue}` et
+        // il n'y a rien à enregistrer.
+        'group_duration{group:::Catalogue}': ['p(95)<600000'],
+      }
+    : {
+        // Dérivés de `perf/baseline.json`, mesuré sur le runner CI — voir
+        // `lib/seuils.js`. Les valeurs `defaut` sont celles qui s'appliquaient
+        // avant la calibration, mesurées le 2026-08-18 sur un VPS : médiane
+        // 5–7 ms, p(95) 13–36 ms, p(99) 36–113 ms.
+        //
+        // Le facteur 5 est conservé — assez large pour qu'un runner partagé ne
+        // rougisse pas sur sa propre variance, assez serré pour qu'un N+1 ou un
+        // index perdu tombe du mauvais côté d'un ordre de grandeur, pas d'un
+        // cheveu.
+        http_req_duration: [
+          expression('smoke', 'http_req_duration', 'p(95)', {
+            facteur: 5,
+            plancher: 100,
+            defaut: 250,
+          }),
+          expression('smoke', 'http_req_duration', 'p(99)', {
+            facteur: 5,
+            plancher: 200,
+            defaut: 600,
+          }),
+        ],
+        http_req_failed: ['rate<0.01'],
+        'group_duration{group:::Catalogue}': [
+          expression('smoke', 'group_duration{group:::Catalogue}', 'p(95)', {
+            facteur: 5,
+            plancher: 150,
+            defaut: 300,
+          }),
+        ],
+      },
   summaryTrendStats: ['med', 'p(95)', 'p(99)', 'max'],
 };
 
@@ -84,4 +106,7 @@ export default function run() {
   sleep(1);
 }
 
-export const handleSummary = summaryHandler('Test de charge — smoke (10 VU / 30 s)', 'smoke');
+export const handleSummary = summaryHandler(
+  `Test de charge — smoke (10 VU / 30 s) — ${provenance('smoke')}`,
+  'smoke',
+);
