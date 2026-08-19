@@ -41,6 +41,7 @@ checkouts racing for the last unit in stock is not a defect an in-memory store c
 | **Accessibility** | 13 | ~1 min 30 | axe-core WCAG 2.1 A/AA across 8 pages and the checkout funnel, skip link, keyboard-only journey, text alternatives |
 | **Visual** | 10 | ~40 s | Component baselines captured in the CI container |
 | **Performance** | 2 scripts | 30 s / 4 min | k6 smoke on every PR, load test nightly |
+| **Unit** | 47 | ~2 s | Monetary arithmetic — rounding, VAT extraction, shipping thresholds, coupon rules |
 
 Tags: `@smoke` 42 · `@regression` 134 · `@critical` 61 · `@contract` 21 · `@security` 19 ·
 `@known-bug` 3.
@@ -117,6 +118,8 @@ about ten seconds.
 
 ```bash
 npm run test:api            # 74 API tests, ~15 s, no browser
+npm run test:unit           # 47 unit tests on the pricing arithmetic, ~2 s, no database
+npm run test:mutation       # Stryker on money.ts and cart.ts pricing, ~45 s
 npm run test:smoke          # the @smoke set
 npm run test:ui             # UI on Chromium
 npm run test:a11y           # accessibility scans
@@ -239,7 +242,8 @@ from the internals of a blob report, because the job was green and the upload wa
 
 | Job | Content |
 | --- | --- |
-| `qualite` | ESLint, `tsc --noEmit`, production build — **published as an artifact** |
+| `qualite` | ESLint, `tsc --noEmit`, 47 unit tests, production build — **published as an artifact** |
+| `mutation` | Stryker on the pricing arithmetic, **breaks below 100 %** |
 | `tests-api` | 74 API tests, no browser |
 | `tests-ui` | Chromium ×3 shards (full regression) + Firefox/WebKit `@smoke` + mobile |
 | `tests-a11y` · `tests-visual` | axe-core scans, baseline comparison |
@@ -286,6 +290,32 @@ delete the day it gets fixed.
 
 The `demo-defauts` CI job runs this and **fails if the suite passes**, making detection a real
 gate on coverage rather than a claim in a README.
+
+### Mutation testing, where the money is
+
+Seeded defects answer the question for three known bugs. Mutation testing asks it in general, and
+without anyone choosing the defect in advance: Stryker rewrites the source — `>=` becomes `>`,
+`Math.round` becomes `Math.floor`, a `+` becomes a `-` — and counts the versions the suite still
+calls correct. A surviving mutant is a line of code no assertion depends on.
+
+It runs on the pricing arithmetic only: `lib/money.ts`, and the pure functions of `lib/cart.ts`.
+That is where a wrong answer is a wrong amount charged to somebody. 103 mutants, **100 % killed**,
+and the CI job breaks below that — a score that is merely published drifts down without anyone
+noticing.
+
+Two mutants are *equivalent*: the mutated code behaves identically to the original, so no test can
+kill them, and Stryker has no way to know that. They are marked in the source with the reasoning
+that makes them equivalent — `-Math.round(-0)` returns `+0`, so `value < 0` and `value <= 0` agree
+everywhere. Marking them is deliberate: lowering the threshold to 98 % to accommodate them would
+also accommodate the next two real survivors.
+
+The exercise paid for itself immediately. It found that nothing pinned whether a coupon expiring
+"on 31 December" is still valid *at* its expiry instant — a business rule the code answered and no
+test asserted. Two tests with a frozen clock now hold both sides of that millisecond.
+
+```bash
+npm run test:mutation        # ~45 s, HTML report in app/reports/mutation/
+```
 
 ## Three problems worth reading about
 
@@ -348,8 +378,6 @@ Stated rather than glossed over — the boundaries are part of the design.
 
 ### Roadmap
 
-- Mutation testing on `lib/money.ts` and `lib/cart.ts` — the arithmetic where a surviving mutant
-  would mean real money
 - A performance baseline measured on the CI runner itself, so the thresholds stop being a
   multiple of somebody's laptop
 - Contract tests generated from an OpenAPI spec rather than hand-written schemas

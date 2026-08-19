@@ -42,6 +42,12 @@ jobs:
       - name: Vérification des types
         run: npm run typecheck
 
+      # Deux secondes, aucune base : les seuls tests du dépôt qui parlent
+      # directement à une fonction. Ils tiennent l'arithmétique monétaire, que la
+      # suite Playwright ne peut éprouver qu'à travers un panier entier.
+      - name: Tests unitaires
+        run: npm run test:unit
+
       # La matrice et le CSV sont dérivés des annotations des specs. Sans cette
       # garde, ils restent committés dans un état qui décrit une suite qui
       # n'existe plus — pire qu'absents, puisqu'on continue de s'y fier.
@@ -127,6 +133,33 @@ jobs:
         with:
           name: blob-api
           path: e2e/blob-report
+          retention-days: 7
+
+  mutation:
+    name: Tests de mutation (arithmétique monétaire)
+    needs: qualite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      # Le seuil est à 100 % sur ce périmètre : le job échoue dès qu'un mutant
+      # survit. C'est ce qui distingue une mesure d'une garde — un score qu'on
+      # se contente de publier redescend sans que personne ne l'apprenne.
+      - name: Mutants
+        run: npm run test:mutation
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: rapport-mutation
+          path: app/reports/mutation
           retention-days: 7
 
   tests-ui:
