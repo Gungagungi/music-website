@@ -28,6 +28,7 @@
     "test:visual": "npm run test:visual -w e2e",
     "report": "npm run report -w e2e",
     "docs:html": "node scripts/rendre-docs.mjs",
+    "tendance": "node scripts/rendre-tendance.mjs",
     "db:up": "docker compose -f docker-compose.dev.yml up -d --wait",
     "db:down": "docker compose -f docker-compose.dev.yml down",
     "db:nuke": "docker compose -f docker-compose.dev.yml down -v",

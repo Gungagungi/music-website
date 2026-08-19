@@ -46,8 +46,37 @@ export default class SummaryReporter implements Reporter {
     mkdirSync(dirname(localPath), { recursive: true });
     writeFileSync(localPath, markdown, 'utf8');
 
+    // Les mêmes chiffres, lisibles par une machine. Le Markdown répond à « qu'a
+    // cassé ce run » ; le JSON alimente `scripts/enregistrer-tendance.mjs`, qui
+    // répond à « depuis quand », et qu'aucun rapport par run ne peut dire.
+    writeFileSync('reports/summary.json', `${JSON.stringify(this.toJson(result), null, 2)}\n`, 'utf8');
+
     const githubSummary = process.env.GITHUB_STEP_SUMMARY;
     if (githubSummary) appendFileSync(githubSummary, `${markdown}\n`, 'utf8');
+  }
+
+  private toJson(result: FullResult): Record<string, unknown> {
+    const projets = Object.fromEntries(
+      [...this.stats.entries()].sort(([a], [b]) => a.localeCompare(b)),
+    );
+    const totaux = [...this.stats.values()].reduce(
+      (sum, entry) => ({
+        passed: sum.passed + entry.passed,
+        failed: sum.failed + entry.failed,
+        flaky: sum.flaky + entry.flaky,
+        skipped: sum.skipped + entry.skipped,
+        durationMs: sum.durationMs + entry.durationMs,
+      }),
+      { passed: 0, failed: 0, flaky: 0, skipped: 0, durationMs: 0 },
+    );
+
+    return {
+      statut: result.status,
+      total: this.totalTests,
+      totaux,
+      projets,
+      instables: this.flakes.map((flake) => `${flake.project} › ${flake.title}`),
+    };
   }
 
   /**

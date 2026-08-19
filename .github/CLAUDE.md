@@ -14,6 +14,8 @@ Ce fichier complète le `CLAUDE.md` de la racine ; il n'est chargé que lorsque 
 
 Le job **`deploiement`** de `ci.yml` construit l'image et monte la pile complète à chaque push, puis lance `verifier-deploiement.sh` et `verifier-persistance.sh`. C'est le seul endroit où le Dockerfile, le compose et le Caddyfile sont exécutés avant une mise en ligne réelle — sans lui, ils pourrissent en silence et on l'apprend un soir de déploiement. Il porte aussi `REQ-DATA-05`, que la suite Playwright ne peut pas couvrir.
 
+**Historique de tendance.** Le job `rapport` du nightly ajoute une ligne à `runs.jsonl` sur la branche orpheline `historique-qa` (durée cumulée, taux d'instabilité, échecs), et `pages.yml` en rend une page. Trois choix à ne pas défaire : une branche orpheline, parce qu'une ligne par nuit sur `main` y noierait l'historique du code et que la donnée ne décrit aucun état du code ; `!cancelled()` plutôt que `success()`, parce qu'un run rouge est exactement celui que la tendance doit garder ; et des échelles partant de zéro dans la page, parce qu'une échelle ajustée aux données transforme 2 % de variation en falaise.
+
 Chaque job de test a besoin d'une base : un service `postgres`, puis l'action composite `.github/actions/preparer-base` (attente, migrations, graines).
 
 Contraintes CI à connaître avant de toucher aux workflows :
