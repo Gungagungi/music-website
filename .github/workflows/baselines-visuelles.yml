@@ -38,6 +38,22 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    # Le projet `visual` dépend de `setup-db`, donc d'une base. Job conteneurisé :
+    # il la joint par le nom du service, pas par localhost.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     steps:
       - uses: actions/checkout@v4
 
@@ -50,6 +66,10 @@ jobs:
 
       - name: Build de production
         run: npm run build -w app
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Régénérer les captures de référence
         working-directory: e2e
