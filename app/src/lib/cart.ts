@@ -115,12 +115,11 @@ export function discountFor(
 ): number {
   if (!coupon) return 0;
   const base = eligibleSubtotal(items, coupon, categories);
-  // Stryker disable next-line ConditionalExpression: mutant équivalent pour tout
-  // coupon que le domaine produit. Sur une base nulle, `applyPercent(0, v)` rend
-  // 0 et `Math.min(v, 0)` rend 0 dès que `v` est positif — ce que sont toutes
-  // les valeurs semées. Le tuer demanderait un coupon à valeur négative, cas où
-  // ce garde ne suffirait de toute façon pas (`Math.min` le laisserait passer
-  // sur une base non nulle).
+  // Stryker disable next-line ConditionalExpression: mutant équivalent. Sur une
+  // base nulle, `applyPercent(0, v)` rend 0 et `Math.min(v, 0)` rend 0 pour tout
+  // `v` positif — et `v` l'est toujours : la contrainte `coupons_value_positive`
+  // (`value > 0`) l'impose en base, elle ne relève pas des valeurs semées. Le
+  // tuer demanderait un coupon que le schéma refuse d'enregistrer.
   if (base === 0) return 0;
 
   if (coupon.type === 'percent') {
