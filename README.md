@@ -262,7 +262,8 @@ feedback loop nobody uses.
 them, with the PNGs also published for review.
 
 **`pages.yml`** — publishes the merged report to
-**<https://gungagungi.github.io/music-website/>**, daily at 02:30 UTC and on demand. It runs its
+**<https://gungagungi.github.io/music-website/>**, daily at 02:30 UTC and on demand, with the QA
+documentation rendered as HTML under `/docs` (dead internal links fail the build rather than ship). It runs its
 own suite rather than reusing the nightly's report: depending on an artifact produced by another
 workflow would break publication every time the nightly fails — and a red report is exactly what
 you want published.
@@ -382,8 +383,6 @@ Stated rather than glossed over — the boundaries are part of the design.
   multiple of somebody's laptop
 - Contract tests generated from an OpenAPI spec rather than hand-written schemas
 - Trend reporting across runs (duration, flake rate) rather than per-run snapshots
-- Serve the QA docs as rendered HTML on Pages rather than raw Markdown — they read better on
-  GitHub today
 
 ---
 
