@@ -34,6 +34,22 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
+    # Job conteneurisé : il joint la base par le nom du service, pas par
+    # localhost, qui désignerait ici le conteneur du job lui-même.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fretline
+          POSTGRES_PASSWORD: fretline
+          POSTGRES_DB: fretline
+        options: >-
+          --health-cmd "pg_isready -U fretline -d fretline"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://fretline:fretline@postgres:5432/fretline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -43,6 +59,10 @@ jobs:
       - run: npm ci
 
       - run: npm run build -w app
+
+      - uses: ./.github/actions/preparer-base
+        with:
+          database-url: ${{ env.DATABASE_URL }}
 
       - name: Suite complète (chromium + API + a11y)
         working-directory: e2e
