@@ -3,6 +3,7 @@ import http from 'k6/http';
 import { Rate, Trend } from 'k6/metrics';
 
 import { summaryHandler } from './lib/summary.js';
+import { CALIBRATION, expression, provenance } from './lib/seuils.js';
 
 /**
  * Load test — nightly.
@@ -28,24 +29,42 @@ export const options = {
     { duration: '2m', target: 50 },
     { duration: '30s', target: 0 },
   ],
-  thresholds: {
-    // Reference run, 2026-08-18, 50 VU, same VPS: median 5 ms, p(95) 17 ms,
-    // p(99) 28 ms, max 90 ms; adding to the cart at p(95) 26 ms, p(99) 47 ms.
-    //
-    // Faster than the smoke run, which is not a paradox: by the time the ramp
-    // reaches fifty users the connection pool is warm and the query plans are
-    // cached, whereas the smoke run pays for both in its first seconds. It is
-    // also why these thresholds are not simply the smoke ones scaled up — at
-    // this level of load the machine is not the bottleneck, so what they watch
-    // for is the same class of regression, not saturation.
-    //
-    // See smoke.js for why the previous values (p(95) < 800 with a measured 17)
-    // were replaced rather than kept.
-    http_req_duration: ['p(95)<400', 'p(99)<800'],
-    http_req_failed: ['rate<0.02'],
-    cart_add_duration: ['p(95)<300'],
-    journey_failed: ['rate<0.02'],
-  },
+  thresholds: CALIBRATION
+    ? { http_req_failed: ['rate<0.02'], journey_failed: ['rate<0.02'] }
+    : {
+        // Dérivés de `perf/baseline.json`, mesuré sur le runner CI. Les valeurs
+        // `defaut` viennent du run de référence du 2026-08-18 sur un VPS, à
+        // 50 VU : médiane 5 ms, p(95) 17 ms, p(99) 28 ms, ajout au panier à
+        // p(95) 26 ms.
+        //
+        // Ce palier est plus rapide que le smoke, ce qui n'est pas un paradoxe :
+        // à cinquante utilisateurs le pool est chaud et les plans sont en cache,
+        // là où le smoke paie les deux dans ses premières secondes. C'est aussi
+        // pourquoi les seuils d'ici ne sont pas ceux du smoke mis à l'échelle —
+        // la machine n'est pas le goulet à ce niveau de charge, et ce qu'ils
+        // surveillent reste la même classe de régression, pas la saturation.
+        http_req_duration: [
+          expression('load', 'http_req_duration', 'p(95)', {
+            facteur: 5,
+            plancher: 100,
+            defaut: 400,
+          }),
+          expression('load', 'http_req_duration', 'p(99)', {
+            facteur: 5,
+            plancher: 200,
+            defaut: 800,
+          }),
+        ],
+        http_req_failed: ['rate<0.02'],
+        cart_add_duration: [
+          expression('load', 'cart_add_duration', 'p(95)', {
+            facteur: 5,
+            plancher: 150,
+            defaut: 300,
+          }),
+        ],
+        journey_failed: ['rate<0.02'],
+      },
   summaryTrendStats: ['med', 'p(95)', 'p(99)', 'max'],
 };
 
@@ -121,4 +140,4 @@ export default function run() {
   sleep(1);
 }
 
-export const handleSummary = summaryHandler('Test de charge — montée à 50 VU', 'load');
+export const handleSummary = summaryHandler(`Test de charge — montée à 50 VU — ${provenance('load')}`, 'load');

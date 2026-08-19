@@ -21,6 +21,9 @@ Les scripts sont dans `package.json` (racine et workspaces). Ce que leurs noms n
 - `npm run test:visual` échoue hors container CI (voir plus bas).
 - `npm run db:reset` emprunte le même chemin que `POST /api/test/reset` ; `db:generate` après toute modification du schéma.
 - `npm run perf:*` exige k6 installé ; `npm run prod:*` exige un `.env` de développement présent.
+- Les seuils k6 sont dérivés de `perf/baseline.json`, mesuré sur le runner CI par le workflow
+  dédié — ne jamais éditer ce fichier à la main, et ne jamais relever un seuil pour faire passer
+  un run : c'est la mesure qu'on refait, pas la borne qu'on déplace.
 - Depuis `e2e/` : `npm run test:bugs` = `SEED_BUGS=1`, `--grep @known-bug`.
 
 Le `webServer` de Playwright lance `npm run start -w app` (build de production, **pas** le serveur de dev, dont les délais de compilation rendent la première navigation imprévisible) et réutilise un serveur déjà présent hors CI. Il faut donc avoir buildé au préalable, et avoir une base joignable via `DATABASE_URL`. Il injecte `E2E_TEST_MODE=1` et `TEST_API_TOKEN`.

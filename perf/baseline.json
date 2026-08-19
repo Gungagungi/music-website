@@ -1,0 +1,7 @@
+{
+  "$commentaire": "Généré par le workflow « Mesurer la baseline de performance ». Ne pas éditer à la main : une valeur écrite au jugé est un seuil qui ne mesure plus rien. Tant que `scenarios` est vide, les scripts retombent sur leurs seuils historiques.",
+  "mesureLe": null,
+  "runner": null,
+  "commit": null,
+  "scenarios": {}
+}
