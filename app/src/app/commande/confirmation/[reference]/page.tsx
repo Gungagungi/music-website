@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { Breadcrumb } from '@/components/Breadcrumb';
+import { TrackOrder } from '@/components/analytics/TrackOrder';
 import { currentUser } from '@/lib/auth';
 import { findOrderByReference } from '@/lib/repositories/orders';
 import { formatPrice } from '@/lib/money';
@@ -31,6 +32,8 @@ export default async function ConfirmationPage({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
+      <TrackOrder reference={order.reference} items={order.items} totals={order.totals} />
+
       <Breadcrumb trail={[{ label: 'Accueil', href: '/' }, { label: 'Confirmation' }]} />
 
       <div className="mt-6 rounded-lg border border-green-600 bg-green-50 p-6" data-testid="order-confirmation">

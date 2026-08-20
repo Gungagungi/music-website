@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { HydrationMarker } from '@/components/HydrationMarker';
+import { Matomo } from '@/components/analytics/Matomo';
+import { isTestMode } from '@/lib/deployment';
 
 import './globals.css';
 
@@ -28,6 +30,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <Footer />
         <HydrationMarker />
+        {/*
+          Le tracker est absent de la suite, et la garde est ici plutôt que dans
+          le composant : le script n'existe alors pas dans le HTML servi à
+          Playwright, donc aucune requête réseau tierce ne vient s'intercaler
+          entre deux assertions, ni décaler un rendu comparé au pixel près.
+          `E2E_TEST_MODE` est le même discriminant que pour les endpoints de
+          test (lib/deployment.ts) — pas NODE_ENV, qui vaut « production » dans
+          la suite comme sur un déploiement.
+        */}
+        {!isTestMode() && <Matomo />}
       </body>
     </html>
   );

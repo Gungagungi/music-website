@@ -97,6 +97,24 @@ else
   echecs=$((echecs + 1))
 fi
 
+# Mesure d'audience, seulement si l'instance est censée exister. Un déploiement
+# sans Matomo est un déploiement valide : la variable absente n'est pas un échec.
+#
+# 200 ou 302 : tant que l'installation guidée n'a pas été faite, Matomo redirige
+# vers son installateur. Exiger 200 ferait échouer la vérification précisément au
+# moment où l'on vient de déployer et où l'on a le plus besoin qu'elle soit
+# lisible.
+if [[ -n "${ANALYTICS_URL:-}" ]]; then
+  echo
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${ANALYTICS_URL%/}/" 2>/dev/null || true)
+  if [[ "${code:-000}" == 200 || "${code:-000}" == 302 ]]; then
+    printf '  ok    %-46s %s\n' 'interface Matomo joignable' "$code"
+  else
+    printf '  ÉCHEC %-46s %s (attendu 200 ou 302)\n' 'interface Matomo joignable' "${code:-000}"
+    echecs=$((echecs + 1))
+  fi
+fi
+
 echo
 if (( echecs > 0 )); then
   echo "$echecs vérification(s) en échec." >&2

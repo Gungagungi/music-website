@@ -62,6 +62,21 @@ interface Fixtures {
 }
 
 export const test = base.extend<Fixtures>({
+  /**
+   * Filet de sécurité : rien ne part vers Matomo depuis la suite.
+   *
+   * La vraie protection est côté serveur — le layout n'émet pas la balise quand
+   * `E2E_TEST_MODE=1` — et cette fixture ne fait que doubler la mise. C'est
+   * délibéré : le jour où la garde régresse, les tests ne doivent pas se mettre
+   * à dépendre d'un hôte tiers joignable, sinon la panne se présentera comme de
+   * l'instabilité réseau. `tests/ui/analytics.spec.ts` reste chargée de
+   * constater la disparition de la garde elle-même.
+   */
+  context: async ({ context }, use) => {
+    await context.route('**/matomo.{js,php}*', (route) => route.abort());
+    await use(context);
+  },
+
   homePage: async ({ page }, use) => {
     await use(new HomePage(page));
   },

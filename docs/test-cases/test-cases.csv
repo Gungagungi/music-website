@@ -184,3 +184,4 @@ TC-421,Rétention des paniers vides,API,API — rétention des paniers,un panier
 TC-422,Rétention des paniers invités,API,API — rétention des paniers,un panier invité garni suit la durée de vie de son cookie,api/retention.spec.ts,@critical @regression,REQ-DATA-12,
 TC-423,Exemption des paniers d’un compte,API,API — rétention des paniers,un panier rattaché à un compte échappe à la fenêtre invité,api/retention.spec.ts,@critical @regression,REQ-DATA-13,
 TC-424,Balayage des comptes dormants,API,API — rétention des paniers,un panier d’un compte dormant depuis plus d’un an est purgé,api/retention.spec.ts,@regression,REQ-DATA-14,
+TC-425,Absence du tracker sous E2E_TEST_MODE,UI,Mesure d’audience,aucune balise Matomo n’est servie en mode test,ui/analytics.spec.ts,@security @smoke,REQ-SEC-16,

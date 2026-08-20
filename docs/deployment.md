@@ -18,13 +18,13 @@ git clone https://github.com/Gungagungi/music-website.git
 cd music-website
 
 cp .env.production.example .env
-$EDITOR .env          # FRETLINE_DOMAIN, POSTGRES_PASSWORD, AUTH_SECRET
+$EDITOR .env          # FRETLINE_DOMAIN, POSTGRES_PASSWORD, AUTH_SECRET, MATOMO_DB_PASSWORD
 
 docker compose up -d --build
 ./scripts/verifier-deploiement.sh https://your-domain
 ```
 
-The three variables have no defaults and the stack refuses to start without them. That is
+The four variables have no defaults and the stack refuses to start without them. That is
 deliberate: a silent default for a database password or a signing key is worse than no
 default, because it works.
 
@@ -33,6 +33,10 @@ into `DATABASE_URL`, and base64's `/` terminates a URL's authority section: the 
 a truncated host and fails with `Invalid URL`, redacting the input as it goes, so the error
 names nothing. Roughly two generated passwords in five hit it. `prod:env` produces URL-safe
 values and refuses a hand-written one that is not.
+
+`MATOMO_DB_PASSWORD` follows the same rule as `POSTGRES_PASSWORD`, for the same reason — it is
+interpolated into a connection string. The Analytics section below covers the rest of Matomo's
+configuration.
 
 `AUTH_SECRET` in particular is enforced twice. Compose refuses to interpolate it if it is
 empty, and the application refuses to start if it is absent *or* still set to the demo value
@@ -80,6 +84,8 @@ On a server, none of this applies: the file is `.env` and the command is plain
 | `migrate` | One-shot. Applies migrations, then seeds the catalogue **only if the database has never been loaded**. The app waits for it to exit successfully |
 | `app` | Next.js standalone server, not exposed to the host |
 | `purge` | Applies the cart retention policy on a loop |
+| `matomo-db` | MariaDB 11 for Matomo, named volume, no published port |
+| `matomo` | Matomo 5, the analytics interface, reached only through Caddy |
 | `caddy` | TLS termination and reverse proxy, the only service bound to host ports |
 
 Migrations run in `migrate`, not at application startup. Both work today with one container;
@@ -151,6 +157,60 @@ docker compose exec -T db pg_restore --clean --if-exists --no-owner \
 
 A backup nobody has restored is a hypothesis. Restore one into a scratch database before you
 need to.
+
+## Analytics
+
+Matomo runs in the same stack, on its own subdomain, with its own MariaDB. See
+[ADR-006](adr/006-self-hosted-analytics.md) for why Matomo rather than something an order of
+magnitude smaller, and why the tracker is absent from the test suite.
+
+Deployment is a two-step affair, because the site id does not exist until Matomo has been
+installed:
+
+```bash
+# 1. Point analytics.your-domain at this server, then:
+$EDITOR .env                       # FRETLINE_ANALYTICS_DOMAIN, MATOMO_DB_PASSWORD
+docker compose up -d --build
+
+# 2. Open https://analytics.your-domain, run the guided install, create the site,
+#    and note the site id it hands you. Then:
+$EDITOR .env                       # NEXT_PUBLIC_MATOMO_URL, NEXT_PUBLIC_MATOMO_SITE_ID
+docker compose up -d --build       # --build is not optional, see below
+```
+
+The DNS record has to exist **before** the first `up`: Caddy asks for the certificate
+immediately, and a missing record costs a failed validation and a back-off before it tries
+again.
+
+`NEXT_PUBLIC_MATOMO_URL` and `NEXT_PUBLIC_MATOMO_SITE_ID` are **frozen at build time**. Next
+substitutes `NEXT_PUBLIC_*` during compilation rather than reading it at runtime, so they are
+passed to the image as build arguments and changing either one requires rebuilding — the same
+trap as `NEXT_PUBLIC_SEED_BUGS`. Restarting the container changes nothing, silently. Leaving
+both empty disables the tracker entirely: nothing is emitted, which is what a workstation and
+the CI build both get.
+
+In Matomo, two settings are not optional for the measurement to stay exempt from a consent
+banner, and only the first is already handled in code:
+
+- *Privacy → Anonymize data*: anonymise **2 bytes** of the IP address, and enable it. The
+  tracker already calls `disableCookies`; without the server-side half, the pair is incomplete.
+- *Websites → Manage → Ecommerce*: enable it on the site, otherwise product views, cart updates
+  and orders are received and then dropped.
+
+The post-deployment check knows about it:
+
+```bash
+ANALYTICS_URL=https://analytics.your-domain ./scripts/verifier-deploiement.sh https://your-domain
+```
+
+Without `ANALYTICS_URL` the check is skipped — a deployment without Matomo is a valid
+deployment, not a failure.
+
+Backing up Matomo is a separate operation from `sauvegarde.sh`, which only dumps PostgreSQL:
+
+```bash
+docker compose exec matomo-db mariadb-dump -umatomo -p"$MATOMO_DB_PASSWORD" matomo > matomo.sql
+```
 
 ## Cart retention
 

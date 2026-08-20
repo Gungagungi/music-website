@@ -62,6 +62,8 @@ Trois pièges à connaître avant de toucher à cette couche :
 
 **Ne pas « améliorer » en traduisant.** La recherche reste une correspondance de sous-chaîne sur index `pg_trgm`, pas un `tsvector` : la racinisation et les frontières de mots casseraient `strat mn` et `basse 5`. Les agrégats d'avis restent incrémentaux, pas recalculés : les `rating`/`review_count` des graines décrivent un historique que les cinq avis semés ne contiennent pas.
 
+**Mesure d'audience** (`app/src/components/analytics/`, `app/src/lib/analytics.ts`). Matomo auto-hébergé, sans cookie, avec suivi e-commerce — voir ADR-006. Deux règles tiennent l'intégration. Le tracker est **absent dès que `E2E_TEST_MODE=1`**, et la garde est dans le layout, côté serveur : la balise n'existe alors pas dans le HTML servi, donc aucune requête tierce ne vient s'intercaler dans une spec ni décaler une capture comparée au pixel. La suite double la mise en abortant `matomo.js`/`matomo.php` au niveau du contexte, et `TC-425` surveille la garde elle-même. Et `NEXT_PUBLIC_MATOMO_URL` / `NEXT_PUBLIC_MATOMO_SITE_ID` sont **figées au build**, exactement comme `NEXT_PUBLIC_SEED_BUGS` : elles entrent par des arguments du Dockerfile, et les changer impose `up -d --build`, pas un redémarrage. Les montants passent par `enUnitesMonetaires()` — seule frontière du dépôt où un montant quitte les centimes entiers.
+
 **Marqueur d'hydratation** (`app/src/components/HydrationMarker.tsx`). Pose `data-hydrated="true"` sur `<html>` après le premier effet. Inerte en production, c'est le signal d'attente explicite dont dépend `BasePage.waitForHydration()`.
 
 ## Défauts semés — `SEED_BUGS=1`

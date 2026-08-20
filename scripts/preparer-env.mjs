@@ -73,15 +73,23 @@ if (production) {
   /** Renseigne une variable déclarée vide par le modèle, sans jamais écraser. */
   function remplir(variable, valeur) {
     if (valeur === undefined || renseignee(contenu, variable)) return;
-    contenu = contenu.replace(
-      new RegExp(String.raw`^[ \t]*${variable}[ \t]*=.*$`, 'm'),
-      `${variable}=${valeur}`,
-    );
+    const declaration = new RegExp(String.raw`^[ \t]*${variable}[ \t]*=.*$`, 'm');
+    // Une variable arrivée après coup n'est pas déclarée par les fichiers créés
+    // avant elle : sans cet ajout, le remplacement ne trouverait rien, le
+    // script sortirait en silence, et le compose échouerait plus loin sur une
+    // interpolation manquante — une erreur qui ne désigne pas le fichier à
+    // corriger.
+    contenu = declaration.test(contenu)
+      ? contenu.replace(declaration, `${variable}=${valeur}`)
+      : `${contenu}\n${variable}=${valeur}\n`;
     remplies.push(variable);
   }
 
   remplir('POSTGRES_PASSWORD', secret(24));
   remplir('AUTH_SECRET', secret(36));
+  // Même raison que POSTGRES_PASSWORD : la valeur traverse une chaîne de
+  // connexion. Elle n'appelle aucune décision humaine non plus.
+  remplir('MATOMO_DB_PASSWORD', secret(24));
 
   // Un mot de passe écrit à la main, lui, peut venir d'un `openssl rand -base64`
   // et rapporter le problème que la génération vient d'éviter. Autant le dire

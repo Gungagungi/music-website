@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { enUnitesMonetaires, push } from '@/lib/analytics';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-constants';
 import type { Product } from '@/lib/types';
 
@@ -40,6 +41,23 @@ export function AddToCartForm({ product }: { product: Product }) {
         kind: 'success',
         message: `« ${product.name} » a été ajouté à votre panier.`,
       });
+
+      // Matomo veut l'état du panier après l'ajout, pas le delta : la réponse
+      // porte le panier complet, donc on rejoue ses lignes plutôt que de tenir
+      // un compte parallèle qui divergerait au premier ajout depuis un autre
+      // onglet. Inerte sans tracker (lib/analytics.ts).
+      for (const item of payload.items ?? []) {
+        push([
+          'addEcommerceItem',
+          item.sku,
+          `${item.brand} ${item.name}`,
+          '',
+          enUnitesMonetaires(item.unitPrice),
+          item.quantity,
+        ]);
+      }
+      push(['trackEcommerceCartUpdate', enUnitesMonetaires(payload.totals?.total ?? 0)]);
+
       // The header cart badge is server-rendered, so the layout has to be
       // re-fetched for the count to catch up.
       router.refresh();
