@@ -1,10 +1,7 @@
-'use client';
-
 import Script from 'next/script';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense } from 'react';
 
-import { push } from '@/lib/analytics';
+import { SuiviDeNavigation } from './SuiviDeNavigation';
 
 /**
  * Adresse de l'instance Matomo et identifiant du site, tous deux figés au build.
@@ -22,46 +19,6 @@ const MATOMO_SITE_ID = process.env.NEXT_PUBLIC_MATOMO_SITE_ID;
 /** Garantit l'unique barre oblique finale attendue par matomo.js. */
 function baseUrl(url: string): string {
   return url.endsWith('/') ? url : `${url}/`;
-}
-
-/**
- * Suivi des navigations côté client.
- *
- * Next ne recharge pas la page d'une route à l'autre : sans ce composant,
- * Matomo n'enregistrerait que la toute première vue de la session. La vue
- * initiale, elle, est déclenchée par l'extrait d'amorçage — d'où le saut du
- * premier passage, qui produirait sinon un doublon sur chaque entrée sur le
- * site.
- *
- * `useSearchParams` est ce qui impose le `<Suspense>` du composant parent : sans
- * lui, toute page qui rend ce composant bascule en rendu dynamique.
- */
-function SuiviDeNavigation() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const precedente = useRef<string | null>(null);
-
-  useEffect(() => {
-    const query = searchParams.toString();
-    const url = query ? `${pathname}?${query}` : pathname;
-
-    if (precedente.current === null) {
-      precedente.current = url;
-      return;
-    }
-
-    push(['setReferrerUrl', new URL(precedente.current, window.location.origin).href]);
-    push(['setCustomUrl', window.location.href]);
-    push(['setDocumentTitle', document.title]);
-    push(['trackPageView']);
-    // Les liens sortants et les téléchargements sont réattachés à chaque vue :
-    // le DOM a été remplacé, les écouteurs posés sur l'ancien ont disparu.
-    push(['enableLinkTracking']);
-
-    precedente.current = url;
-  }, [pathname, searchParams]);
-
-  return null;
 }
 
 /**
@@ -84,20 +41,41 @@ export function Matomo() {
   return (
     <>
       {/*
-        Extrait officiel, inline et volontairement pas remplacé par un effet :
-        `_paq` doit exister et porter ses réglages avant que matomo.js ne vide la
-        file, et c'est lui qui insère la balise de chargement. Un `<Script src>`
-        séparé laisserait l'ordre des deux à la merci de la stratégie choisie.
+        L'amorçage se PRÉFIXE à la file au lieu de l'alimenter, et c'est tout
+        l'intérêt de ce composant.
+
+        Deux populations empilent dans `_paq` sans se connaître : cet extrait,
+        qui porte les réglages, et les effets des composants, qui portent les
+        vues et les événements e-commerce. Aucun ordre d'exécution ne peut être
+        garanti entre les deux — `afterInteractive` place l'extrait après
+        l'hydratation, donc après les effets. Un simple `push` laisserait alors
+        `disableCookies` derrière la première vue de page, et cette vue-là
+        serait enregistrée avec cookie : la promesse de dispense de bandeau
+        tombe sur la première page de chaque visite.
+
+        Préfixer rend la question sans objet. Les réglages passent devant quoi
+        que ce soit qui attendait déjà, matomo.js vide la file dans l'ordre à son
+        arrivée, et plus personne n'a à savoir qui s'est exécuté en premier.
+
+        Deux autres pistes ont été essayées et écartées, chacune pour une raison
+        qui ne se voit qu'à l'exécution. `beforeInteractive` est rangé par Next
+        dans sa file `__next_s` et ne s'exécute jamais dans l'App Router. Une
+        balise <script> inline rendue par React casse l'hydratation
+        (`aB.apply is not a function`) : le HTML servi reste impeccable, et la
+        page perd toute interactivité.
+
+        Aucun `trackPageView` ici : SuiviDeNavigation l'émet, pour la première
+        vue comme pour les suivantes.
       */}
       <Script id="matomo-init" strategy="afterInteractive">
         {`
-          var _paq = window._paq = window._paq || [];
-          _paq.push(['disableCookies']);
-          _paq.push(['trackPageView']);
-          _paq.push(['enableLinkTracking']);
           (function() {
-            _paq.push(['setTrackerUrl', ${JSON.stringify(`${base}matomo.php`)}]);
-            _paq.push(['setSiteId', ${JSON.stringify(MATOMO_SITE_ID)}]);
+            var reglages = [
+              ['disableCookies'],
+              ['setTrackerUrl', ${JSON.stringify(`${base}matomo.php`)}],
+              ['setSiteId', ${JSON.stringify(MATOMO_SITE_ID)}]
+            ];
+            window._paq = reglages.concat(window._paq || []);
             var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
             g.async = true; g.src = ${JSON.stringify(`${base}matomo.js`)};
             s.parentNode.insertBefore(g, s);

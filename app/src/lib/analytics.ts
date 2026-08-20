@@ -19,10 +19,36 @@ declare global {
   }
 }
 
-/** Empile une commande Matomo, ou ne fait rien si le tracker n'est pas là. */
-export function push(...commande: unknown[]): void {
-  if (typeof window === 'undefined' || !window._paq) return;
-  window._paq.push(commande);
+/**
+ * Empile une commande Matomo.
+ *
+ * La file est créée si elle n'existe pas encore, et c'est le point délicat : les
+ * effets des composants s'exécutent à l'hydratation, l'amorçage du tracker juste
+ * après. Une version antérieure écartait les commandes tant que `window._paq`
+ * était absent, et le `setEcommerceView` des fiches produit n'atteignait donc
+ * jamais Matomo — silencieusement, puisque c'est exactement ce que la garde
+ * était censée faire.
+ *
+ * Empiler avant le chargement de matomo.js n'a rien d'un contournement : `_paq`
+ * est une file que le tracker vide à son arrivée, et c'est le mode d'emploi
+ * officiel. L'amorçage, lui, se préfixe à ce qui l'attend (voir Matomo.tsx),
+ * de sorte que ses réglages précèdent toujours la première vue.
+ *
+ * Sur le serveur, ou si le tracker n'est jamais chargé, la file grossit de
+ * quelques entrées puis disparaît avec la page.
+ *
+ * La commande est prise telle quelle, et surtout pas en paramètres du reste :
+ * `push(...commande)` empilait `[['trackPageView']]` au lieu de
+ * `['trackPageView']`, et matomo.js appelait `apply` sur un tableau plutôt que
+ * sur une méthode. Le tracker mourait, et avec lui l'hydratation de la page —
+ * `aB.apply is not a function`, dans du code minifié, sans rien qui désigne
+ * l'appelant. La faute est restée invisible tant que la garde ci-dessus
+ * écartait toutes les commandes : elle ne s'est déclarée qu'en réparant la
+ * garde.
+ */
+export function push(commande: unknown[]): void {
+  if (typeof window === 'undefined') return;
+  (window._paq = window._paq ?? []).push(commande);
 }
 
 /**
