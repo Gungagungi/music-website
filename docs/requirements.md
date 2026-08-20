@@ -226,6 +226,11 @@ push.
 | `REQ-SEC-13` | An unknown route returns a structured 404 | Error envelope, no stack trace |
 | `REQ-SEC-14` | No response ever exposes a password hash | `.strict()` schemas reject any extra field, `passwordHash` included |
 | `REQ-SEC-15` | Test-created accounts are isolated from each other | Each worker's account sees only its own profile |
+| `REQ-SEC-16` | The audience tracker never loads under test | No Matomo tag is served while `E2E_TEST_MODE=1`, whatever the build carries |
+
+`REQ-SEC-16` guards determinism as much as privacy: a third-party script slipping into the suite
+would add an uncontrolled network request between assertions, and pixel-compared screenshots would
+start to drift for reasons no diff can explain.
 
 `REQ-SEC-14` is enforced structurally rather than by assertion: because every response schema is
 `.strict()`, a leak fails the contract test whether or not anyone thought to check for that

@@ -43,6 +43,16 @@ COPY app ./app
 # sortie de `next build`), et `db/client.ts` n'ouvre son pool qu'à la première
 # requête. Si une page devenait prérendue, le build échouerait ici — c'est voulu.
 ENV BUILD_STANDALONE=1
+
+# Adresse de l'instance Matomo et identifiant du site. `NEXT_PUBLIC_*` est
+# substitué à la compilation, pas lu à l'exécution : ces deux valeurs doivent
+# donc entrer ici, comme arguments de build, et changer l'une ou l'autre impose
+# de reconstruire l'image. Vides par défaut — le tracker ne rend alors rien.
+ARG NEXT_PUBLIC_MATOMO_URL=""
+ARG NEXT_PUBLIC_MATOMO_SITE_ID=""
+ENV NEXT_PUBLIC_MATOMO_URL=$NEXT_PUBLIC_MATOMO_URL \
+    NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
+
 RUN npm run build -w app \
  && node app/scripts/build-db-cli.mjs
 

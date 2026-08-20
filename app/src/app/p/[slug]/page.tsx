@@ -7,6 +7,7 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { PriceTag } from '@/components/PriceTag';
 import { ProductGrid } from '@/components/ProductGrid';
 import { Rating } from '@/components/Rating';
+import { TrackProductView } from '@/components/analytics/TrackProductView';
 import { CATEGORY_BY_SLUG } from '@/data/categories';
 import { getProductBySlug, queryProducts, reviewsForProduct } from '@/lib/catalog';
 import { formatPrice } from '@/lib/money';
@@ -43,6 +44,15 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8" data-testid="product-page" data-sku={product.sku}>
+      {/* Inerte sans tracker : les commandes empilées vers un `_paq` absent sont
+          ignorées (lib/analytics.ts). */}
+      <TrackProductView
+        sku={product.sku}
+        name={`${product.brand} ${product.name}`}
+        category={category?.label ?? product.category}
+        price={product.price}
+      />
+
       <Breadcrumb
         trail={[
           { label: 'Accueil', href: '/' },

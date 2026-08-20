@@ -33,3 +33,33 @@
 		format console
 	}
 }
+
+# Interface Matomo, sur son propre nom de domaine.
+#
+# Un sous-domaine dédié plutôt qu'un chemin sous le site : Matomo est une
+# application PHP complète, qui réécrit ses propres URL et pose ses cookies de
+# session sur la racine. La monter sous /analytics obligerait à réécrire ses
+# liens un par un, et le premier oubli se solderait par une page blanche.
+#
+# Variable distincte de FRETLINE_DOMAIN, et non `analytics.{$FRETLINE_DOMAIN}` :
+# un essai local met FRETLINE_DOMAIN=:80, et `analytics.:80` n'est pas une
+# adresse. Le défaut ci-dessous sert exactement ce cas — Caddy écoute alors en
+# clair sur 8081, sans rien demander à Let's Encrypt.
+{$FRETLINE_ANALYTICS_DOMAIN::8081} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Content-Security-Policy "frame-ancestors 'none'"
+		-Server
+	}
+
+	reverse_proxy matomo:80
+
+	log {
+		output stdout
+		format console
+	}
+}

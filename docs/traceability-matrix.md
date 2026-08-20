@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 139 |
-| — covered by this suite | 138 |
+| Requirements declared | 140 |
+| — covered by this suite | 139 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 185 |
+| Automated test cases | 186 |
 | — Accessibility | 13 |
 | — API | 74 |
-| — UI | 88 |
+| — UI | 89 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -155,6 +155,7 @@ if the committed copy differs.
 | `REQ-SEC-13` | `TC-300` | API | @regression @security |
 | `REQ-SEC-14` | `TC-301` | API | @contract @critical @security |
 | `REQ-SEC-15` | `TC-204` | API | @regression |
+| `REQ-SEC-16` | `TC-425` | UI | @security @smoke |
 | `REQ-SORT-01` | `TC-040`, `TC-041`, `TC-043` | UI | @critical @regression @smoke |
 | `REQ-SORT-02` | `TC-042` | UI | @regression |
 | `REQ-VIS-01` | `TC-330`, `TC-331`, `TC-339` | Visual | @regression |
@@ -353,6 +354,7 @@ if the committed copy differs.
 | `TC-422` | Rétention des paniers invités | `REQ-DATA-12` | `api/retention.spec.ts` |
 | `TC-423` | Exemption des paniers d’un compte | `REQ-DATA-13` | `api/retention.spec.ts` |
 | `TC-424` | Balayage des comptes dormants | `REQ-DATA-14` | `api/retention.spec.ts` |
+| `TC-425` | Absence du tracker sous E2E_TEST_MODE | `REQ-SEC-16` | `ui/analytics.spec.ts` |
 
 ## Verified outside the automated suite
 

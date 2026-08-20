@@ -1,8 +1,9 @@
-# Déploiement complet : PostgreSQL, l'application, un reverse proxy et la purge
-# des paniers. Prévu pour un VPS unique.
+# Déploiement complet : PostgreSQL, l'application, un reverse proxy, la purge
+# des paniers et la mesure d'audience. Prévu pour un VPS unique.
 #
 #   cp .env.production.example .env
-#   $EDITOR .env                    # au minimum FRETLINE_DOMAIN, POSTGRES_PASSWORD, AUTH_SECRET
+#   $EDITOR .env                    # au minimum FRETLINE_DOMAIN, POSTGRES_PASSWORD,
+#                                   AUTH_SECRET, MATOMO_DB_PASSWORD
 #   docker compose up -d --build
 #   ./scripts/verifier-deploiement.sh https://exemple.fr
 #
@@ -25,6 +26,9 @@ x-app: &app
   build:
     context: .
     dockerfile: Dockerfile
+    args:
+      NEXT_PUBLIC_MATOMO_URL: ${NEXT_PUBLIC_MATOMO_URL:-}
+      NEXT_PUBLIC_MATOMO_SITE_ID: ${NEXT_PUBLIC_MATOMO_SITE_ID:-}
   image: fretline-app:latest
   environment:
     DATABASE_URL: postgresql://${POSTGRES_USER:-fretline}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire}@db:5432/${POSTGRES_DB:-fretline}
@@ -99,6 +103,51 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  # --- Mesure d'audience ----------------------------------------------------
+  #
+  # Matomo n'accepte que MySQL ou MariaDB : le service `db` PostgreSQL ci-dessus
+  # ne peut pas l'héberger, d'où un second SGBD. C'est le prix de Matomo, assumé
+  # pour son suivi e-commerce — Umami aurait tenu dans la base existante mais ne
+  # sait pas rattacher une commande à une visite. Voir ADR-006.
+  matomo-db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: matomo
+      MARIADB_USER: matomo
+      MARIADB_PASSWORD: ${MATOMO_DB_PASSWORD:?MATOMO_DB_PASSWORD est obligatoire}
+      MARIADB_RANDOM_ROOT_PASSWORD: 'yes'
+    volumes:
+      - matomo-dbdata:/var/lib/mysql
+    # Aucun port publié, même règle que `db`.
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  matomo:
+    image: matomo:5-apache
+    restart: unless-stopped
+    environment:
+      MATOMO_DATABASE_HOST: matomo-db
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD: ${MATOMO_DB_PASSWORD:?MATOMO_DB_PASSWORD est obligatoire}
+      MATOMO_DATABASE_DBNAME: matomo
+      # Matomo ne voit que l'adresse du proxy sans cela, et range toutes les
+      # visites sous une seule IP — celle du conteneur Caddy.
+      MATOMO_GENERAL_PROXY_CLIENT_HEADERS: HTTP_X_FORWARDED_FOR
+      MATOMO_GENERAL_PROXY_HOST_HEADERS: HTTP_X_FORWARDED_HOST
+    volumes:
+      - matomo-data:/var/www/html
+    expose:
+      - '80'
+    depends_on:
+      matomo-db:
+        condition: service_healthy
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -119,8 +168,14 @@ services:
       - caddy-config:/config
     depends_on:
       - app
+      - matomo
 
 volumes:
   pgdata:
   caddy-data:
   caddy-config:
+  # Matomo tient sa configuration et ses plugins dans son propre répertoire
+  # d'installation : sans ce volume, chaque `up --build` redemanderait
+  # l'installation guidée depuis zéro.
+  matomo-data:
+  matomo-dbdata:
