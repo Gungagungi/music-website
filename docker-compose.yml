@@ -161,9 +161,14 @@ services:
       # Matomo sans nom de domaine : Caddy l'écoute alors sur 8081, en clair, et
       # il faut bien publier ce port pour l'atteindre. Avec un domaine
       # renseigné, Matomo est servi sur 443 comme le reste et ce mappage ne
-      # porte plus rien — inoffensif, et un port de moins à se rappeler le jour
-      # où l'on veut essayer la pile en local.
-      - '${FRETLINE_ANALYTICS_PORT:-8081}:8081'
+      # porte plus rien.
+      #
+      # Sur la boucle locale, et pas sur 0.0.0.0. Ce port sert un Matomo en
+      # clair, et tant que l'installation guidée n'a pas été faite, le premier
+      # visiteur venu la termine et s'en fait l'administrateur — d'une
+      # application PHP qui a la main sur sa base. Depuis un poste distant,
+      # passer par un tunnel : ssh -L 8081:localhost:8081 <serveur>
+      - '127.0.0.1:${FRETLINE_ANALYTICS_PORT:-8081}:8081'
     environment:
       FRETLINE_DOMAIN: ${FRETLINE_DOMAIN:?FRETLINE_DOMAIN est obligatoire}
       # Le Caddyfile ne voit que ce qu'on lui passe : sans cette ligne, le
