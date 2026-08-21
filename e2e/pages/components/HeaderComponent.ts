@@ -37,16 +37,19 @@ export class HeaderComponent {
   }
 
   /**
-   * Le libellé du bouton nomme le thème vers lequel il bascule, jamais celui
-   * qui est actif : c'est donc l'inverse du thème courant, et le lire est la
-   * façon la plus directe de constater le thème appliqué sans dépendre d'une
-   * valeur de couleur.
+   * Mode affiché par le bouton — « Système », « Clair » ou « Sombre ».
+   *
+   * Les trois libellés sont dans le DOM, la cascade n'en montre qu'un : lire le
+   * seul visible revient à lire l'état réellement appliqué, sans passer par une
+   * valeur de couleur ni par l'attribut que le test cherche justement à vérifier
+   * ailleurs.
    */
-  async themeToggleLabel(): Promise<string> {
-    return (await this.themeToggle.innerText()).trim();
+  async themeMode(): Promise<string> {
+    return (await this.themeToggle.locator('[data-mode]:visible').innerText()).trim();
   }
 
-  async toggleTheme(): Promise<void> {
+  /** Avance d'un cran dans le cycle Système → Clair → Sombre. */
+  async cycleTheme(): Promise<void> {
     await this.themeToggle.click();
   }
 

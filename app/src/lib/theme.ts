@@ -1,14 +1,29 @@
 /**
- * Thème d'affichage : ce que le visiteur a explicitement choisi.
+ * Thème d'affichage.
  *
- * L'absence de valeur stockée n'est pas un troisième thème, c'est l'état par
- * défaut « suivre l'appareil » — et il est traité entièrement par CSS
- * (`color-scheme: light dark` et les `light-dark()` de globals.css), sans
- * qu'aucun code d'application n'ait à lire la préférence système.
+ * Trois états, dont un qui n'est pas une couleur : `system` signifie « suivre
+ * l'appareil », et il se distingue des deux autres par l'**absence** de choix
+ * stocké. C'est ce qui permet à toute la logique de tenir dans la cascade —
+ * l'état par défaut est le sélecteur `:root` sans attribut, les deux autres
+ * sont `:root[data-theme='light']` et `:root[data-theme='dark']`.
+ *
+ * Le cycle repasse par `system` plutôt que de faire l'aller-retour entre clair
+ * et sombre : sans lui, un visiteur ayant touché le bouton une seule fois ne
+ * pourrait plus jamais revenir au suivi de son appareil sans vider le stockage
+ * de son navigateur, et rien dans l'interface ne le lui dirait.
  */
 export type Theme = 'light' | 'dark';
+export type ThemeChoice = Theme | 'system';
 
 export const THEME_STORAGE_KEY = 'fretline-theme';
+
+/** Ordre du cycle du bouton de bascule. */
+export const THEME_CYCLE: readonly ThemeChoice[] = ['system', 'light', 'dark'];
+
+export function nextTheme(current: ThemeChoice): ThemeChoice {
+  const index = THEME_CYCLE.indexOf(current);
+  return THEME_CYCLE[(index + 1) % THEME_CYCLE.length];
+}
 
 /**
  * Script reposé sur `<html>` avant la première peinture.

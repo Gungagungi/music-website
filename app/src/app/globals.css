@@ -111,42 +111,48 @@
   Le seul aiguillage de thème qui ne porte pas sur une couleur.
 
   `light-dark()` ne s'applique qu'aux valeurs de type <color> : il ne peut donc
-  pas choisir un `display`, et les deux libellés du bouton de bascule (« Thème
-  sombre » / « Thème clair ») repassent par la forme classique — media query
-  pour l'appareil, attribut pour le choix explicite. Les deux blocs donnent les
-  mêmes valeurs, si bien que leur ordre et leur spécificité n'ont pas à être
-  arbitrés : le seul cas qu'ils doivent départager, appareil en sombre et choix
-  explicite en clair, ne fait matcher ni l'un ni l'autre.
+  pas choisir un `display`, et les trois libellés du bouton (Système / Clair /
+  Sombre) repassent par des sélecteurs ordinaires. Aucune media query n'est
+  nécessaire ici, et c'est ce qui rend ce bloc lisible : « suivre l'appareil »
+  n'est pas une troisième valeur d'attribut, c'est l'absence d'attribut, donc
+  les trois états sont directement distinguables au sélecteur.
 
-  Masquer par `display: none` plutôt que visuellement est voulu : le libellé
-  caché doit aussi sortir de l'arbre d'accessibilité, sinon le bouton s'annonce
-  « Thème sombre Thème clair ».
+  Masquer par `display: none` plutôt que visuellement est voulu : les libellés
+  cachés doivent aussi sortir de l'arbre d'accessibilité, sinon le bouton
+  s'annonce « Système Clair Sombre ».
 */
 :root {
-  --affichage-libelle-clair: inline-flex;
-  --affichage-libelle-sombre: none;
+  --affichage-theme-systeme: inline-flex;
+  --affichage-theme-clair: none;
+  --affichage-theme-sombre: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --affichage-libelle-clair: none;
-    --affichage-libelle-sombre: inline-flex;
-  }
+:root[data-theme='light'] {
+  --affichage-theme-systeme: none;
+  --affichage-theme-clair: inline-flex;
+  --affichage-theme-sombre: none;
 }
 
 :root[data-theme='dark'] {
-  --affichage-libelle-clair: none;
-  --affichage-libelle-sombre: inline-flex;
+  --affichage-theme-systeme: none;
+  --affichage-theme-clair: none;
+  --affichage-theme-sombre: inline-flex;
 }
 
-.theme-toggle-clair {
-  display: var(--affichage-libelle-clair);
+.theme-mode-systeme {
+  display: var(--affichage-theme-systeme);
   align-items: center;
   gap: 0.5rem;
 }
 
-.theme-toggle-sombre {
-  display: var(--affichage-libelle-sombre);
+.theme-mode-clair {
+  display: var(--affichage-theme-clair);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-mode-sombre {
+  display: var(--affichage-theme-sombre);
   align-items: center;
   gap: 0.5rem;
 }

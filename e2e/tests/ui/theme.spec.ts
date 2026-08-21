@@ -4,7 +4,7 @@ import { expect, test } from '@/fixtures/test-fixtures';
 import { TAGS, covers, testCase } from '@/utils/tags';
 
 /**
- * Thème d'affichage : détection de l'appareil et bascule manuelle.
+ * Thème d'affichage : détection de l'appareil, cycle manuel, retour au suivi.
  *
  * Les assertions portent sur la couleur **calculée** du corps de page plutôt
  * que sur une classe ou un attribut. C'est ce qui distingue « le thème est
@@ -38,6 +38,7 @@ test.describe('Thème d’affichage', () => {
         await homePage.open();
 
         expect(await fondDePage(page)).toBe(FOND.clair);
+        expect(await homePage.header.themeMode()).toBe('Système');
         // Rien n'a été choisi : la page ne doit porter aucun verrou de thème,
         // sinon elle cesserait de suivre l'appareil s'il changeait d'avis.
         await expect(page.locator('html')).not.toHaveAttribute('data-theme');
@@ -45,29 +46,42 @@ test.describe('Thème d’affichage', () => {
     );
 
     test(
-      'le bouton bascule vers le thème sombre',
+      'le bouton parcourt les trois états et revient au suivi de l’appareil',
       {
         tag: [TAGS.smoke, TAGS.critical],
         annotation: [
-          testCase('TC-427', 'Bascule manuelle vers le thème sombre'),
+          testCase('TC-427', 'Cycle Système → Clair → Sombre → Système'),
           covers('REQ-THEME-02'),
         ],
       },
       async ({ homePage, page }) => {
         await homePage.open();
-        expect(await homePage.header.themeToggleLabel()).toBe('Thème sombre');
+        const html = page.locator('html');
 
-        await homePage.header.toggleTheme();
+        expect(await homePage.header.themeMode()).toBe('Système');
 
+        await homePage.header.cycleTheme();
+        expect(await homePage.header.themeMode()).toBe('Clair');
+        await expect(html).toHaveAttribute('data-theme', 'light');
+        expect(await fondDePage(page)).toBe(FOND.clair);
+
+        await homePage.header.cycleTheme();
+        expect(await homePage.header.themeMode()).toBe('Sombre');
+        await expect(html).toHaveAttribute('data-theme', 'dark');
         expect(await fondDePage(page)).toBe(FOND.sombre);
-        // Le libellé nomme la destination, pas l'état : une fois en sombre, le
-        // bouton doit proposer le retour au clair.
-        expect(await homePage.header.themeToggleLabel()).toBe('Thème clair');
+
+        // Le cas qui manquait à la première version : sans ce troisième cran,
+        // un visiteur ayant touché le bouton une fois ne pouvait plus revenir
+        // au suivi de son appareil autrement qu'en vidant son stockage.
+        await homePage.header.cycleTheme();
+        expect(await homePage.header.themeMode()).toBe('Système');
+        await expect(html).not.toHaveAttribute('data-theme');
+        expect(await fondDePage(page)).toBe(FOND.clair);
       },
     );
 
     test(
-      'la bascule survit à la navigation',
+      'le choix explicite survit à la navigation',
       {
         tag: [TAGS.regression],
         annotation: [
@@ -77,12 +91,37 @@ test.describe('Thème d’affichage', () => {
       },
       async ({ homePage, cartPage, page }) => {
         await homePage.open();
-        await homePage.header.toggleTheme();
+        await homePage.header.cycleTheme(); // clair
+        await homePage.header.cycleTheme(); // sombre
 
         await cartPage.open();
 
         await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
         expect(await fondDePage(page)).toBe(FOND.sombre);
+      },
+    );
+
+    test(
+      'le retour au suivi de l’appareil survit à la navigation',
+      {
+        tag: [TAGS.regression],
+        annotation: [
+          testCase('TC-432', 'Le retour à « Système » efface le choix mémorisé'),
+          covers('REQ-THEME-05'),
+        ],
+      },
+      async ({ homePage, cartPage, page }) => {
+        await homePage.open();
+        for (let i = 0; i < 3; i += 1) await homePage.header.cycleTheme();
+
+        await cartPage.open();
+
+        // Un cycle complet doit ramener à l'état initial, y compris dans le
+        // stockage : un « system » mémorisé comme valeur serait indiscernable
+        // d'un choix explicite au prochain chargement.
+        await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+        expect(await page.evaluate(() => localStorage.getItem('fretline-theme'))).toBeNull();
+        expect(await homePage.header.themeMode()).toBe('Système');
       },
     );
 
@@ -97,7 +136,8 @@ test.describe('Thème d’affichage', () => {
       },
       async ({ homePage, page, context }) => {
         await homePage.open();
-        await homePage.header.toggleTheme();
+        await homePage.header.cycleTheme(); // clair
+        await homePage.header.cycleTheme(); // sombre
 
         // Le défaut visé est un scintillement : la page apparaît dans le mauvais
         // thème, puis se corrige. Une assertion prise après le chargement ne le
@@ -113,7 +153,6 @@ test.describe('Thème d’affichage', () => {
         expect(await fondDePage(page)).toBe(FOND.sombre);
       },
     );
-
   });
 
   test.describe('appareil en thème sombre', () => {
@@ -133,7 +172,7 @@ test.describe('Thème d’affichage', () => {
 
         expect(await fondDePage(page)).toBe(FOND.sombre);
         await expect(page.locator('html')).not.toHaveAttribute('data-theme');
-        expect(await homePage.header.themeToggleLabel()).toBe('Thème clair');
+        expect(await homePage.header.themeMode()).toBe('Système');
       },
     );
 
@@ -148,7 +187,7 @@ test.describe('Thème d’affichage', () => {
       },
       async ({ homePage, page }) => {
         await homePage.open();
-        await homePage.header.toggleTheme();
+        await homePage.header.cycleTheme(); // clair, à rebours de l'appareil
 
         expect(await fondDePage(page)).toBe(FOND.clair);
 
@@ -159,7 +198,7 @@ test.describe('Thème d’affichage', () => {
         await homePage.waitForHydration();
 
         expect(await fondDePage(page)).toBe(FOND.clair);
-        expect(await homePage.header.themeToggleLabel()).toBe('Thème sombre');
+        expect(await homePage.header.themeMode()).toBe('Clair');
       },
     );
   });

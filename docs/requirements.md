@@ -29,9 +29,15 @@ falsifiable, never implementation. "The cart shows VAT contained within the tota
 | ID | Requirement | Acceptance criteria |
 | --- | --- | --- |
 | `REQ-THEME-01` | The site follows the device's colour scheme by default | With no explicit choice stored, a device set to dark renders the dark palette, and one set to light renders the light palette |
-| `REQ-THEME-02` | The theme can be switched by hand from the header | A control next to the cart flips light to dark and back, and its label names the theme it switches *to* |
+| `REQ-THEME-02` | The theme can be switched by hand from the header | A control next to the cart cycles System → Light → Dark → System, and shows which of the three is active |
 | `REQ-THEME-03` | An explicit choice overrides the device preference | Choosing light on a device set to dark keeps the light palette |
 | `REQ-THEME-04` | An explicit choice survives navigation and reload | The chosen theme is already applied on the served document, before hydration — no flash of the other theme |
+| `REQ-THEME-05` | Following the device is reachable again after an explicit choice | Completing the cycle clears the stored choice, so the site tracks the device once more |
+
+`REQ-THEME-05` exists because the first implementation lacked it: a two-state toggle locks the
+visitor into an explicit choice on the very first click, and nothing in the interface offers a way
+back — the device preference is then unreachable short of clearing browser storage. The defect is
+invisible to a test that only checks that switching works.
 
 `REQ-THEME-04` is the one worth automating carefully. A theme that is *eventually* correct passes
 any assertion made after page load; the defect it hides is a visible flash, and the only place it
