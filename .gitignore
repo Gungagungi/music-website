@@ -50,3 +50,13 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Instructions pour agents, générées par `next dev`
+#
+# Next les réécrit à chaque démarrage (voir
+# node_modules/next/dist/server/lib/generate-agent-files.js) : les supprimer ne
+# fait que les ramener. Elles décrivent la version de Next installée, pas ce
+# dépôt — les versionner ferait diverger leur contenu de la dépendance dès la
+# prochaine montée de version, silencieusement.
+app/AGENTS.md
+app/CLAUDE.md
