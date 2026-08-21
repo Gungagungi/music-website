@@ -95,6 +95,75 @@ Les baselines (`e2e/tests/visual/__screenshots__/`) sont capturées dans **le co
 - Après un changement d'interface assumé : Actions → *Régénérer les baselines visuelles* → choisir la branche. Le workflow régénère dans le container et recommite. Relire le diff des PNG.
 - `snapshotPathTemplate` épingle le nom de plateforme : une capture macOS ne matchera jamais une capture Linux.
 
+## Intégration continue
+
+Cinq workflows, deux cadences. `ci.yml` garde les merges et doit rester rapide : régression
+complète sur un seul moteur, smoke sur les deux autres. L'exhaustif est renvoyé à la nuit.
+
+**`ci.yml`** — push sur `main`, toute PR, `workflow_dispatch`. Les jobs, et l'équivalent local :
+
+| Job (nom du check) | Ce qu'il garde | Reproduction locale |
+| --- | --- | --- |
+| `qualite` — *Qualité & build* | lint, typecheck, `test:unit`, `trace:check`, `openapi:check`, `check:catalog`, build. Publie `app/.next` comme artifact partagé par tous les autres jobs. | `npm run lint && npm run typecheck && npm run test:unit && npm run build`, puis depuis `e2e/` : `npm run trace:check && npm run openapi:check`, et `npm run check:catalog` |
+| `tests-api` — *Tests API* | Projet Playwright `api`, sans navigateur, < 1 min. | `npm run db:setup && npm run build && npm run test:api` |
+| `mutation` — *Tests de mutation* | Stryker sur l'arithmétique monétaire, seuil 100 % : un mutant survivant = rouge. | `npm run test:mutation` |
+| `tests-ui` — *UI chromium (n/3)*, *UI firefox*, *UI webkit*, *UI mobile-chrome* | Régression complète sur chromium (3 shards), smoke ailleurs. Conteneur Playwright. | `npx playwright test --project=<projet>` depuis `e2e/` |
+| `tests-a11y` — *Accessibilité* | Projet `a11y` (axe-core). | `npm run test:a11y` |
+| `tests-visual` — *Régression visuelle* | Comparaison de captures. **Non reproductible localement** — voir la section dédiée. | aucune |
+| `perf-smoke` — *Performance (smoke)* | k6 contre les seuils de `perf/baseline.json`. | `npm run perf:smoke` (exige k6) |
+| `demo-defauts` — *Démonstration* | `SEED_BUGS=1` : vérifie que la suite **détecte** les défauts semés. Rouge si elle reste verte. | depuis `e2e/` : `npm run test:bugs` |
+| `deploiement` — *Image et pile de production* | Build de l'image Docker et validation de la pile Compose. | `npm run prod:config` |
+| `rapport` — *Rapport consolidé* | Fusionne les blob reports de tous les jobs. Échoue si un blob manque ou s'écrase. | `npm run report` |
+
+**`nightly.yml`** (02:00 UTC) — régression complète sur les trois moteurs (2 shards chacun) plus
+un vrai test de charge k6 (50 VU). C'est là que les flakies WebKit se manifestent, la CI ne
+lançant que le smoke sur ce moteur.
+
+**`pages.yml`** (02:30 UTC) — relance sa propre suite et publie le rapport sur GitHub Pages.
+Indépendant du nightly *par choix* : publier un rapport rouge est précisément l'objectif.
+
+**`baselines-visuelles.yml`** et **`baseline-perf.yml`** — `workflow_dispatch` uniquement. Ils
+régénèrent et recommitent des références (PNG, `perf/baseline.json`) dans l'environnement qui
+les compare. Jamais automatiques : une référence acceptée sans être regardée entérine la
+régression qu'elle devait détecter.
+
+### Protection de `main`
+
+`main` exige les checks de `ci.yml` et interdit force-push et suppression. `enforce_admins` est
+**désactivé** : le propriétaire du dépôt peut encore pousser directement, ce qui est nécessaire
+aux workflows de baselines. La règle bloque les PR, pas un administrateur déterminé.
+
+## Autoréparation CI — branches `ci-autofix/<date>`
+
+Un agent planifié (cron sur le VPS, 03:00 UTC) inspecte les runs échoués, reproduit, classe et
+propose un correctif en PR. Les règles qu'il suit, et que doit suivre quiconque reprend ce
+travail à la main :
+
+- **Périmètre** : échecs de `CI` sur `main`, de `Nightly` et de `Pages`. Les PR ouvertes sont
+  hors périmètre — leurs branches appartiennent à leur auteur.
+- **Jamais de merge, jamais de push sur `main`.** Une branche `ci-autofix/<AAAA-MM-JJ>` et une PR.
+- **Classification obligatoire** avant tout patch : *flaky* / *régression réelle* / *infra-config*.
+  La PR porte l'analyse de cause racine, pas seulement le diff.
+- **Flaky** : attente déterministe (`expect.poll`, `toPass`, attente sur un état observable). À
+  défaut seulement, un `retries` ciblé sur le projet concerné. **Jamais** supprimer ou affaiblir
+  une assertion, jamais `test.skip`, jamais `waitForTimeout`.
+- **Régression réelle** : correctif minimal, dans le code fautif, avec le test qui la démontre.
+  Si la cause n'est pas établie, une PR de diagnostic sans patch vaut mieux qu'un patch spéculatif.
+- **Infra-config** : scope de token manquant, binaire absent (`jq`, k6), tag du conteneur
+  Playwright désaccordé de `e2e/package.json`, service Postgres joint par `localhost` depuis un
+  job conteneurisé. Ces quatre-là couvrent l'essentiel de l'historique.
+- **Régression visuelle** : jamais corrigée automatiquement. `npm run test:visual` échoue par
+  construction hors conteneur CI, et relever `maxDiffPixelRatio` est interdit. L'agent rapporte
+  et renvoie vers *Actions → Régénérer les baselines visuelles*.
+- **Ressources** : le VPS héberge la production Fretline. L'agent travaille dans un worktree git
+  dédié (`~/.local/share/ci-autofix/worktree`), jamais dans ce checkout, et ne lance jamais la
+  matrice complète — seulement le projet Playwright qui a échoué, après
+  `npm run db:setup && npm run build`.
+- **Runtime** : Node 22 partout — CI, image de production (`node:22-alpine`) et poste local, ce
+  dernier via fnm (`~/.local/share/fnm`), le paquet Debian restant en 20 sur `/usr/bin/node`.
+  L'activation fnm est explicite dans le runner : `~/.bashrc` sort avant le bloc fnm pour les
+  shells non interactifs, et un job systemd en est un.
+
 ## Conventions
 
 - Français pour l'interface, les commentaires, les messages d'erreur API, les noms de tests et les messages de commit (`feat|fix|test|ci(scope): …`). Identifiants de code en anglais.
