@@ -103,14 +103,14 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
     <aside
       aria-label="Filtres"
       data-testid="facet-panel"
-      className="rounded-lg border border-ink-100 bg-white p-4"
+      className="rounded-lg border border-line bg-surface p-4"
     >
       <div className="flex items-center justify-between">
         <h2 className="text-base font-bold">Filtrer</h2>
         <button
           type="button"
           onClick={clearAll}
-          className="text-sm text-ink-500 underline hover:text-amber-brand"
+          className="text-sm text-fg-muted underline hover:text-amber-brand"
           data-testid="facet-clear-all"
         >
           Tout effacer
@@ -134,7 +134,7 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
                 />
                 <label htmlFor={id} className="flex-1 text-sm">
                   {brand.name}{' '}
-                  <span className="text-ink-500">({brand.count})</span>
+                  <span className="text-fg-muted">({brand.count})</span>
                 </label>
               </div>
             );
@@ -144,7 +144,7 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
 
       <fieldset className="mt-6" data-testid="facet-price">
         <legend className="text-sm font-semibold">Prix (€)</legend>
-        <p className="mt-1 text-xs text-ink-500">
+        <p className="mt-1 text-xs text-fg-muted">
           De {Math.floor(priceBounds.min / 100)} € à {Math.ceil(priceBounds.max / 100)} €
         </p>
         <div className="mt-2 flex items-end gap-2">
@@ -159,7 +159,7 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
               min={0}
               value={minPrice}
               onChange={(event) => setMinPrice(event.target.value)}
-              className="mt-1 w-full rounded border border-ink-100 px-2 py-1 text-sm"
+              className="mt-1 w-full rounded border border-line px-2 py-1 text-sm"
               data-testid="facet-min-price"
             />
           </div>
@@ -174,7 +174,7 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
               min={0}
               value={maxPrice}
               onChange={(event) => setMaxPrice(event.target.value)}
-              className="mt-1 w-full rounded border border-ink-100 px-2 py-1 text-sm"
+              className="mt-1 w-full rounded border border-line px-2 py-1 text-sm"
               data-testid="facet-max-price"
             />
           </div>
@@ -182,7 +182,7 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
         <button
           type="button"
           onClick={applyPriceRange}
-          className="mt-2 w-full rounded bg-ink-900 px-3 py-2 text-sm font-semibold text-white hover:bg-ink-800"
+          className="mt-2 w-full rounded bg-contrast px-3 py-2 text-sm font-semibold text-contrast-fg hover:bg-contrast-hover"
           data-testid="facet-apply-price"
         >
           Appliquer
@@ -219,7 +219,7 @@ export function FacetPanel({ brands, priceBounds }: FacetPanelProps) {
         </label>
         <select
           id="facet-min-rating"
-          className="mt-2 w-full rounded border border-ink-100 px-2 py-2 text-sm"
+          className="mt-2 w-full rounded border border-line px-2 py-2 text-sm"
           value={minRating}
           onChange={(event) => {
             const value = event.target.value;

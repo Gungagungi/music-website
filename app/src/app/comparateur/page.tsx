@@ -42,34 +42,34 @@ export default async function ComparePage({
       <h1 className="mt-4 text-3xl font-bold" data-testid="compare-title">
         Comparateur
       </h1>
-      <p className="mt-2 text-ink-500">
+      <p className="mt-2 text-fg-muted">
         Comparez jusqu’à {MAX_COMPARED} produits côte à côte.
       </p>
 
       {products.length === 0 ? (
         <div
-          className="mt-8 rounded-lg border border-dashed border-ink-300 bg-white p-12 text-center"
+          className="mt-8 rounded-lg border border-dashed border-line-strong bg-surface p-12 text-center"
           data-testid="compare-empty"
         >
           <p className="text-lg font-semibold">Aucun produit à comparer.</p>
-          <p className="mt-2 text-sm text-ink-500">
+          <p className="mt-2 text-sm text-fg-muted">
             Depuis une fiche produit, utilisez le lien « Comparer ce produit ».
           </p>
         </div>
       ) : (
         <div className="mt-8 overflow-x-auto">
-          <table className="w-full min-w-3xl border-collapse bg-white text-sm" data-testid="compare-table">
+          <table className="w-full min-w-3xl border-collapse bg-surface text-sm" data-testid="compare-table">
             <caption className="sr-only">Comparaison des produits sélectionnés</caption>
             <thead>
               <tr>
-                <th scope="col" className="w-48 border border-ink-100 p-3 text-left">
+                <th scope="col" className="w-48 border border-line p-3 text-left">
                   Produit
                 </th>
                 {products.map((product) => (
                   <th
                     key={product.id}
                     scope="col"
-                    className="border border-ink-100 p-3 text-left align-top"
+                    className="border border-line p-3 text-left align-top"
                     data-testid="compare-column"
                     data-slug={product.slug}
                   >
@@ -79,9 +79,9 @@ export default async function ComparePage({
                       alt=""
                       width={120}
                       height={120}
-                      className="mb-2 size-30 rounded bg-ink-100"
+                      className="mb-2 size-30 rounded bg-muted"
                     />
-                    <p className="text-xs uppercase text-ink-500">{product.brand}</p>
+                    <p className="text-xs uppercase text-fg-muted">{product.brand}</p>
                     <Link href={`/p/${product.slug}`} className="font-semibold hover:text-amber-brand">
                       {product.name}
                     </Link>
@@ -91,7 +91,7 @@ export default async function ComparePage({
                           .filter((candidate) => candidate.slug !== product.slug)
                           .map((candidate) => candidate.slug)
                           .join(',')}`}
-                        className="text-xs underline text-ink-500"
+                        className="text-xs underline text-fg-muted"
                         data-testid="compare-remove"
                       >
                         Retirer
@@ -103,11 +103,11 @@ export default async function ComparePage({
             </thead>
             <tbody>
               <tr>
-                <th scope="row" className="border border-ink-100 p-3 text-left">
+                <th scope="row" className="border border-line p-3 text-left">
                   Prix
                 </th>
                 {products.map((product) => (
-                  <td key={product.id} className="border border-ink-100 p-3">
+                  <td key={product.id} className="border border-line p-3">
                     <PriceTag
                       price={product.price}
                       listPrice={product.listPrice}
@@ -117,32 +117,32 @@ export default async function ComparePage({
                 ))}
               </tr>
               <tr>
-                <th scope="row" className="border border-ink-100 p-3 text-left">
+                <th scope="row" className="border border-line p-3 text-left">
                   Note
                 </th>
                 {products.map((product) => (
-                  <td key={product.id} className="border border-ink-100 p-3">
+                  <td key={product.id} className="border border-line p-3">
                     <Rating value={product.rating} count={product.reviewCount} />
                   </td>
                 ))}
               </tr>
               <tr>
-                <th scope="row" className="border border-ink-100 p-3 text-left">
+                <th scope="row" className="border border-line p-3 text-left">
                   Disponibilité
                 </th>
                 {products.map((product) => (
-                  <td key={product.id} className="border border-ink-100 p-3">
+                  <td key={product.id} className="border border-line p-3">
                     {product.stock > 0 ? 'En stock' : 'Rupture de stock'}
                   </td>
                 ))}
               </tr>
               {specKeys.map((key) => (
                 <tr key={key}>
-                  <th scope="row" className="border border-ink-100 p-3 text-left">
+                  <th scope="row" className="border border-line p-3 text-left">
                     {key}
                   </th>
                   {products.map((product) => (
-                    <td key={product.id} className="border border-ink-100 p-3">
+                    <td key={product.id} className="border border-line p-3">
                       {product.specs[key] ?? '—'}
                     </td>
                   ))}

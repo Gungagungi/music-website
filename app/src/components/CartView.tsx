@@ -65,11 +65,11 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
   if (cart.items.length === 0) {
     return (
       <div
-        className="rounded-lg border border-dashed border-ink-300 bg-white p-12 text-center"
+        className="rounded-lg border border-dashed border-line-strong bg-surface p-12 text-center"
         data-testid="empty-cart"
       >
         <p className="text-xl font-semibold">Votre panier est vide.</p>
-        <p className="mt-2 text-ink-500">
+        <p className="mt-2 text-fg-muted">
           Parcourez le catalogue et ajoutez vos premiers articles pour continuer.
         </p>
         <Link
@@ -90,7 +90,7 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
           {cart.items.map((item) => (
             <li
               key={item.id}
-              className="flex flex-wrap items-center gap-4 rounded-lg border border-ink-100 bg-white p-4"
+              className="flex flex-wrap items-center gap-4 rounded-lg border border-line bg-surface p-4"
               data-testid="cart-line"
               data-sku={item.sku}
             >
@@ -100,20 +100,20 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
                 alt=""
                 width={80}
                 height={80}
-                className="size-20 rounded bg-ink-100"
+                className="size-20 rounded bg-muted"
               />
 
               <div className="min-w-40 flex-1">
-                <p className="text-xs uppercase tracking-wide text-ink-500">{item.brand}</p>
+                <p className="text-xs uppercase tracking-wide text-fg-muted">{item.brand}</p>
                 <Link href={`/p/${item.slug}`} className="font-semibold hover:text-amber-brand" data-testid="cart-line-name">
                   {item.name}
                 </Link>
                 {item.color && (
-                  <p className="text-sm text-ink-500" data-testid="cart-line-color">
+                  <p className="text-sm text-fg-muted" data-testid="cart-line-color">
                     Coloris : {item.color}
                   </p>
                 )}
-                <p className="text-sm text-ink-500" data-testid="cart-line-unit-price">
+                <p className="text-sm text-fg-muted" data-testid="cart-line-unit-price">
                   {formatPrice(item.unitPrice)} l’unité
                 </p>
               </div>
@@ -133,7 +133,7 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
                     const next = Number.parseInt(event.target.value, 10);
                     if (Number.isFinite(next) && next >= 1) void changeQuantity(item.id, next);
                   }}
-                  className="w-20 rounded border border-ink-100 px-2 py-1"
+                  className="w-20 rounded border border-line px-2 py-1"
                   data-testid="cart-line-quantity"
                 />
               </div>
@@ -146,7 +146,7 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
                 type="button"
                 onClick={() => void removeLine(item.id)}
                 disabled={pending}
-                className="rounded border border-ink-100 px-3 py-2 text-sm hover:border-red-600 hover:text-red-700"
+                className="rounded border border-line px-3 py-2 text-sm hover:border-red-600 hover:text-danger"
                 data-testid="cart-line-remove"
                 aria-label={`Retirer ${item.name} du panier`}
               >
@@ -157,7 +157,7 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
         </ul>
       </section>
 
-      <aside className="h-fit rounded-lg border border-ink-100 bg-white p-6" data-testid="cart-summary">
+      <aside className="h-fit rounded-lg border border-line bg-surface p-6" data-testid="cart-summary">
         <h2 className="text-lg font-bold">Récapitulatif</h2>
 
         <dl className="mt-4 space-y-2 text-sm">
@@ -175,7 +175,7 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
             testId="summary-shipping"
           />
           <Row label="Dont TVA (20 %)" value={formatPrice(cart.totals.vat)} testId="summary-vat" muted />
-          <div className="flex justify-between border-t border-ink-100 pt-3 text-lg font-bold">
+          <div className="flex justify-between border-t border-line pt-3 text-lg font-bold">
             <dt>Total</dt>
             <dd data-testid="summary-total">{formatPrice(cart.totals.total)}</dd>
           </div>
@@ -183,7 +183,7 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
 
         <div className="mt-6">
           {cart.couponCode ? (
-            <div className="flex items-center justify-between rounded border border-green-600 bg-green-50 px-3 py-2 text-sm">
+            <div className="flex items-center justify-between rounded border border-success-line bg-success-bg px-3 py-2 text-sm">
               <span data-testid="applied-coupon">Code {cart.couponCode} appliqué</span>
               <button
                 type="button"
@@ -204,14 +204,14 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
                   id="coupon-code"
                   value={couponInput}
                   onChange={(event) => setCouponInput(event.target.value)}
-                  className="flex-1 rounded border border-ink-100 px-3 py-2 text-sm uppercase"
+                  className="flex-1 rounded border border-line px-3 py-2 text-sm uppercase"
                   placeholder="BIENVENUE10"
                   data-testid="coupon-input"
                 />
                 <button
                   type="submit"
                   disabled={pending}
-                  className="rounded bg-ink-900 px-4 py-2 text-sm font-semibold text-white hover:bg-ink-800"
+                  className="rounded bg-contrast px-4 py-2 text-sm font-semibold text-contrast-fg hover:bg-contrast-hover"
                   data-testid="coupon-submit"
                 >
                   Appliquer
@@ -220,7 +220,7 @@ export function CartView({ initialCart }: { initialCart: Cart }) {
             </form>
           )}
 
-          <p role="alert" data-testid="coupon-error" className="mt-2 text-sm font-semibold text-red-700">
+          <p role="alert" data-testid="coupon-error" className="mt-2 text-sm font-semibold text-danger">
             {couponError}
           </p>
         </div>
@@ -249,7 +249,7 @@ function Row({
   muted?: boolean;
 }) {
   return (
-    <div className={muted ? 'flex justify-between text-ink-500' : 'flex justify-between'}>
+    <div className={muted ? 'flex justify-between text-fg-muted' : 'flex justify-between'}>
       <dt>{label}</dt>
       <dd data-testid={testId}>{value}</dd>
     </div>

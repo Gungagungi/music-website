@@ -20,11 +20,11 @@ export default async function RegisterPage() {
         Créer un compte
       </h1>
 
-      <div className="mt-6 rounded-lg border border-ink-100 bg-white p-6">
+      <div className="mt-6 rounded-lg border border-line bg-surface p-6">
         <AuthForm mode="register" redirectTo="/compte/commandes" />
       </div>
 
-      <p className="mt-6 text-sm text-ink-500">
+      <p className="mt-6 text-sm text-fg-muted">
         Vous avez déjà un compte ?{' '}
         <Link href="/compte/connexion" className="underline hover:text-amber-brand">
           Se connecter

@@ -11,13 +11,13 @@ export function SortSelect() {
 
   return (
     <div className="flex items-center gap-2">
-      <label htmlFor="sort-select" className="text-sm text-ink-500">
+      <label htmlFor="sort-select" className="text-sm text-fg-muted">
         Trier par
       </label>
       <select
         id="sort-select"
         data-testid="sort-select"
-        className="rounded border border-ink-100 bg-white px-2 py-2 text-sm"
+        className="rounded border border-line bg-surface px-2 py-2 text-sm"
         value={searchParams.get('sort') ?? 'pertinence'}
         onChange={(event) => {
           const params = new URLSearchParams(searchParams.toString());

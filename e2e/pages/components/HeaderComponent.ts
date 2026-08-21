@@ -12,6 +12,7 @@ export class HeaderComponent {
   readonly cartLink: Locator;
   readonly cartCount: Locator;
   readonly categoryNav: Locator;
+  readonly themeToggle: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.getByTestId('site-header');
@@ -23,6 +24,7 @@ export class HeaderComponent {
     this.cartLink = page.getByTestId('cart-link');
     this.cartCount = page.getByTestId('cart-count');
     this.categoryNav = page.getByTestId('category-nav');
+    this.themeToggle = page.getByTestId('theme-toggle');
   }
 
   async search(term: string): Promise<void> {
@@ -32,6 +34,20 @@ export class HeaderComponent {
 
   async openCategory(slug: string): Promise<void> {
     await this.page.getByTestId(`nav-${slug}`).click();
+  }
+
+  /**
+   * Le libellé du bouton nomme le thème vers lequel il bascule, jamais celui
+   * qui est actif : c'est donc l'inverse du thème courant, et le lire est la
+   * façon la plus directe de constater le thème appliqué sans dépendre d'une
+   * valeur de couleur.
+   */
+  async themeToggleLabel(): Promise<string> {
+    return (await this.themeToggle.innerText()).trim();
+  }
+
+  async toggleTheme(): Promise<void> {
+    await this.themeToggle.click();
   }
 
   async cartItemCount(): Promise<number> {

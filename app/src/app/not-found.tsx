@@ -5,7 +5,7 @@ export default function NotFound() {
     <div className="mx-auto max-w-2xl px-4 py-24 text-center" data-testid="not-found">
       <p className="text-sm font-semibold uppercase tracking-widest text-amber-brand">Erreur 404</p>
       <h1 className="mt-3 text-4xl font-bold">Cette page est introuvable.</h1>
-      <p className="mt-4 text-ink-500">
+      <p className="mt-4 text-fg-muted">
         Le produit ou la page que vous cherchez n’existe pas ou n’est plus disponible.
       </p>
       <Link

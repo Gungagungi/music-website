@@ -24,6 +24,19 @@ falsifiable, never implementation. "The cart shows VAT contained within the tota
 | `REQ-NAV-01` | Departments are reachable from the header | Selecting a department navigates to its catalogue page with the matching heading |
 | `REQ-NAV-02` | A breadcrumb reflects the catalogue hierarchy | The product page shows its category; following the breadcrumb returns to that category |
 
+### Display theme
+
+| ID | Requirement | Acceptance criteria |
+| --- | --- | --- |
+| `REQ-THEME-01` | The site follows the device's colour scheme by default | With no explicit choice stored, a device set to dark renders the dark palette, and one set to light renders the light palette |
+| `REQ-THEME-02` | The theme can be switched by hand from the header | A control next to the cart flips light to dark and back, and its label names the theme it switches *to* |
+| `REQ-THEME-03` | An explicit choice overrides the device preference | Choosing light on a device set to dark keeps the light palette |
+| `REQ-THEME-04` | An explicit choice survives navigation and reload | The chosen theme is already applied on the served document, before hydration — no flash of the other theme |
+
+`REQ-THEME-04` is the one worth automating carefully. A theme that is *eventually* correct passes
+any assertion made after page load; the defect it hides is a visible flash, and the only place it
+is observable is the state of the document before the framework has run.
+
 ### Catalogue and facets
 
 | ID | Requirement | Acceptance criteria |
@@ -246,6 +259,7 @@ particular field.
 | `REQ-A11Y-04` | A skip link leads to the main content | Reachable on first tab, and it works |
 | `REQ-A11Y-05` | The core journey is operable by keyboard | Catalogue to cart without a pointer, focus always visible |
 | `REQ-A11Y-06` | Informative images have text alternatives | Product images carry a meaningful alternative; decorative images are hidden from the tree |
+| `REQ-A11Y-07` | The dark theme meets the same contrast requirements | axe-core scan with the device set to dark reports no serious or critical violation |
 
 `REQ-A11Y-03` is what [BUG-003](bug-reports/BUG-003-missing-form-labels.md) violates.
 

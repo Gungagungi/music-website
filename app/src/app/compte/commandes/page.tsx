@@ -35,7 +35,7 @@ export default async function OrdersPage() {
           <h1 className="text-3xl font-bold" data-testid="orders-title">
             Mes commandes
           </h1>
-          <p className="mt-1 text-ink-500" data-testid="account-email">
+          <p className="mt-1 text-fg-muted" data-testid="account-email">
             Connecté en tant que {user.email}
           </p>
         </div>
@@ -45,13 +45,13 @@ export default async function OrdersPage() {
       <div className="mt-8">
         {orders.length === 0 ? (
           <div
-            className="rounded-lg border border-dashed border-ink-300 bg-white p-12 text-center"
+            className="rounded-lg border border-dashed border-line-strong bg-surface p-12 text-center"
             data-testid="empty-orders"
           >
             <p className="text-xl font-semibold">Vous n’avez pas encore de commande.</p>
             <Link
               href="/"
-              className="mt-6 inline-block rounded bg-ink-900 px-5 py-3 font-semibold text-white"
+              className="mt-6 inline-block rounded bg-contrast px-5 py-3 font-semibold text-contrast-fg"
             >
               Parcourir le catalogue
             </Link>
@@ -61,7 +61,7 @@ export default async function OrdersPage() {
             {orders.map((order) => (
               <li
                 key={order.id}
-                className="rounded-lg border border-ink-100 bg-white p-5"
+                className="rounded-lg border border-line bg-surface p-5"
                 data-testid="order-item"
                 data-reference={order.reference}
               >
@@ -70,7 +70,7 @@ export default async function OrdersPage() {
                     <p className="font-bold" data-testid="order-item-reference">
                       {order.reference}
                     </p>
-                    <p className="text-sm text-ink-500">
+                    <p className="text-sm text-fg-muted">
                       {new Date(order.createdAt).toLocaleDateString('fr-FR', {
                         year: 'numeric',
                         month: 'long',
@@ -84,7 +84,7 @@ export default async function OrdersPage() {
                       {formatPrice(order.totals.total)}
                     </p>
                     <p
-                      className="text-sm font-semibold text-green-700"
+                      className="text-sm font-semibold text-success"
                       data-testid="order-item-status"
                     >
                       {STATUS_LABELS[order.status] ?? order.status}
@@ -92,7 +92,7 @@ export default async function OrdersPage() {
                   </div>
                 </div>
 
-                <ul className="mt-3 border-t border-ink-100 pt-3 text-sm text-ink-500">
+                <ul className="mt-3 border-t border-line pt-3 text-sm text-fg-muted">
                   {order.items.map((item) => (
                     <li key={item.id}>
                       {item.quantity} × {item.brand} {item.name}

@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 140 |
-| — covered by this suite | 139 |
+| Requirements declared | 145 |
+| — covered by this suite | 144 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 186 |
-| — Accessibility | 13 |
+| Automated test cases | 199 |
+| — Accessibility | 20 |
 | — API | 74 |
-| — UI | 89 |
+| — UI | 95 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -31,6 +31,7 @@ if the committed copy differs.
 | `REQ-A11Y-04` | `TC-320` | Accessibility | @smoke |
 | `REQ-A11Y-05` | `TC-321` | Accessibility | @critical @regression |
 | `REQ-A11Y-06` | `TC-322` | Accessibility | @regression |
+| `REQ-A11Y-07` | `TC-440`, `TC-441`, `TC-442`, `TC-443`, `TC-444`, `TC-445`, `TC-446` | Accessibility | @regression |
 | `REQ-ACC-01` | `TC-088` | UI | @regression |
 | `REQ-API-01` | `TC-210` | API | @contract @critical @smoke |
 | `REQ-API-02` | `TC-211` | API | @regression |
@@ -158,6 +159,10 @@ if the committed copy differs.
 | `REQ-SEC-16` | `TC-425` | UI | @security @smoke |
 | `REQ-SORT-01` | `TC-040`, `TC-041`, `TC-043` | UI | @critical @regression @smoke |
 | `REQ-SORT-02` | `TC-042` | UI | @regression |
+| `REQ-THEME-01` | `TC-426`, `TC-429` | UI | @smoke |
+| `REQ-THEME-02` | `TC-427` | UI | @critical @smoke |
+| `REQ-THEME-03` | `TC-430` | UI | @critical @regression |
+| `REQ-THEME-04` | `TC-428`, `TC-431` | UI | @regression |
 | `REQ-VIS-01` | `TC-330`, `TC-331`, `TC-339` | Visual | @regression |
 | `REQ-VIS-02` | `TC-332`, `TC-333` | Visual | @critical @regression |
 | `REQ-VIS-03` | `TC-334` | Visual | @regression |
@@ -355,6 +360,19 @@ if the committed copy differs.
 | `TC-423` | Exemption des paniers d’un compte | `REQ-DATA-13` | `api/retention.spec.ts` |
 | `TC-424` | Balayage des comptes dormants | `REQ-DATA-14` | `api/retention.spec.ts` |
 | `TC-425` | Absence du tracker sous E2E_TEST_MODE | `REQ-SEC-16` | `ui/analytics.spec.ts` |
+| `TC-426` | Thème clair suivi depuis la préférence de l’appareil | `REQ-THEME-01` | `ui/theme.spec.ts` |
+| `TC-427` | Bascule manuelle vers le thème sombre | `REQ-THEME-02` | `ui/theme.spec.ts` |
+| `TC-428` | Persistance du thème choisi d’une page à l’autre | `REQ-THEME-04` | `ui/theme.spec.ts` |
+| `TC-429` | Thème sombre suivi depuis la préférence de l’appareil | `REQ-THEME-01` | `ui/theme.spec.ts` |
+| `TC-430` | Le thème choisi prime sur celui de l’appareil | `REQ-THEME-03` | `ui/theme.spec.ts` |
+| `TC-431` | Absence de scintillement — thème posé avant le framework | `REQ-THEME-04` | `ui/theme.spec.ts` |
+| `TC-440` | Scan a11y sombre — accueil | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
+| `TC-441` | Scan a11y sombre — catalogue | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
+| `TC-442` | Scan a11y sombre — fiche produit | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
+| `TC-443` | Scan a11y sombre — recherche | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
+| `TC-444` | Scan a11y sombre — connexion | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
+| `TC-445` | Scan a11y sombre — inscription | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
+| `TC-446` | Scan a11y sombre — comparateur | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
 
 ## Verified outside the automated suite
 

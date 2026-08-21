@@ -13,7 +13,7 @@ const MISSING_LABEL_BUG_ENABLED = process.env.SEED_BUGS === '1';
 
 export function Footer() {
   return (
-    <footer className="mt-16 bg-ink-950 text-ink-300" data-testid="site-footer">
+    <footer className="mt-16 bg-chrome text-ink-300" data-testid="site-footer">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="text-lg font-bold text-white">Fretline</p>
@@ -52,7 +52,7 @@ export function Footer() {
             {MISSING_LABEL_BUG_ENABLED ? (
               <input
                 type="email"
-                className="rounded-md border border-ink-700 bg-ink-900 px-3 py-2 text-white placeholder:text-ink-500"
+                className="rounded-md border border-ink-700 bg-chrome-alt px-3 py-2 text-white placeholder:text-ink-500"
                 data-testid="newsletter-email"
               />
             ) : (
@@ -65,7 +65,7 @@ export function Footer() {
                   name="email"
                   type="email"
                   placeholder="vous@exemple.fr"
-                  className="rounded-md border border-ink-700 bg-ink-900 px-3 py-2 text-white placeholder:text-ink-500"
+                  className="rounded-md border border-ink-700 bg-chrome-alt px-3 py-2 text-white placeholder:text-ink-500"
                   data-testid="newsletter-email"
                 />
               </>

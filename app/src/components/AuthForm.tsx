@@ -97,14 +97,14 @@ export function AuthForm({ mode, redirectTo }: { mode: 'login' | 'register'; red
         hint={mode === 'register' ? '8 caractères minimum, dont au moins un chiffre.' : undefined}
       />
 
-      <p role="alert" data-testid="auth-error" className="text-sm font-semibold text-red-700">
+      <p role="alert" data-testid="auth-error" className="text-sm font-semibold text-danger">
         {formError}
       </p>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-amber-brand px-5 py-3 font-semibold text-ink-950 hover:bg-amber-brandDark hover:text-white disabled:bg-ink-300"
+        className="w-full rounded-md bg-amber-brand px-5 py-3 font-semibold text-ink-950 hover:bg-amber-brandDark hover:text-white disabled:bg-disabled"
         data-testid="auth-submit"
       >
         {pending ? 'Veuillez patienter…' : mode === 'login' ? 'Se connecter' : 'Créer mon compte'}
@@ -144,16 +144,16 @@ function Field({
         autoComplete={autoComplete}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
-        className="mt-1 w-full rounded border border-ink-100 px-3 py-2"
+        className="mt-1 w-full rounded border border-line px-3 py-2"
         data-testid={`field-${id}`}
       />
       {hint && (
-        <p id={`${id}-hint`} className="mt-1 text-xs text-ink-500">
+        <p id={`${id}-hint`} className="mt-1 text-xs text-fg-muted">
           {hint}
         </p>
       )}
       {error && (
-        <p id={`${id}-error`} className="mt-1 text-sm text-red-700" data-testid={`error-${id}`}>
+        <p id={`${id}-error`} className="mt-1 text-sm text-danger" data-testid={`error-${id}`}>
           {error}
         </p>
       )}

@@ -29,7 +29,7 @@ export function SearchBar() {
         value={term}
         onChange={(event) => setTerm(event.target.value)}
         placeholder="Rechercher une guitare, un ampli, une pédale…"
-        className="w-full rounded-md border border-ink-700 bg-white px-3 py-2 text-ink-900 placeholder:text-ink-500"
+        className="w-full rounded-md border border-ink-700 bg-surface px-3 py-2 text-fg placeholder:text-fg-muted"
         data-testid="search-input"
       />
       <button

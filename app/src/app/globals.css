@@ -1,6 +1,10 @@
 @import 'tailwindcss';
 
 @theme {
+  /* Palette brute. Elle ne dépend d'aucun thème : ce sont les teintes dans
+     lesquelles les tokens sémantiques ci-dessous vont puiser. Ne l'utiliser
+     directement que là où la couleur est la même en clair et en sombre — un
+     libellé blanc sur le bandeau de marque, par exemple. */
   --color-ink-950: #0b1220;
   --color-ink-900: #111c2e;
   --color-ink-800: #1b2a41;
@@ -10,20 +14,141 @@
   --color-ink-100: #e5eaf1;
   --color-ink-50: #f5f7fa;
 
-  --color-amber-brand: #e0872b;
-  --color-amber-brandDark: #c26f1c;
-
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
     sans-serif;
+
+  /*
+    Tokens sémantiques — la seule chose que les composants ont le droit de citer
+    pour une couleur qui change avec le thème.
+
+    Chacun porte ses deux valeurs dans un `light-dark()`, et c'est ce qui fait
+    tenir la fonctionnalité en un seul fichier : le navigateur choisit la
+    branche d'après la propriété `color-scheme` de l'élément racine, réglée
+    juste en dessous. Aucune variante `dark:` dans les composants, aucune
+    seconde définition de la palette à maintenir en parallèle, et surtout aucun
+    JavaScript dans le chemin critique — la détection du thème de l'appareil est
+    entièrement CSS, donc elle est bonne dès la première peinture.
+
+    Écrire `dark:` sur chaque classe aurait eu le défaut inverse : deux couleurs
+    par élément, dispersées dans 26 fichiers, sans endroit où lire la palette.
+  */
+  --color-canvas: light-dark(#f5f7fa, #0b1220);
+  --color-surface: light-dark(#ffffff, #131f33);
+  --color-muted: light-dark(#e5eaf1, #1b2a41);
+  --color-fg: light-dark(#111c2e, #e5eaf1);
+  --color-fg-muted: light-dark(#5b6f8d, #9fb1ca);
+  --color-line: light-dark(#e5eaf1, #2a3d59);
+  --color-line-strong: light-dark(#a7b4c6, #3d5372);
+  --color-disabled: light-dark(#a7b4c6, #3d5372);
+
+  /* Encart en creux dans une carte — un ton en retrait du fond de la carte, pas
+     le gris des séparateurs : `--color-muted` sous du texte secondaire tombe à
+     4,23:1 en thème clair, sous le seuil AA. */
+  --color-inset: light-dark(#f5f7fa, #0e1829);
+
+  /* Aplat foncé des boutons secondaires et de l'encart d'accueil. Ce n'est pas
+     l'inverse du fond : en sombre, un aplat à la teinte du fond disparaîtrait
+     dans la carte qui le porte, donc il s'éclaircit au lieu de s'inverser. */
+  --color-contrast: light-dark(#111c2e, #33486a);
+  --color-contrast-hover: light-dark(#1b2a41, #415a82);
+  --color-contrast-fg: light-dark(#ffffff, #f5f7fa);
+  /* Le texte secondaire de l'encart d'accueil a sa propre teinte : l'aplat
+     s'éclaircissant en thème sombre, un gris qui passait à 9:1 sur l'aplat
+     clair retombe à 4,38:1 sur l'aplat sombre. */
+  --color-contrast-fg-muted: light-dark(#a7b4c6, #c9d5e6);
+  --color-contrast-line: light-dark(#2a3d59, #5b7099);
+
+  /* Bandeau de marque : sombre dans les deux thèmes, mais pas de la même
+     teinte. En sombre il doit rester distinct du fond de page, sinon l'en-tête
+     et le pied se fondent dans la page et la mise en page perd sa structure. */
+  --color-chrome: light-dark(#0b1220, #16223a);
+  --color-chrome-alt: light-dark(#111c2e, #1e2c47);
+
+  /*
+    L'ambre de la marque s'éclaircit en thème sombre, et ce n'est pas une
+    coquetterie : à #e0872b sur l'aplat sombre de l'encart d'accueil, le
+    rapport de contraste tombe à 3,37:1, sous le seuil AA. La teinte claire
+    reste la référence de marque ; la sombre en est la transposition lisible.
+    Toute retouche de l'une des deux se vérifie avec le scan a11y en thème
+    sombre (REQ-A11Y-07), qui est là pour ça.
+  */
+  --color-amber-brand: light-dark(#e0872b, #f5b170);
+  --color-amber-brandDark: light-dark(#c26f1c, #e0872b);
+
+  --color-success: light-dark(#15803d, #4ade80);
+  --color-success-line: light-dark(#16a34a, #2f7d4f);
+  --color-success-bg: light-dark(#f0fdf4, #10261a);
+  --color-danger: light-dark(#b91c1c, #fca5a5);
 }
 
+/*
+  `color-scheme` est l'interrupteur du thème, et le seul.
+
+  Sans attribut : `light dark` laisse `light-dark()` suivre la préférence
+  déclarée par le système, ce qui couvre la détection automatique. Avec
+  l'attribut, le choix explicite du visiteur l'emporte. Un script minuscule
+  (voir layout.tsx) repose l'attribut avant la première peinture ; tout le reste
+  découle de la cascade.
+
+  Effet de bord voulu : `color-scheme` pilote aussi les couleurs que le
+  navigateur dessine lui-même — barres de défilement, sélecteurs natifs,
+  remplissage automatique. Un thème sombre qui laisse des `<select>` blancs se
+  trahit sur la première liste déroulante.
+*/
 :root {
+  color-scheme: light dark;
+}
+
+:root[data-theme='light'] {
   color-scheme: light;
 }
 
-body {
-  background-color: var(--color-ink-50);
-  color: var(--color-ink-900);
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/*
+  Le seul aiguillage de thème qui ne porte pas sur une couleur.
+
+  `light-dark()` ne s'applique qu'aux valeurs de type <color> : il ne peut donc
+  pas choisir un `display`, et les deux libellés du bouton de bascule (« Thème
+  sombre » / « Thème clair ») repassent par la forme classique — media query
+  pour l'appareil, attribut pour le choix explicite. Les deux blocs donnent les
+  mêmes valeurs, si bien que leur ordre et leur spécificité n'ont pas à être
+  arbitrés : le seul cas qu'ils doivent départager, appareil en sombre et choix
+  explicite en clair, ne fait matcher ni l'un ni l'autre.
+
+  Masquer par `display: none` plutôt que visuellement est voulu : le libellé
+  caché doit aussi sortir de l'arbre d'accessibilité, sinon le bouton s'annonce
+  « Thème sombre Thème clair ».
+*/
+:root {
+  --affichage-libelle-clair: inline-flex;
+  --affichage-libelle-sombre: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --affichage-libelle-clair: none;
+    --affichage-libelle-sombre: inline-flex;
+  }
+}
+
+:root[data-theme='dark'] {
+  --affichage-libelle-clair: none;
+  --affichage-libelle-sombre: inline-flex;
+}
+
+.theme-toggle-clair {
+  display: var(--affichage-libelle-clair);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-toggle-sombre {
+  display: var(--affichage-libelle-sombre);
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* Visible focus everywhere — the accessibility suite asserts on it, and it is
@@ -40,7 +165,7 @@ body {
   top: 0;
   z-index: 100;
   padding: 0.75rem 1.25rem;
-  background: var(--color-ink-900);
+  background: var(--color-chrome);
   color: white;
   border-radius: 0 0 0.5rem 0;
 }

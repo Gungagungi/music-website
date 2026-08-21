@@ -35,9 +35,9 @@ export default async function SearchPage({
       </h1>
 
       {!term ? (
-        <div className="mt-6 rounded-lg border border-dashed border-ink-300 bg-white p-10" data-testid="search-prompt">
+        <div className="mt-6 rounded-lg border border-dashed border-line-strong bg-surface p-10" data-testid="search-prompt">
           <p className="text-lg font-semibold">Saisissez un terme de recherche.</p>
-          <p className="mt-2 text-sm text-ink-500">
+          <p className="mt-2 text-sm text-fg-muted">
             Vous pouvez chercher par marque, par modèle ou par référence.
           </p>
           <ul className="mt-4 flex flex-wrap gap-2">
@@ -45,7 +45,7 @@ export default async function SearchPage({
               <li key={category.slug}>
                 <Link
                   href={`/c/${category.slug}`}
-                  className="rounded border border-ink-100 px-3 py-1 text-sm hover:border-amber-brand"
+                  className="rounded border border-line px-3 py-1 text-sm hover:border-amber-brand"
                 >
                   {category.label}
                 </Link>
@@ -56,7 +56,7 @@ export default async function SearchPage({
       ) : (
         <>
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-ink-500" data-testid="result-count">
+            <p className="text-sm text-fg-muted" data-testid="result-count">
               <strong data-testid="result-count-value">{result.total}</strong>{' '}
               {result.total > 1 ? 'produits trouvés' : 'produit trouvé'}
             </p>
@@ -66,13 +66,13 @@ export default async function SearchPage({
           <div className="mt-4">
             {result.items.length === 0 ? (
               <div
-                className="rounded-lg border border-dashed border-ink-300 bg-white p-10 text-center"
+                className="rounded-lg border border-dashed border-line-strong bg-surface p-10 text-center"
                 data-testid="empty-results"
               >
                 <p className="text-lg font-semibold">
                   Aucun produit ne correspond à « {term} ».
                 </p>
-                <p className="mt-2 text-sm text-ink-500">
+                <p className="mt-2 text-sm text-fg-muted">
                   Vérifiez l’orthographe ou essayez un terme plus général, comme « stratocaster » ou
                   « ampli ».
                 </p>
