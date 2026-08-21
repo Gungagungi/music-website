@@ -64,6 +64,12 @@ Trois pièges à connaître avant de toucher à cette couche :
 
 **Mesure d'audience** (`app/src/components/analytics/`, `app/src/lib/analytics.ts`). Matomo auto-hébergé, sans cookie, avec suivi e-commerce — voir ADR-006. Deux règles tiennent l'intégration. Le tracker est **absent dès que `E2E_TEST_MODE=1`**, et la garde est dans le layout, côté serveur : la balise n'existe alors pas dans le HTML servi, donc aucune requête tierce ne vient s'intercaler dans une spec ni décaler une capture comparée au pixel. La suite double la mise en abortant `matomo.js`/`matomo.php` au niveau du contexte, et `TC-425` surveille la garde elle-même. Et `NEXT_PUBLIC_MATOMO_URL` / `NEXT_PUBLIC_MATOMO_SITE_ID` sont **figées au build**, exactement comme `NEXT_PUBLIC_SEED_BUGS` : elles entrent par des arguments du Dockerfile, et les changer impose `up -d --build`, pas un redémarrage. Les montants passent par `enUnitesMonetaires()` — seule frontière du dépôt où un montant quitte les centimes entiers.
 
+**Thème d'affichage** (`app/src/app/globals.css`, `app/src/lib/theme.ts`, `app/src/components/ThemeToggle.tsx`). Les couleurs qui changent avec le thème passent toutes par des tokens sémantiques (`bg-surface`, `text-fg-muted`, `border-line`, `bg-contrast`…) définis en `light-dark()` dans `@theme` : une seule définition par token porte les deux thèmes, et il n'y a aucune variante `dark:` dans les composants. Ce qui reste écrit en palette brute (`ink-*`) l'est parce que le fond est sombre dans les deux thèmes — en-tête, pied de page, texte sur aplat ambre. Le seul aiguillage qui ne porte pas sur une couleur, l'affichage des deux libellés du bouton, repasse par une media query : `light-dark()` n'accepte que des `<color>`.
+
+L'interrupteur est la propriété `color-scheme` de `<html>`, et rien d'autre. Sans attribut `data-theme`, `light dark` laisse le navigateur suivre l'appareil — **la détection automatique ne coûte pas une ligne de JavaScript**, donc elle est juste dès la première peinture, y compris script bloqué. Le choix explicite, lui, est reposé par un `<script>` inline **dans `<head>`** (`THEME_BOOTSTRAP_SCRIPT`) : c'est ce qui évite le sursaut de thème, et c'est aussi pourquoi il n'est pas passé à `next/script` — `afterInteractive` s'exécute après la peinture, `beforeInteractive` jamais (voir `Matomo.tsx`). Le bouton de bascule est sans état React : le thème effectif dépend du stockage local et de l'appareil, deux choses que le serveur ignore, et en faire un état rendu redonnerait soit une divergence d'hydratation, soit le scintillement qu'on vient d'éliminer.
+
+Le contraste du thème sombre est tenu par le scan axe en `colorScheme: 'dark'` (`REQ-A11Y-07`), pas par la relecture : c'est là qu'ont été attrapés l'ambre de marque à 3,37:1 sur l'aplat sombre — d'où un ambre propre au thème sombre — et un encart passé sous le seuil AA. Toute retouche de la palette se revalide par ce scan.
+
 **Marqueur d'hydratation** (`app/src/components/HydrationMarker.tsx`). Pose `data-hydrated="true"` sur `<html>` après le premier effet. Inerte en production, c'est le signal d'attente explicite dont dépend `BasePage.waitForHydration()`.
 
 ## Défauts semés — `SEED_BUGS=1`
@@ -86,6 +92,75 @@ Les baselines (`e2e/tests/visual/__screenshots__/`) sont capturées dans **le co
 - Ne jamais relever `maxDiffPixelRatio` (0,01) pour absorber l'écart : cela rendrait la suite aveugle aux vraies régressions.
 - Après un changement d'interface assumé : Actions → *Régénérer les baselines visuelles* → choisir la branche. Le workflow régénère dans le container et recommite. Relire le diff des PNG.
 - `snapshotPathTemplate` épingle le nom de plateforme : une capture macOS ne matchera jamais une capture Linux.
+
+## Intégration continue
+
+Cinq workflows, deux cadences. `ci.yml` garde les merges et doit rester rapide : régression
+complète sur un seul moteur, smoke sur les deux autres. L'exhaustif est renvoyé à la nuit.
+
+**`ci.yml`** — push sur `main`, toute PR, `workflow_dispatch`. Les jobs, et l'équivalent local :
+
+| Job (nom du check) | Ce qu'il garde | Reproduction locale |
+| --- | --- | --- |
+| `qualite` — *Qualité & build* | lint, typecheck, `test:unit`, `trace:check`, `openapi:check`, `check:catalog`, build. Publie `app/.next` comme artifact partagé par tous les autres jobs. | `npm run lint && npm run typecheck && npm run test:unit && npm run build`, puis depuis `e2e/` : `npm run trace:check && npm run openapi:check`, et `npm run check:catalog` |
+| `tests-api` — *Tests API* | Projet Playwright `api`, sans navigateur, < 1 min. | `npm run db:setup && npm run build && npm run test:api` |
+| `mutation` — *Tests de mutation* | Stryker sur l'arithmétique monétaire, seuil 100 % : un mutant survivant = rouge. | `npm run test:mutation` |
+| `tests-ui` — *UI chromium (n/3)*, *UI firefox*, *UI webkit*, *UI mobile-chrome* | Régression complète sur chromium (3 shards), smoke ailleurs. Conteneur Playwright. | `npx playwright test --project=<projet>` depuis `e2e/` |
+| `tests-a11y` — *Accessibilité* | Projet `a11y` (axe-core). | `npm run test:a11y` |
+| `tests-visual` — *Régression visuelle* | Comparaison de captures. **Non reproductible localement** — voir la section dédiée. | aucune |
+| `perf-smoke` — *Performance (smoke)* | k6 contre les seuils de `perf/baseline.json`. | `npm run perf:smoke` (exige k6) |
+| `demo-defauts` — *Démonstration* | `SEED_BUGS=1` : vérifie que la suite **détecte** les défauts semés. Rouge si elle reste verte. | depuis `e2e/` : `npm run test:bugs` |
+| `deploiement` — *Image et pile de production* | Build de l'image Docker et validation de la pile Compose. | `npm run prod:config` |
+| `rapport` — *Rapport consolidé* | Fusionne les blob reports de tous les jobs. Échoue si un blob manque ou s'écrase. | `npm run report` |
+
+**`nightly.yml`** (02:00 UTC) — régression complète sur les trois moteurs (2 shards chacun) plus
+un vrai test de charge k6 (50 VU). C'est là que les flakies WebKit se manifestent, la CI ne
+lançant que le smoke sur ce moteur.
+
+**`pages.yml`** (02:30 UTC) — relance sa propre suite et publie le rapport sur GitHub Pages.
+Indépendant du nightly *par choix* : publier un rapport rouge est précisément l'objectif.
+
+**`baselines-visuelles.yml`** et **`baseline-perf.yml`** — `workflow_dispatch` uniquement. Ils
+régénèrent et recommitent des références (PNG, `perf/baseline.json`) dans l'environnement qui
+les compare. Jamais automatiques : une référence acceptée sans être regardée entérine la
+régression qu'elle devait détecter.
+
+### Protection de `main`
+
+`main` exige les checks de `ci.yml` et interdit force-push et suppression. `enforce_admins` est
+**désactivé** : le propriétaire du dépôt peut encore pousser directement, ce qui est nécessaire
+aux workflows de baselines. La règle bloque les PR, pas un administrateur déterminé.
+
+## Autoréparation CI — branches `ci-autofix/<date>`
+
+Un agent planifié (cron sur le VPS, 03:00 UTC) inspecte les runs échoués, reproduit, classe et
+propose un correctif en PR. Les règles qu'il suit, et que doit suivre quiconque reprend ce
+travail à la main :
+
+- **Périmètre** : échecs de `CI` sur `main`, de `Nightly` et de `Pages`. Les PR ouvertes sont
+  hors périmètre — leurs branches appartiennent à leur auteur.
+- **Jamais de merge, jamais de push sur `main`.** Une branche `ci-autofix/<AAAA-MM-JJ>` et une PR.
+- **Classification obligatoire** avant tout patch : *flaky* / *régression réelle* / *infra-config*.
+  La PR porte l'analyse de cause racine, pas seulement le diff.
+- **Flaky** : attente déterministe (`expect.poll`, `toPass`, attente sur un état observable). À
+  défaut seulement, un `retries` ciblé sur le projet concerné. **Jamais** supprimer ou affaiblir
+  une assertion, jamais `test.skip`, jamais `waitForTimeout`.
+- **Régression réelle** : correctif minimal, dans le code fautif, avec le test qui la démontre.
+  Si la cause n'est pas établie, une PR de diagnostic sans patch vaut mieux qu'un patch spéculatif.
+- **Infra-config** : scope de token manquant, binaire absent (`jq`, k6), tag du conteneur
+  Playwright désaccordé de `e2e/package.json`, service Postgres joint par `localhost` depuis un
+  job conteneurisé. Ces quatre-là couvrent l'essentiel de l'historique.
+- **Régression visuelle** : jamais corrigée automatiquement. `npm run test:visual` échoue par
+  construction hors conteneur CI, et relever `maxDiffPixelRatio` est interdit. L'agent rapporte
+  et renvoie vers *Actions → Régénérer les baselines visuelles*.
+- **Ressources** : le VPS héberge la production Fretline. L'agent travaille dans un worktree git
+  dédié (`~/.local/share/ci-autofix/worktree`), jamais dans ce checkout, et ne lance jamais la
+  matrice complète — seulement le projet Playwright qui a échoué, après
+  `npm run db:setup && npm run build`.
+- **Runtime** : Node 22 partout — CI, image de production (`node:22-alpine`) et poste local, ce
+  dernier via fnm (`~/.local/share/fnm`), le paquet Debian restant en 20 sur `/usr/bin/node`.
+  L'activation fnm est explicite dans le runner : `~/.bashrc` sort avant le bloc fnm pour les
+  shells non interactifs, et un job systemd en est un.
 
 ## Conventions
 
