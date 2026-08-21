@@ -559,8 +559,15 @@ jobs:
       # les mêmes artefacts. La plus importante est que /api/test/* réponde 404 :
       # ces routes effacent la base, et rien dans l'interface ne signale qu'elles
       # sont ouvertes.
+      #
+      # Sans argument, plutôt que http://localhost codé en dur : le script dérive
+      # l'URL de FRETLINE_DOMAIN dans .env.production, généré juste au-dessus
+      # avec --domain=:80. Un appel en dur donnait le même résultat aujourd'hui,
+      # mais pour une raison que rien ne garantissait — changer le domaine à
+      # l'étape « Configurer la pile » sans toucher celle-ci aurait vérifié la
+      # mauvaise URL en silence.
       - name: Vérifications post-déploiement
-        run: ./scripts/verifier-deploiement.sh http://localhost
+        run: ./scripts/verifier-deploiement.sh
 
       # La commande est celle du service `migrate`, relancée à la main : elle doit
       # être rejouable sans effet, sinon toute mise à jour du site est un pari.
