@@ -20,14 +20,14 @@ export function Pagination({
           {page > 1 ? (
             <Link
               href={buildHref(page - 1)}
-              className="rounded border border-ink-100 bg-white px-3 py-2 text-sm hover:border-amber-brand"
+              className="rounded border border-line bg-surface px-3 py-2 text-sm hover:border-amber-brand"
               data-testid="pagination-prev"
               rel="prev"
             >
               Précédent
             </Link>
           ) : (
-            <span className="rounded border border-ink-100 px-3 py-2 text-sm text-ink-300" aria-disabled="true">
+            <span className="rounded border border-line px-3 py-2 text-sm text-disabled" aria-disabled="true">
               Précédent
             </span>
           )}
@@ -41,8 +41,8 @@ export function Pagination({
               data-testid={`pagination-page-${candidate}`}
               className={
                 candidate === page
-                  ? 'rounded bg-ink-900 px-3 py-2 text-sm font-semibold text-white'
-                  : 'rounded border border-ink-100 bg-white px-3 py-2 text-sm hover:border-amber-brand'
+                  ? 'rounded bg-contrast px-3 py-2 text-sm font-semibold text-contrast-fg'
+                  : 'rounded border border-line bg-surface px-3 py-2 text-sm hover:border-amber-brand'
               }
             >
               {candidate}
@@ -54,14 +54,14 @@ export function Pagination({
           {page < totalPages ? (
             <Link
               href={buildHref(page + 1)}
-              className="rounded border border-ink-100 bg-white px-3 py-2 text-sm hover:border-amber-brand"
+              className="rounded border border-line bg-surface px-3 py-2 text-sm hover:border-amber-brand"
               data-testid="pagination-next"
               rel="next"
             >
               Suivant
             </Link>
           ) : (
-            <span className="rounded border border-ink-100 px-3 py-2 text-sm text-ink-300" aria-disabled="true">
+            <span className="rounded border border-line px-3 py-2 text-sm text-disabled" aria-disabled="true">
               Suivant
             </span>
           )}

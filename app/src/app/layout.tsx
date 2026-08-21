@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { HydrationMarker } from '@/components/HydrationMarker';
 import { Matomo } from '@/components/analytics/Matomo';
 import { isTestMode } from '@/lib/deployment';
+import { THEME_BOOTSTRAP_SCRIPT } from '@/lib/theme';
 
 import './globals.css';
 
@@ -20,7 +21,24 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className="min-h-screen flex flex-col font-sans antialiased">
+      <head>
+        {/*
+          Repose le choix explicite de thème avant la première peinture.
+
+          Ce <script> est rendu par React, ce qui a déjà mal tourné dans ce
+          dépôt — une balise inline placée dans le corps du document avait cassé
+          l'hydratation. La différence tient à l'emplacement : dans <head>, le
+          script s'exécute pendant l'analyse du document, avant que React ne
+          touche au DOM, et il ne modifie qu'un attribut de <html> — que React
+          ne rend pas et ne réconcilie donc pas.
+
+          Il ne sert qu'au choix explicite : la détection du thème de l'appareil
+          est purement CSS (globals.css), donc elle fonctionne aussi quand ce
+          script est bloqué.
+        */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
+      </head>
+      <body className="min-h-screen flex flex-col bg-canvas font-sans text-fg antialiased">
         <a href="#contenu" className="skip-link">
           Aller au contenu principal
         </a>

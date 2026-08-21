@@ -70,13 +70,13 @@ export default async function ProductPage({ params }: PageProps) {
               alt={`${product.brand} ${product.name}`}
               width={400}
               height={400}
-              className="w-full rounded-lg border border-ink-100 bg-white"
+              className="w-full rounded-lg border border-line bg-surface"
               data-testid="product-image"
             />
 
             <div data-testid="product-identity">
               <p
-                className="text-sm font-semibold uppercase tracking-wide text-ink-500"
+                className="text-sm font-semibold uppercase tracking-wide text-fg-muted"
                 data-testid="product-brand"
               >
                 {product.brand}
@@ -84,7 +84,7 @@ export default async function ProductPage({ params }: PageProps) {
               <h1 className="mt-1 text-3xl font-bold" data-testid="product-title">
                 {product.name}
               </h1>
-              <p className="mt-2 text-sm text-ink-500" data-testid="product-sku">
+              <p className="mt-2 text-sm text-fg-muted" data-testid="product-sku">
                 Réf. {product.sku}
               </p>
               <div className="mt-3">
@@ -102,8 +102,8 @@ export default async function ProductPage({ params }: PageProps) {
             </h2>
             <dl className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2" data-testid="product-specs">
               {Object.entries(product.specs).map(([key, value]) => (
-                <div key={key} className="flex justify-between border-b border-ink-100 py-2">
-                  <dt className="text-sm text-ink-500">{key}</dt>
+                <div key={key} className="flex justify-between border-b border-line py-2">
+                  <dt className="text-sm text-fg-muted">{key}</dt>
                   <dd className="text-sm font-medium">{value}</dd>
                 </div>
               ))}
@@ -116,12 +116,12 @@ export default async function ProductPage({ params }: PageProps) {
             </h2>
             {/* The star rating aggregates the product's whole history; only the
                 most recent reviews are kept in full. */}
-            <p className="mt-1 text-sm text-ink-500" data-testid="reviews-summary">
+            <p className="mt-1 text-sm text-fg-muted" data-testid="reviews-summary">
               Note moyenne {product.rating.toFixed(1)}/5 sur {product.reviewCount} avis ·{' '}
               {reviews.length} avis détaillé{reviews.length > 1 ? 's' : ''}
             </p>
             {reviews.length === 0 ? (
-              <p className="mt-3 text-ink-500" data-testid="no-reviews">
+              <p className="mt-3 text-fg-muted" data-testid="no-reviews">
                 Aucun avis pour le moment. Soyez le premier à donner le vôtre.
               </p>
             ) : (
@@ -129,7 +129,7 @@ export default async function ProductPage({ params }: PageProps) {
                 {reviews.map((review) => (
                   <li
                     key={review.id}
-                    className="rounded-lg border border-ink-100 bg-white p-4"
+                    className="rounded-lg border border-line bg-surface p-4"
                     data-testid="review-item"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -137,7 +137,7 @@ export default async function ProductPage({ params }: PageProps) {
                       <Rating value={review.rating} count={1} />
                     </div>
                     <p className="mt-2 text-sm leading-relaxed">{review.body}</p>
-                    <p className="mt-2 text-xs text-ink-500">
+                    <p className="mt-2 text-xs text-fg-muted">
                       {review.author} ·{' '}
                       {new Date(review.createdAt).toLocaleDateString('fr-FR', {
                         year: 'numeric',
@@ -155,7 +155,7 @@ export default async function ProductPage({ params }: PageProps) {
         {/* The buy box carries its own test id: prices and availability labels
             also appear on the related-product cards further down the page. */}
         <aside
-          className="h-fit rounded-lg border border-ink-100 bg-white p-6 lg:sticky lg:top-6"
+          className="h-fit rounded-lg border border-line bg-surface p-6 lg:sticky lg:top-6"
           data-testid="product-buybox"
         >
           <PriceTag
@@ -165,13 +165,13 @@ export default async function ProductPage({ params }: PageProps) {
             size="lg"
           />
 
-          <p className="mt-1 text-xs text-ink-500">TVA incluse</p>
+          <p className="mt-1 text-xs text-fg-muted">TVA incluse</p>
 
           <p
             className={
               product.stock > 0
-                ? 'mt-4 text-sm font-semibold text-green-700'
-                : 'mt-4 text-sm font-semibold text-red-700'
+                ? 'mt-4 text-sm font-semibold text-success'
+                : 'mt-4 text-sm font-semibold text-danger'
             }
             data-testid="product-availability"
             data-stock={product.stock}
@@ -180,7 +180,7 @@ export default async function ProductPage({ params }: PageProps) {
           </p>
 
           {product.leftHanded && (
-            <p className="mt-2 inline-block rounded bg-ink-100 px-2 py-1 text-xs font-semibold" data-testid="left-handed-badge">
+            <p className="mt-2 inline-block rounded bg-muted px-2 py-1 text-xs font-semibold" data-testid="left-handed-badge">
               Modèle gaucher
             </p>
           )}
@@ -189,7 +189,7 @@ export default async function ProductPage({ params }: PageProps) {
             <AddToCartForm product={product} />
           </div>
 
-          <ul className="mt-6 space-y-1 text-xs text-ink-500">
+          <ul className="mt-6 space-y-1 text-xs text-fg-muted">
             <li>Livraison offerte dès {formatPrice(19900)}</li>
             <li>Retour sous 30 jours</li>
             <li>Garantie 3 ans</li>

@@ -9,7 +9,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article
-      className="flex h-full flex-col overflow-hidden rounded-lg border border-ink-100 bg-white transition hover:border-amber-brand hover:shadow-md"
+      className="flex h-full flex-col overflow-hidden rounded-lg border border-line bg-surface transition hover:border-amber-brand hover:shadow-md"
       data-testid="product-card"
       data-sku={product.sku}
       data-slug={product.slug}
@@ -23,12 +23,12 @@ export function ProductCard({ product }: { product: Product }) {
           width={400}
           height={400}
           loading="lazy"
-          className="aspect-square w-full bg-ink-100 object-cover"
+          className="aspect-square w-full bg-muted object-cover"
         />
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-ink-500" data-testid="product-brand">
+        <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted" data-testid="product-brand">
           {product.brand}
         </p>
 
@@ -47,7 +47,7 @@ export function ProductCard({ product }: { product: Product }) {
             discountPct={product.discountPct}
           />
           <p
-            className={inStock ? 'text-xs font-semibold text-green-700' : 'text-xs font-semibold text-red-700'}
+            className={inStock ? 'text-xs font-semibold text-success' : 'text-xs font-semibold text-danger'}
             data-testid="product-availability"
           >
             {inStock ? 'En stock' : 'Rupture de stock'}

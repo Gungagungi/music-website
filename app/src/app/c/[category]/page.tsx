@@ -57,14 +57,14 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       <h1 className="mt-4 text-3xl font-bold" data-testid="category-title">
         {definition.label}
       </h1>
-      <p className="mt-2 max-w-3xl text-ink-500">{definition.tagline}</p>
+      <p className="mt-2 max-w-3xl text-fg-muted">{definition.tagline}</p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[280px_1fr]">
         <FacetPanel brands={brands} priceBounds={priceBounds} />
 
         <section aria-label="Résultats">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-ink-500" data-testid="result-count">
+            <p className="text-sm text-fg-muted" data-testid="result-count">
               <strong data-testid="result-count-value">{result.total}</strong>{' '}
               {result.total > 1 ? 'produits' : 'produit'}
               {filterCount > 0 && (
@@ -81,16 +81,16 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
           <div className="mt-4">
             {result.items.length === 0 ? (
               <div
-                className="rounded-lg border border-dashed border-ink-300 bg-white p-10 text-center"
+                className="rounded-lg border border-dashed border-line-strong bg-surface p-10 text-center"
                 data-testid="empty-results"
               >
                 <p className="text-lg font-semibold">Aucun produit ne correspond à ces critères.</p>
-                <p className="mt-2 text-sm text-ink-500">
+                <p className="mt-2 text-sm text-fg-muted">
                   Élargissez la fourchette de prix ou retirez un filtre pour voir plus de résultats.
                 </p>
                 <Link
                   href={`/c/${definition.slug}`}
-                  className="mt-4 inline-block rounded bg-ink-900 px-4 py-2 text-sm font-semibold text-white"
+                  className="mt-4 inline-block rounded bg-contrast px-4 py-2 text-sm font-semibold text-contrast-fg"
                   data-testid="empty-results-reset"
                 >
                   Réinitialiser les filtres

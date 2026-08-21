@@ -21,7 +21,7 @@ export function PriceTag({
       </span>
       {listPrice !== null && (
         <>
-          <span className="text-sm text-ink-500 line-through" data-testid="product-list-price">
+          <span className="text-sm text-fg-muted line-through" data-testid="product-list-price">
             {formatPrice(listPrice)}
           </span>
           <span

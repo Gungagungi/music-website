@@ -36,7 +36,7 @@ export default async function ConfirmationPage({
 
       <Breadcrumb trail={[{ label: 'Accueil', href: '/' }, { label: 'Confirmation' }]} />
 
-      <div className="mt-6 rounded-lg border border-green-600 bg-green-50 p-6" data-testid="order-confirmation">
+      <div className="mt-6 rounded-lg border border-success-line bg-success-bg p-6" data-testid="order-confirmation">
         <h1 className="text-3xl font-bold">Merci pour votre commande !</h1>
         <p className="mt-2">
           Votre commande{' '}
@@ -46,7 +46,7 @@ export default async function ConfirmationPage({
         </p>
       </div>
 
-      <section className="mt-8 rounded-lg border border-ink-100 bg-white p-6" aria-labelledby="order-detail-title">
+      <section className="mt-8 rounded-lg border border-line bg-surface p-6" aria-labelledby="order-detail-title">
         <h2 id="order-detail-title" className="text-xl font-bold">
           Détail de la commande
         </h2>
@@ -63,7 +63,7 @@ export default async function ConfirmationPage({
           ))}
         </ul>
 
-        <dl className="mt-6 space-y-2 border-t border-ink-100 pt-4 text-sm">
+        <dl className="mt-6 space-y-2 border-t border-line pt-4 text-sm">
           <div className="flex justify-between">
             <dt>Sous-total</dt>
             <dd data-testid="order-subtotal">{formatPrice(order.totals.subtotal)}</dd>
@@ -80,7 +80,7 @@ export default async function ConfirmationPage({
               {order.totals.shipping === 0 ? 'Offerte' : formatPrice(order.totals.shipping)}
             </dd>
           </div>
-          <div className="flex justify-between border-t border-ink-100 pt-3 text-lg font-bold">
+          <div className="flex justify-between border-t border-line pt-3 text-lg font-bold">
             <dt>Total</dt>
             <dd data-testid="order-total">{formatPrice(order.totals.total)}</dd>
           </div>
@@ -102,7 +102,7 @@ export default async function ConfirmationPage({
 
       <Link
         href="/"
-        className="mt-8 inline-block rounded bg-ink-900 px-5 py-3 font-semibold text-white"
+        className="mt-8 inline-block rounded bg-contrast px-5 py-3 font-semibold text-contrast-fg"
         data-testid="back-to-shop"
       >
         Continuer mes achats

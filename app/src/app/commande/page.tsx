@@ -26,16 +26,16 @@ export default async function CheckoutPage() {
       <div className="mt-8">
         {!cart || cart.items.length === 0 ? (
           <div
-            className="rounded-lg border border-dashed border-ink-300 bg-white p-12 text-center"
+            className="rounded-lg border border-dashed border-line-strong bg-surface p-12 text-center"
             data-testid="checkout-empty"
           >
             <p className="text-xl font-semibold">Votre panier est vide.</p>
-            <p className="mt-2 text-ink-500">
+            <p className="mt-2 text-fg-muted">
               Ajoutez au moins un article avant de passer commande.
             </p>
             <Link
               href="/"
-              className="mt-6 inline-block rounded bg-ink-900 px-5 py-3 font-semibold text-white"
+              className="mt-6 inline-block rounded bg-contrast px-5 py-3 font-semibold text-contrast-fg"
               data-testid="checkout-empty-cta"
             >
               Retour à la boutique
@@ -44,7 +44,7 @@ export default async function CheckoutPage() {
         ) : (
           <>
             {!user && (
-              <p className="mb-6 rounded border border-ink-100 bg-white p-4 text-sm" data-testid="guest-notice">
+              <p className="mb-6 rounded border border-line bg-surface p-4 text-sm" data-testid="guest-notice">
                 Vous commandez en tant qu’invité.{' '}
                 <Link href="/compte/connexion?redirect=/commande" className="underline hover:text-amber-brand">
                   Connectez-vous

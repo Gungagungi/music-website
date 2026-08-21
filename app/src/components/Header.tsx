@@ -4,6 +4,7 @@ import { CATEGORIES, CATEGORY_GROUPS } from '@/data/categories';
 import { currentCartId, currentUser } from '@/lib/auth';
 import { getCart } from '@/lib/cart';
 import { SearchBar } from '@/components/SearchBar';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export async function Header() {
   const [user, cartId] = await Promise.all([currentUser(), currentCartId()]);
@@ -11,7 +12,7 @@ export async function Header() {
   const itemCount = cart?.totals.itemCount ?? 0;
 
   return (
-    <header className="bg-ink-950 text-white" data-testid="site-header">
+    <header className="bg-chrome text-white" data-testid="site-header">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-4">
         <Link
           href="/"
@@ -48,6 +49,8 @@ export async function Header() {
             </Link>
           )}
 
+          <ThemeToggle />
+
           <Link
             href="/panier"
             className="relative flex items-center gap-2 rounded-md bg-amber-brand px-3 py-2 text-sm font-semibold text-ink-950 hover:bg-amber-brandDark hover:text-white"
@@ -55,7 +58,7 @@ export async function Header() {
           >
             Panier
             <span
-              className="min-w-6 rounded-full bg-ink-950 px-2 py-0.5 text-center text-xs font-bold text-white"
+              className="min-w-6 rounded-full bg-chrome px-2 py-0.5 text-center text-xs font-bold text-white"
               data-testid="cart-count"
               aria-label={`${itemCount} article${itemCount > 1 ? 's' : ''} dans le panier`}
             >
@@ -65,7 +68,7 @@ export async function Header() {
         </nav>
       </div>
 
-      <nav aria-label="Catégories de produits" className="bg-ink-900" data-testid="category-nav">
+      <nav aria-label="Catégories de produits" className="bg-chrome-alt" data-testid="category-nav">
         <ul className="mx-auto flex max-w-7xl flex-wrap gap-x-6 gap-y-2 px-4 py-3 text-sm">
           {CATEGORY_GROUPS.map((group) => (
             <li key={group} className="group relative">

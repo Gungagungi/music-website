@@ -21,7 +21,7 @@ export default async function HomePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <section
-        className="rounded-2xl bg-ink-900 px-6 py-12 text-white sm:px-12"
+        className="rounded-2xl bg-contrast px-6 py-12 text-contrast-fg sm:px-12"
         data-testid="hero"
       >
         <p className="text-sm font-semibold uppercase tracking-widest text-amber-brand">
@@ -30,7 +30,7 @@ export default async function HomePage() {
         <h1 className="mt-3 max-w-2xl text-4xl font-bold leading-tight sm:text-5xl">
           Tout pour brancher, jouer et sonner juste.
         </h1>
-        <p className="mt-4 max-w-2xl text-ink-300">
+        <p className="mt-4 max-w-2xl text-contrast-fg-muted">
           Plus de {counts.size ? [...counts.values()].reduce((sum, value) => sum + value, 0) : 0}{' '}
           références en stock, de la guitare d’étude au matériel de scène. Livraison offerte dès
           199 €, retour sous 30 jours.
@@ -45,7 +45,7 @@ export default async function HomePage() {
           </Link>
           <Link
             href="/c/pedales-effets"
-            className="rounded-md border border-ink-700 px-5 py-3 font-semibold hover:border-amber-brand"
+            className="rounded-md border border-contrast-line px-5 py-3 font-semibold hover:border-amber-brand"
             data-testid="hero-cta-secondary"
           >
             Explorer les pédales
@@ -62,11 +62,11 @@ export default async function HomePage() {
             <li key={category.slug}>
               <Link
                 href={`/c/${category.slug}`}
-                className="flex h-full flex-col justify-between rounded-lg border border-ink-100 bg-white p-4 hover:border-amber-brand"
+                className="flex h-full flex-col justify-between rounded-lg border border-line bg-surface p-4 hover:border-amber-brand"
                 data-testid={`category-tile-${category.slug}`}
               >
                 <span className="font-semibold">{category.label}</span>
-                <span className="mt-2 text-xs text-ink-500">
+                <span className="mt-2 text-xs text-fg-muted">
                   {counts.get(category.slug) ?? 0} références
                 </span>
               </Link>

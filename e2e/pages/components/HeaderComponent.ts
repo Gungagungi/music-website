@@ -12,6 +12,7 @@ export class HeaderComponent {
   readonly cartLink: Locator;
   readonly cartCount: Locator;
   readonly categoryNav: Locator;
+  readonly themeToggle: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.getByTestId('site-header');
@@ -23,6 +24,7 @@ export class HeaderComponent {
     this.cartLink = page.getByTestId('cart-link');
     this.cartCount = page.getByTestId('cart-count');
     this.categoryNav = page.getByTestId('category-nav');
+    this.themeToggle = page.getByTestId('theme-toggle');
   }
 
   async search(term: string): Promise<void> {
@@ -32,6 +34,23 @@ export class HeaderComponent {
 
   async openCategory(slug: string): Promise<void> {
     await this.page.getByTestId(`nav-${slug}`).click();
+  }
+
+  /**
+   * Mode affiché par le bouton — « Système », « Clair » ou « Sombre ».
+   *
+   * Les trois libellés sont dans le DOM, la cascade n'en montre qu'un : lire le
+   * seul visible revient à lire l'état réellement appliqué, sans passer par une
+   * valeur de couleur ni par l'attribut que le test cherche justement à vérifier
+   * ailleurs.
+   */
+  async themeMode(): Promise<string> {
+    return (await this.themeToggle.locator('[data-mode]:visible').innerText()).trim();
+  }
+
+  /** Avance d'un cran dans le cycle Système → Clair → Sombre. */
+  async cycleTheme(): Promise<void> {
+    await this.themeToggle.click();
   }
 
   async cartItemCount(): Promise<number> {

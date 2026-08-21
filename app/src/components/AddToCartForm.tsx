@@ -79,7 +79,7 @@ export function AddToCartForm({ product }: { product: Product }) {
             id="product-color"
             value={color}
             onChange={(event) => setColor(event.target.value)}
-            className="mt-1 w-full rounded border border-ink-100 bg-white px-3 py-2"
+            className="mt-1 w-full rounded border border-line bg-surface px-3 py-2"
             data-testid="product-color"
           >
             {product.colors.map((option) => (
@@ -102,7 +102,7 @@ export function AddToCartForm({ product }: { product: Product }) {
           max={Math.min(MAX_QUANTITY_PER_LINE, Math.max(product.stock, 1))}
           value={quantity}
           onChange={(event) => setQuantity(Number.parseInt(event.target.value, 10) || 1)}
-          className="mt-1 w-24 rounded border border-ink-100 px-3 py-2"
+          className="mt-1 w-24 rounded border border-line px-3 py-2"
           data-testid="product-quantity"
           disabled={outOfStock}
         />
@@ -111,7 +111,7 @@ export function AddToCartForm({ product }: { product: Product }) {
       <button
         type="submit"
         disabled={outOfStock || pending}
-        className="w-full rounded-md bg-amber-brand px-5 py-3 font-semibold text-ink-950 hover:bg-amber-brandDark hover:text-white disabled:cursor-not-allowed disabled:bg-ink-300 disabled:text-ink-500"
+        className="w-full rounded-md bg-amber-brand px-5 py-3 font-semibold text-ink-950 hover:bg-amber-brandDark hover:text-white disabled:cursor-not-allowed disabled:bg-disabled disabled:text-fg-muted"
         data-testid="add-to-cart"
       >
         {outOfStock ? 'Produit indisponible' : pending ? 'Ajout en cours…' : 'Ajouter au panier'}
@@ -126,8 +126,8 @@ export function AddToCartForm({ product }: { product: Product }) {
         data-status={status.kind}
         className={
           status.kind === 'error'
-            ? 'text-sm font-semibold text-red-700'
-            : 'text-sm font-semibold text-green-700'
+            ? 'text-sm font-semibold text-danger'
+            : 'text-sm font-semibold text-success'
         }
       >
         {status.message}

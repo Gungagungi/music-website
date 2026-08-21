@@ -13,13 +13,13 @@ import { TAGS, covers, testCase } from '@/utils/tags';
  * findings go unnoticed too.
  */
 const PAGES = [
-  { name: 'accueil', path: '/', tc: 'TC-310' },
-  { name: 'catalogue', path: `/c/${CATEGORIES.electricGuitars.slug}`, tc: 'TC-311' },
-  { name: 'fiche produit', path: `/p/${PRODUCTS.inStock.slug}`, tc: 'TC-312' },
-  { name: 'recherche', path: '/recherche?q=guitare', tc: 'TC-313' },
-  { name: 'connexion', path: '/compte/connexion', tc: 'TC-314' },
-  { name: 'inscription', path: '/compte/inscription', tc: 'TC-315' },
-  { name: 'comparateur', path: `/comparateur?refs=${PRODUCTS.inStock.slug},${PRODUCTS.cheap.slug}`, tc: 'TC-316' },
+  { name: 'accueil', path: '/', tc: 'TC-310', tcDark: 'TC-440' },
+  { name: 'catalogue', path: `/c/${CATEGORIES.electricGuitars.slug}`, tc: 'TC-311', tcDark: 'TC-441' },
+  { name: 'fiche produit', path: `/p/${PRODUCTS.inStock.slug}`, tc: 'TC-312', tcDark: 'TC-442' },
+  { name: 'recherche', path: '/recherche?q=guitare', tc: 'TC-313', tcDark: 'TC-443' },
+  { name: 'connexion', path: '/compte/connexion', tc: 'TC-314', tcDark: 'TC-444' },
+  { name: 'inscription', path: '/compte/inscription', tc: 'TC-315', tcDark: 'TC-445' },
+  { name: 'comparateur', path: `/comparateur?refs=${PRODUCTS.inStock.slug},${PRODUCTS.cheap.slug}`, tc: 'TC-316', tcDark: 'TC-446' },
 ] as const;
 
 test.describe('Accessibilité — pages publiques', () => {
@@ -179,4 +179,40 @@ test.describe('Accessibilité — navigation au clavier', () => {
       );
     },
   );
+});
+
+/**
+ * Le thème sombre repasse le scan de contraste, pas seulement le scan de
+ * structure.
+ *
+ * C'est la seule partie de la fonctionnalité qu'une relecture ne suffit pas à
+ * garder : un texte gris sur fond blanc lisible devient illisible sur fond
+ * sombre sans que rien ne le signale, et le rapport de contraste est
+ * exactement ce qu'axe sait calculer. Le scan tourne avec l'appareil réglé en
+ * sombre plutôt qu'en cliquant le bouton, parce que c'est ainsi que la plupart
+ * des visiteurs concernés arriveront sur le site.
+ */
+test.describe('Accessibilité — thème sombre', () => {
+  test.use({ colorScheme: 'dark' });
+
+  for (const target of PAGES) {
+    test(
+      `la page ${target.name} reste exempte de violations sérieuses en thème sombre`,
+      {
+        tag: [TAGS.regression],
+        annotation: [
+          testCase(target.tcDark as `TC-${string}`, `Scan a11y sombre — ${target.name}`),
+          covers('REQ-A11Y-07'),
+        ],
+      },
+      async ({ page }) => {
+        await page.goto(target.path);
+        await expect(page.locator('html[data-hydrated="true"]')).toBeAttached();
+
+        const blocking = atLeast(await scanForViolations(page), 'serious');
+
+        expect(blocking, `Violations WCAG 2.1 AA (thème sombre) :\n${formatViolations(blocking)}`).toEqual([]);
+      },
+    );
+  }
 });

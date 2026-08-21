@@ -129,8 +129,8 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
               aria-current={step === entry.key ? 'step' : undefined}
               className={
                 step === entry.key
-                  ? 'rounded bg-ink-900 px-3 py-2 text-sm font-semibold text-white'
-                  : 'rounded border border-ink-100 bg-white px-3 py-2 text-sm text-ink-500'
+                  ? 'rounded bg-contrast px-3 py-2 text-sm font-semibold text-contrast-fg'
+                  : 'rounded border border-line bg-surface px-3 py-2 text-sm text-fg-muted'
               }
             >
               {index + 1}. {entry.label}
@@ -138,7 +138,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
           ))}
         </ol>
 
-        <div className="mt-6 rounded-lg border border-ink-100 bg-white p-6">
+        <div className="mt-6 rounded-lg border border-line bg-surface p-6">
           {step === 'livraison' && (
             <form
               data-testid="shipping-form"
@@ -193,7 +193,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
                   type="text"
                   value={address.line2}
                   onChange={(event) => setAddress({ ...address, line2: event.target.value })}
-                  className="w-full rounded border border-ink-100 px-3 py-2"
+                  className="w-full rounded border border-line px-3 py-2"
                   data-testid="field-line2"
                 />
               ) : (
@@ -278,7 +278,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
                 ))}
               </fieldset>
 
-              <p className="rounded bg-ink-50 p-3 text-sm text-ink-500">
+              <p className="rounded bg-inset p-3 text-sm text-fg-muted">
                 Aucun paiement réel n’est effectué : ce site est une démonstration.
               </p>
 
@@ -286,7 +286,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
                 <button
                   type="button"
                   onClick={() => setStep('livraison')}
-                  className="rounded border border-ink-100 px-5 py-3 font-semibold"
+                  className="rounded border border-line px-5 py-3 font-semibold"
                   data-testid="payment-back"
                 >
                   Retour
@@ -306,7 +306,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
             <div data-testid="review-step" className="space-y-4">
               <h2 className="text-xl font-bold">Vérifiez votre commande</h2>
 
-              <div className="rounded border border-ink-100 p-4 text-sm" data-testid="review-address">
+              <div className="rounded border border-line p-4 text-sm" data-testid="review-address">
                 <p className="font-semibold">Livraison</p>
                 <p>
                   {address.firstName} {address.lastName}
@@ -319,7 +319,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
                 <p>{address.country}</p>
               </div>
 
-              <div className="rounded border border-ink-100 p-4 text-sm" data-testid="review-payment">
+              <div className="rounded border border-line p-4 text-sm" data-testid="review-payment">
                 <p className="font-semibold">Paiement</p>
                 <p>
                   {paymentMethod === 'carte'
@@ -349,12 +349,12 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
                 </label>
               </div>
               {errors.acceptTerms && (
-                <p id="accept-terms-error" className="text-sm text-red-700" data-testid="error-acceptTerms">
+                <p id="accept-terms-error" className="text-sm text-danger" data-testid="error-acceptTerms">
                   {errors.acceptTerms}
                 </p>
               )}
 
-              <p role="alert" data-testid="checkout-error" className="text-sm font-semibold text-red-700">
+              <p role="alert" data-testid="checkout-error" className="text-sm font-semibold text-danger">
                 {formError}
               </p>
 
@@ -362,7 +362,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
                 <button
                   type="button"
                   onClick={() => setStep('paiement')}
-                  className="rounded border border-ink-100 px-5 py-3 font-semibold"
+                  className="rounded border border-line px-5 py-3 font-semibold"
                   data-testid="review-back"
                 >
                   Retour
@@ -371,7 +371,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
                   type="button"
                   onClick={() => void placeOrder()}
                   disabled={pending}
-                  className="rounded-md bg-amber-brand px-5 py-3 font-semibold text-ink-950 hover:bg-amber-brandDark hover:text-white disabled:bg-ink-300"
+                  className="rounded-md bg-amber-brand px-5 py-3 font-semibold text-ink-950 hover:bg-amber-brandDark hover:text-white disabled:bg-disabled"
                   data-testid="place-order"
                 >
                   {pending ? 'Envoi en cours…' : 'Valider et payer'}
@@ -382,7 +382,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
         </div>
       </div>
 
-      <aside className="h-fit rounded-lg border border-ink-100 bg-white p-6" data-testid="checkout-summary">
+      <aside className="h-fit rounded-lg border border-line bg-surface p-6" data-testid="checkout-summary">
         <h2 className="text-lg font-bold">Votre commande</h2>
         <ul className="mt-4 space-y-2 text-sm">
           {cart.items.map((item) => (
@@ -394,7 +394,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
             </li>
           ))}
         </ul>
-        <dl className="mt-4 space-y-2 border-t border-ink-100 pt-4 text-sm">
+        <dl className="mt-4 space-y-2 border-t border-line pt-4 text-sm">
           <div className="flex justify-between">
             <dt>Sous-total</dt>
             <dd data-testid="summary-subtotal">{formatPrice(cart.totals.subtotal)}</dd>
@@ -411,7 +411,7 @@ export function CheckoutForm({ cart, isAuthenticated }: { cart: Cart; isAuthenti
               {cart.totals.shipping === 0 ? 'Offerte' : formatPrice(cart.totals.shipping)}
             </dd>
           </div>
-          <div className="flex justify-between border-t border-ink-100 pt-3 text-lg font-bold">
+          <div className="flex justify-between border-t border-line pt-3 text-lg font-bold">
             <dt>Total</dt>
             <dd data-testid="summary-total">{formatPrice(cart.totals.total)}</dd>
           </div>
@@ -458,16 +458,16 @@ function TextField({
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
-        className="mt-1 w-full rounded border border-ink-100 px-3 py-2"
+        className="mt-1 w-full rounded border border-line px-3 py-2"
         data-testid={`field-${id}`}
       />
       {hint && (
-        <p id={`${id}-hint`} className="mt-1 text-xs text-ink-500">
+        <p id={`${id}-hint`} className="mt-1 text-xs text-fg-muted">
           {hint}
         </p>
       )}
       {error && (
-        <p id={`${id}-error`} className="mt-1 text-sm text-red-700" data-testid={`error-${id}`}>
+        <p id={`${id}-error`} className="mt-1 text-sm text-danger" data-testid={`error-${id}`}>
           {error}
         </p>
       )}

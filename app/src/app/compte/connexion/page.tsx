@@ -26,11 +26,11 @@ export default async function LoginPage({
         Se connecter
       </h1>
 
-      <div className="mt-6 rounded-lg border border-ink-100 bg-white p-6">
+      <div className="mt-6 rounded-lg border border-line bg-surface p-6">
         <AuthForm mode="login" redirectTo={target ?? '/compte/commandes'} />
       </div>
 
-      <p className="mt-6 text-sm text-ink-500">
+      <p className="mt-6 text-sm text-fg-muted">
         Pas encore de compte ?{' '}
         <Link href="/compte/inscription" className="underline hover:text-amber-brand" data-testid="register-link">
           Créer un compte
