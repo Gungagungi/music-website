@@ -1,0 +1,23 @@
+# Cadence de l'audit de sécurité.
+#
+# 04:00 UTC : après l'agent d'autoréparation CI (03:00) et après la fenêtre
+# d'`unattended-upgrades`, de sorte que le contrôle « mises à jour en attente »
+# juge un système déjà rafraîchi plutôt que l'état de la veille.
+
+[Unit]
+Description=Audit de sécurité Fretline, quotidien
+Documentation=file:/home/debian/dev/pro/music-website/docs/security.md
+
+[Timer]
+OnCalendar=*-*-* 04:00:00 UTC
+
+# Rattrape l'exécution manquée si la machine était éteinte à l'heure dite. Un
+# audit sauté sans que personne ne le sache est un audit qui ne sert à rien.
+Persistent=true
+
+# Étale le départ sur dix minutes. Sans cela, le scan nuclei part à la seconde
+# près en même temps que tout ce qui est planifié à heure ronde.
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

@@ -52,6 +52,9 @@
     "perf:load": "k6 run perf/load.js",
     "perf:rupture": "k6 run perf/rupture.js",
     "perf:baseline": "node scripts/enregistrer-baseline.mjs",
+    "securite:audit": "./scripts/audit-securite.py",
+    "securite:depot": "./scripts/audit-securite.py --familles depot,images --seuil eleve",
+    "securite:cible": "./scripts/audit-securite.py --familles web --seuil eleve --cible",
     "trace": "npm run trace -w e2e",
     "openapi": "npm run openapi -w e2e"
   },
