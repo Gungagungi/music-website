@@ -9,10 +9,38 @@
 # suffit, et on ne s'en aperçoit qu'après.
 set -euo pipefail
 
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+# Sans argument, on dérive l'URL de FRETLINE_DOMAIN dans .env.production plutôt
+# que de coder en dur http://localhost : ce dernier n'est correct que pour
+# l'essai local (FRETLINE_DOMAIN=:80), et faux pour tout déploiement réel, où
+# Caddy sert en HTTPS et redirige le clair. La CI continue de passer l'URL en
+# argument (elle génère .env.production avec --domain=:80, donc explicite ou
+# dérivé donnent le même résultat) : ce script reste appelable des deux façons.
 BASE_URL="${1:-}"
 if [[ -z "$BASE_URL" ]]; then
-  echo "usage : $0 <url-de-base>" >&2
-  exit 64
+  if [[ ! -f .env.production ]]; then
+    echo "usage : $0 <url-de-base>" >&2
+    exit 64
+  fi
+
+  domaine=$(grep -E '^FRETLINE_DOMAIN=' .env.production | tail -n1 | cut -d= -f2-)
+  if [[ -z "$domaine" ]]; then
+    echo "FRETLINE_DOMAIN absent de .env.production ; passez l'URL en argument." >&2
+    exit 64
+  elif [[ "$domaine" == :* ]]; then
+    # Simple valeur de port : essai local, Caddy sert en clair.
+    BASE_URL="http://localhost"
+  else
+    BASE_URL="https://${domaine}"
+  fi
+
+  # Idem pour Matomo : si l'appelant n'a pas déjà fixé ANALYTICS_URL, on le lit
+  # dans .env.production plutôt que de laisser cette vérification facultative
+  # sur un déploiement où l'instance existe pourtant.
+  if [[ -z "${ANALYTICS_URL:-}" ]]; then
+    ANALYTICS_URL=$(grep -E '^NEXT_PUBLIC_MATOMO_URL=' .env.production | tail -n1 | cut -d= -f2-)
+  fi
 fi
 BASE_URL="${BASE_URL%/}"
 
@@ -60,9 +88,30 @@ verifier() {
   fi
 }
 
+verifier_pas_de_redirection() {
+  # Une base qui redirige (Caddy renvoie systématiquement en HTTPS le trafic
+  # d'un domaine avec certificat, ou un domaine a changé) fait échouer chaque
+  # `verifier` avec un 3xx différent de l'attendu : une page d'échecs qui ne dit
+  # rien de plus que « ça redirige ». Autant le dire une fois, avec la cible.
+  # Substitution de commande, pas `read < <(...)` : sans retour à la ligne
+  # final, `read` rend un statut non nul même après avoir bien lu la ligne, et
+  # `set -e` arrêtait le script ici sans le moindre message.
+  local resultat code cible
+  resultat=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' \
+    --max-time 10 "${BASE_URL}/api/health" 2>/dev/null || true)
+  code="${resultat%% *}"
+  cible="${resultat#* }"
+
+  if [[ "$code" == 3?? && -n "$cible" ]]; then
+    echo "  Cette base redirige vers ${cible} — relancez la vérification dessus." >&2
+    exit 1
+  fi
+}
+
 echo "Vérification de ${BASE_URL}"
 
 attendre_la_pile || exit 1
+verifier_pas_de_redirection
 
 verifier "page d'accueil"                    /                  200
 verifier "catalogue"           /c/guitares-electriques        200

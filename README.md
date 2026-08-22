@@ -40,7 +40,7 @@ checkouts racing for the last unit in stock is not a defect an in-memory store c
 | **UI** | 88 | ~5 min | Catalogue and facets, sorting, pagination, search, product page, cart, coupons, checkout, authentication, comparator |
 | **Accessibility** | 13 | ~1 min 30 | axe-core WCAG 2.1 A/AA across 8 pages and the checkout funnel, skip link, keyboard-only journey, text alternatives |
 | **Visual** | 10 | ~40 s | Component baselines captured in the CI container |
-| **Performance** | 2 scripts | 30 s / 4 min | k6 smoke on every PR, load test nightly |
+| **Performance** | 3 scripts | 30 s / 4 min / manual | k6 smoke on every PR, load test nightly, breakpoint test on demand |
 | **Unit** | 47 | ~2 s | Monetary arithmetic — rounding, VAT extraction, shipping thresholds, coupon rules |
 
 Tags: `@smoke` 42 · `@regression` 134 · `@critical` 61 · `@contract` 21 · `@security` 19 ·
@@ -86,7 +86,7 @@ music-website/
 │   ├── reporters/          # Markdown summary → GitHub job summary
 │   ├── scripts/            # Traceability generator
 │   └── tests/              # ui/ api/ a11y/ visual/
-├── perf/                   # k6 — smoke.js, load.js
+├── perf/                   # k6 — smoke.js, load.js, rupture.js
 ├── scripts/                # backups, post-deployment checks
 ├── docs/                   # QA documentation
 └── .github/workflows/      # ci · nightly · visual baselines · pages
@@ -125,6 +125,7 @@ npm run test:ui             # UI on Chromium
 npm run test:a11y           # accessibility scans
 npm run report              # open the HTML report
 npm run perf:smoke          # k6 (k6 must be installed)
+npm run perf:rupture        # breakpoint test — answers "how far does it hold", never in CI
 
 cd e2e
 npx playwright test tests/ui/panier.spec.ts --project=chromium

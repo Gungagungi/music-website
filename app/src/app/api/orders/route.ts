@@ -1,4 +1,4 @@
-import { created, fail, ok, parseBody } from '@/lib/api';
+import { created, enforceRateLimit, fail, ok, parseBody } from '@/lib/api';
 import { currentUserFromRequest } from '@/lib/auth';
 import { clearCart } from '@/lib/cart';
 import { resolveCart } from '@/lib/cart-session';
@@ -19,6 +19,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit('order', request);
+  if (limited) return limited;
+
   const parsed = await parseBody(request, createOrderSchema);
   if (!parsed.ok) return parsed.response;
 

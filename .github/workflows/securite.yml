@@ -1,0 +1,118 @@
+# Versant dépôt de l'audit de sécurité.
+#
+# Le versant machine — sshd, nftables, permissions des secrets, ports en écoute
+# — ne peut pas vivre ici : un runner GitHub n'a aucun accès au VPS. Il est tenu
+# par un timer systemd sur le serveur (scripts/systemd/audit-securite.timer).
+# Ce workflow couvre ce qu'un runner peut réellement voir : les dépendances, les
+# secrets committés, les images de la pile, et les en-têtes de la cible publique.
+#
+# Cadence hebdomadaire plutôt que sur chaque PR, et c'est délibéré : les bases
+# de CVE bougent sans que le dépôt bouge, donc l'échéance utile est le calendrier
+# et non le commit. Le contrôle des dépendances, lui, tourne aussi sur les PR qui
+# touchent au verrou npm, parce que là c'est bien le diff qui change le risque.
+
+name: Sécurité
+
+on:
+  schedule:
+    # Lundi 05:00 UTC — après le timer quotidien du VPS, dont le rapport de la
+    # nuit est alors déjà disponible pour comparaison.
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'package-lock.json'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - 'Caddyfile'
+      - 'scripts/audit-securite.py'
+      - '.github/workflows/securite.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  dependances:
+    name: Dépendances et secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # L'historique complet : le contrôle de secrets committés ne juge que
+          # le contenu de HEAD, mais un diagnostic utile demande de pouvoir
+          # remonter au commit fautif sans re-cloner.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # `--omit=dev` : les dépendances de développement ne sont jamais déployées.
+      # Les mélanger noierait le signal sous l'outillage de test, et un rapport
+      # qu'on prend l'habitude de survoler ne protège plus de rien.
+      - name: CVE des dépendances de production
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Contrôles dépôt de l'audit
+        run: python3 scripts/audit-securite.py --familles depot --seuil eleve
+
+  images:
+    name: CVE des images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # L'image applicative est construite ici plutôt que tirée d'un registre :
+      # le dépôt n'en publie aucun, et scanner l'image que produit le Dockerfile
+      # courant est de toute façon la question qui nous intéresse.
+      - name: Construire l'image applicative
+        run: docker build -t fretline-app:audit .
+
+      - name: Scanner l'image applicative
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: fretline-app:audit
+          severity: 'HIGH,CRITICAL'
+          # Une CVE sans correctif publié n'appelle aucune action : la signaler
+          # à chaque exécution entraîne à ignorer le rapport entier.
+          ignore-unfixed: true
+          exit-code: '1'
+          scanners: vuln
+
+      # Les images tierces se mettent à jour en repoussant leur tag, et rien
+      # dans ce dépôt ne dit quand c'est devenu nécessaire. Elles ne bloquent
+      # pas le job : leur correctif est un redéploiement, pas un changement de
+      # code, donc rougir ici ne ferait qu'entraîner à ignorer un check.
+      - name: Scanner les images tierces
+        continue-on-error: true
+        run: |
+          set -u
+          for image in postgres:17-alpine mariadb:11 matomo:5-apache caddy:2-alpine; do
+            echo "::group::$image"
+            docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              aquasec/trivy:latest image \
+              --severity HIGH,CRITICAL --ignore-unfixed --scanners vuln \
+              --quiet "$image" || true
+            echo "::endgroup::"
+          done
+
+  cible:
+    name: Cible publique
+    runs-on: ubuntu-latest
+    # Sans l'adresse du déploiement, il n'y a rien à sonder — et un job qui
+    # réussit faute d'avoir rien fait est pire qu'un job absent.
+    if: vars.FRETLINE_URL != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: En-têtes, TLS, endpoints de test
+        run: |
+          python3 scripts/audit-securite.py \
+            --familles web \
+            --cible "${{ vars.FRETLINE_URL }}" \
+            --seuil eleve \
+            --format texte

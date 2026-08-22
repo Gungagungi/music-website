@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync } from 'node:crypto';
+import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 
 /**
  * Password hashing, extracted from lib/db.ts so it survives the move to
@@ -14,10 +14,27 @@ export function hashPassword(password: string): string {
 export function verifyPassword(password: string, stored: string): boolean {
   const [salt, expected] = stored.split(':');
   if (!salt || !expected) return false;
-  const derived = scryptSync(password, salt, 64).toString('hex');
-  // Length-safe comparison; the demo does not need constant-time semantics but
-  // the equality shape should still not leak on differing lengths.
-  return derived.length === expected.length && derived === expected;
+  const derived = scryptSync(password, salt, 64);
+
+  // Comparaison à temps constant. La version précédente utilisait `===` en
+  // assumant qu'une démo n'en avait pas besoin ; un audit l'a relevé, et
+  // l'argument ne tient pas : `timingSafeEqual` coûte trois lignes, tandis que
+  // `===` sort au premier octet différent et rend la durée de la comparaison
+  // fonction du préfixe deviné.
+  //
+  // `timingSafeEqual` exige deux tampons de même longueur — il lève sinon, au
+  // lieu de renvoyer false. La longueur est donc vérifiée d'abord, et elle ne
+  // révèle rien : elle est constante pour tout hash que cette fonction a
+  // produit, et n'est différente que pour une valeur stockée corrompue.
+  let expectedBytes: Buffer;
+  try {
+    expectedBytes = Buffer.from(expected, 'hex');
+  } catch {
+    return false;
+  }
+  if (expectedBytes.length !== derived.length) return false;
+
+  return timingSafeEqual(derived, expectedBytes);
 }
 
 /**

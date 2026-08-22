@@ -1,0 +1,75 @@
+# Audit de sécurité récurrent — voir scripts/audit-securite.py
+#
+# Installation :
+#   sudo cp scripts/systemd/audit-securite.* /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now audit-securite.timer
+#
+# L'unité tourne sous le compte `debian` et non sous root : elle a besoin du
+# groupe docker (trivy interroge le démon) et de `sudo -n` pour les deux seules
+# lectures privilégiées dont elle dépend, `sshd -T` et `nft list ruleset`. Lui
+# donner root entier pour ces deux commandes serait payer très cher un audit
+# qui, par définition, ne modifie rien.
+
+[Unit]
+Description=Audit de sécurité Fretline (hôte, images, dépôt, cible publique)
+Documentation=file:/home/debian/dev/pro/music-website/docs/security.md
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=debian
+Group=debian
+SupplementaryGroups=docker
+WorkingDirectory=/home/debian/dev/pro/music-website
+
+# La cible est lue depuis .env.production plutôt que codée ici : le domaine y
+# est déjà, et deux copies d'une même adresse finissent toujours par diverger.
+EnvironmentFile=/home/debian/dev/pro/music-website/.env.production
+
+# Le rapport JSON est horodaté et conservé ; `dernier.json` pointe toujours sur
+# la dernière exécution, pour qu'un contrôle externe n'ait pas à deviner un nom.
+ExecStart=/bin/sh -c '\
+  REP="$${HOME}/.local/share/audit-securite"; \
+  mkdir -p "$$REP"; \
+  HORODATAGE=$$(date -u +%%Y-%%m-%%dT%%H%%M%%SZ); \
+  /home/debian/dev/pro/music-website/scripts/audit-securite.py \
+    --cible "https://$${FRETLINE_DOMAIN}" \
+    --seuil eleve \
+    --sortie "$$REP/audit-$${HORODATAGE}.json"; \
+  CODE=$$?; \
+  ln -sf "$$REP/audit-$${HORODATAGE}.json" "$$REP/dernier.json"; \
+  find "$$REP" -name "audit-*.json" -mtime +90 -delete; \
+  exit $$CODE'
+
+# Le scan nuclei est bridé à 20 requêtes par seconde mais parcourt plus de
+# treize mille modèles : une heure est large, et la borne existe surtout pour
+# qu'une exécution bloquée ne recouvre pas la suivante.
+TimeoutStartSec=3600
+
+# L'audit ne modifie rien du système : il lit des fichiers, interroge des
+# services et émet des requêtes HTTP. Il écrit en revanche beaucoup dans le
+# home — son rapport, mais aussi les caches de trivy (base de CVE), de nuclei
+# et de npm.
+#
+# D'où `ProtectSystem=full` et non `strict`. `strict` passe le home entier en
+# lecture seule et exige que chaque chemin de `ReadWritePaths` existe déjà au
+# démarrage : l'unité échouait en 226/NAMESPACE avant même d'exécuter quoi que
+# ce soit, parce que le répertoire de rapports n'était pas encore créé. Énumérer
+# à la place les quatre caches serait une liste à tenir à jour au rythme des
+# outils, pour un durcissement qui ne protège pas grand-chose de plus : /usr,
+# /boot et /etc restent en lecture seule dans les deux cas, et c'est là que se
+# trouve ce qu'un audit ne doit jamais pouvoir modifier.
+PrivateTmp=true
+ProtectSystem=full
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+
+# Un échec est attendu et informatif : il signifie qu'un constat a dépassé le
+# seuil. `systemctl status audit-securite` et le journal le montrent, ce qui
+# suffit sur une machine à un seul opérateur.
+StandardOutput=journal
+StandardError=journal

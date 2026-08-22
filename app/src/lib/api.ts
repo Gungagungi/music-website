@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { ZodError, ZodType } from 'zod';
 
+import { consume, type RateLimitName } from '@/lib/rate-limit';
+
 /**
  * Every error the API can return uses this envelope. A single, predictable
  * shape is what lets the test suite assert on failures as precisely as on
@@ -119,6 +121,31 @@ export function parseQuery<T>(
     };
   }
   return { ok: true, data: result.data };
+}
+
+/**
+ * Applies the rate limit for `name` and returns a ready-made 429 when the
+ * caller is over quota, or `null` when the request may proceed.
+ *
+ * `Retry-After` is set because the envelope alone tells a client it was
+ * throttled but not for how long, and a client left guessing retries
+ * immediately — which is exactly the traffic the limit exists to shed.
+ */
+export function enforceRateLimit(
+  name: RateLimitName,
+  request: Request,
+): NextResponse<ApiErrorBody> | null {
+  const result = consume(name, request);
+  if (result.allowed) return null;
+
+  const response = fail(
+    'RATE_LIMITED',
+    'Trop de requêtes. Merci de réessayer dans un instant.',
+  );
+  response.headers.set('Retry-After', String(result.retryAfterSeconds));
+  response.headers.set('X-RateLimit-Limit', String(result.limit));
+  response.headers.set('X-RateLimit-Remaining', '0');
+  return response;
 }
 
 /** Test-only endpoints are invisible unless the app runs in E2E mode. */
