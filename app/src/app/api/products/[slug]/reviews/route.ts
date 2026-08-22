@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { created, fail, ok, parseBody } from '@/lib/api';
+import { created, enforceRateLimit, fail, ok, parseBody } from '@/lib/api';
 import { currentUserFromRequest } from '@/lib/auth';
 import { getProductBySlug, reviewsForProduct } from '@/lib/catalog';
 import { createReview, hasReviewed } from '@/lib/repositories/reviews';
@@ -19,6 +19,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return fail('NOT_FOUND', 'Produit introuvable.');
+
+  const limited = enforceRateLimit('review', request);
+  if (limited) return limited;
 
   const user = await currentUserFromRequest(request);
   if (!user) return fail('UNAUTHORIZED', 'Connectez-vous pour publier un avis.');

@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
 
-import { authSecret } from '@/lib/deployment';
+import { authSecret, isProductionDeployment } from '@/lib/deployment';
 import { findUserById } from '@/lib/repositories/users';
 import type { PublicUser, User } from '@/lib/types';
 
@@ -25,6 +25,32 @@ let secretKey: Uint8Array | undefined;
 function secret(): Uint8Array {
   secretKey ??= new TextEncoder().encode(authSecret());
   return secretKey;
+}
+
+/**
+ * Cookie attributes shared by every place that sets the session cookie.
+ *
+ * `secure` was missing until a security audit turned it up. Caddy already
+ * redirects http→https (308) and serves HSTS, so the window was narrow — but
+ * both of those are *responses*, which means they only help a browser that has
+ * already been to the site. `secure` is the flag that stops the browser
+ * emitting the cookie over cleartext in the first place, including on the very
+ * first request of a fresh profile.
+ *
+ * Keyed on the deployment marker rather than on NODE_ENV: Playwright's
+ * `webServer` runs in production mode over plain http on localhost, and a
+ * `secure` cookie there would simply never come back — the whole authenticated
+ * half of the suite would fail. Same discriminant as everywhere else in this
+ * repo, see lib/deployment.ts.
+ */
+export function sessionCookieOptions(maxAge: number) {
+  return {
+    httpOnly: true,
+    secure: isProductionDeployment(),
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge,
+  };
 }
 
 export function toPublicUser(user: User): PublicUser {

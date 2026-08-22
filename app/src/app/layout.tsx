@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -18,7 +19,12 @@ export const metadata: Metadata = {
     'Fretline, la boutique de démonstration dédiée aux guitares, basses, amplis et accessoires. Projet fictif de portfolio QA.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Nonce de la CSP, produit par requête dans proxy.ts. Il autorise les deux
+  // seuls scripts inline du document — l'amorçage du thème et celui de Matomo —
+  // sans ouvrir `script-src` à tout le reste.
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
+
   return (
     <html lang="fr">
       <head>
@@ -36,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           est purement CSS (globals.css), donc elle fonctionne aussi quand ce
           script est bloqué.
         */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
       </head>
       <body className="min-h-screen flex flex-col bg-canvas font-sans text-fg antialiased">
         <a href="#contenu" className="skip-link">
@@ -57,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           test (lib/deployment.ts) — pas NODE_ENV, qui vaut « production » dans
           la suite comme sur un déploiement.
         */}
-        {!isTestMode() && <Matomo />}
+        {!isTestMode() && <Matomo nonce={nonce} />}
       </body>
     </html>
   );

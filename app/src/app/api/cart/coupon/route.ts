@@ -1,4 +1,4 @@
-import { fail, ok, parseBody } from '@/lib/api';
+import { enforceRateLimit, fail, ok, parseBody } from '@/lib/api';
 import { evaluateCoupon, recalc } from '@/lib/cart';
 import { setCartCoupon } from '@/lib/repositories/carts';
 import { resolveCart } from '@/lib/cart-session';
@@ -8,6 +8,12 @@ import { couponSchema } from '@/lib/schemas';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Un code promo se devine : sans limite, cette route est un oracle qui
+  // distingue COUPON_UNKNOWN d'un refus motivé, donc de quoi énumérer les
+  // codes valides à la vitesse du réseau.
+  const limited = enforceRateLimit('coupon', request);
+  if (limited) return limited;
+
   const parsed = await parseBody(request, couponSchema);
   if (!parsed.ok) return parsed.response;
 
