@@ -72,7 +72,7 @@ jobs:
         run: docker build -t fretline-app:audit .
 
       - name: Scanner l'image applicative
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: fretline-app:audit
           severity: 'HIGH,CRITICAL'
