@@ -167,4 +167,155 @@ test.describe('Régression visuelle', () => {
       await expect(page.getByTestId('site-footer')).toHaveScreenshot('footer.png');
     },
   );
+
+  /**
+   * Thème sombre.
+   *
+   * Le contraste du sombre est déjà tenu par le scan axe (`REQ-A11Y-07`), mais
+   * un scan ne juge que des rapports de luminance : un token sémantique qui
+   * repasserait en palette brute, ou un aplat qui perdrait sa surface, resterait
+   * accessible tout en étant faux. Ces baselines gardent l'apparence, pas le
+   * contraste.
+   *
+   * L'appareil est émulé en sombre plutôt que le bouton cliqué : sans choix
+   * stocké, la cascade suit `color-scheme: light dark`, donc c'est le chemin
+   * par défaut des visiteurs qui est capturé, et non un état atteint par trois
+   * clics.
+   *
+   * Périmètre volontairement plus étroit qu'en clair : les états vides et le
+   * panneau de facettes n'ajoutent rien : ils n'exercent aucun token que les
+   * cinq captures ci-dessous n'exercent déjà.
+   */
+  test.describe('thème sombre', () => {
+    test.use({ colorScheme: 'dark' });
+
+    test(
+      'en-tête du site',
+      {
+        tag: [TAGS.regression],
+        annotation: [testCase('TC-340', 'Baseline sombre — en-tête'), covers('REQ-VIS-07')],
+      },
+      async ({ homePage, page }) => {
+        await homePage.open();
+        await stabilise(page);
+
+        await expect(homePage.header.root).toHaveScreenshot('header-dark.png');
+      },
+    );
+
+    test(
+      'bandeau d’accueil',
+      {
+        tag: [TAGS.regression],
+        annotation: [testCase('TC-341', 'Baseline sombre — hero'), covers('REQ-VIS-07')],
+      },
+      async ({ homePage, page }) => {
+        await homePage.open();
+        await stabilise(page);
+
+        await expect(homePage.hero).toHaveScreenshot('hero-dark.png');
+      },
+    );
+
+    test(
+      'carte produit avec promotion',
+      {
+        tag: [TAGS.regression],
+        annotation: [testCase('TC-342', 'Baseline sombre — carte produit'), covers('REQ-VIS-07')],
+      },
+      async ({ catalogPage, page }) => {
+        await catalogPage.openCategory(CATEGORIES.effectPedals.slug);
+        await stabilise(page);
+
+        await expect(catalogPage.cardBySlug(PRODUCTS.cheap.slug).root).toHaveScreenshot(
+          'product-card-promo-dark.png',
+        );
+      },
+    );
+
+    test(
+      'bloc d’achat de la fiche produit',
+      {
+        tag: [TAGS.regression],
+        annotation: [testCase('TC-343', 'Baseline sombre — bloc d’achat'), covers('REQ-VIS-07')],
+      },
+      async ({ productPage, page }) => {
+        await productPage.openProduct(PRODUCTS.inStock.slug);
+        await stabilise(page);
+
+        await expect(page.getByTestId('product-buybox')).toHaveScreenshot(
+          'product-buybox-dark.png',
+        );
+      },
+    );
+
+    test(
+      'récapitulatif du panier avec remise',
+      {
+        tag: [TAGS.regression],
+        annotation: [
+          testCase('TC-344', 'Baseline sombre — récapitulatif panier'),
+          covers('REQ-VIS-07'),
+        ],
+      },
+      async ({ cartWith, cartPage, page }) => {
+        await cartWith([{ sku: PRODUCTS.cheap.sku, quantity: 2 }]);
+        await cartPage.open();
+        await cartPage.applyCoupon('BIENVENUE10');
+        await expect(cartPage.appliedCoupon).toBeVisible();
+        await stabilise(page);
+
+        await expect(cartPage.summary).toHaveScreenshot('cart-summary-discount-dark.png');
+      },
+    );
+  });
+
+  /**
+   * Les trois états du bouton de thème.
+   *
+   * C'est le seul aiguillage de l'interface qui ne passe pas par `light-dark()`
+   * — les libellés sont tous rendus et la cascade n'en montre qu'un, via
+   * `--affichage-theme-*`. Une capture par état est donc exactement l'outil
+   * adapté : une règle perdue ferait apparaître deux libellés côte à côte, ou
+   * aucun, ce qu'aucune assertion de couleur ne verrait.
+   *
+   * `TC-427` vérifie déjà que le cycle change d'état ; ici on garde à quoi
+   * chaque état ressemble. L'appareil est fixé en clair pour que les deux
+   * premières captures ne dépendent que du cycle.
+   */
+  test.describe('bouton de thème', () => {
+    test.use({ colorScheme: 'light' });
+
+    /**
+     * Un identifiant par état, et non un seul test qui parcourt le cycle :
+     * une ligne de matrice qui prétendrait couvrir trois vérifications
+     * laisserait la disparition de l'une d'elles passer inaperçue.
+     */
+    for (const { tc, clics, etat, fichier } of [
+      { tc: 'TC-345', clics: 0, etat: 'Système', fichier: 'theme-toggle-systeme.png' },
+      { tc: 'TC-346', clics: 1, etat: 'Clair', fichier: 'theme-toggle-clair.png' },
+      { tc: 'TC-347', clics: 2, etat: 'Sombre', fichier: 'theme-toggle-sombre.png' },
+    ] as const) {
+      test(
+        `bouton de thème — état ${etat}`,
+        {
+          tag: [TAGS.regression],
+          annotation: [
+            testCase(tc, `Baseline — bouton de thème, état ${etat}`),
+            covers('REQ-VIS-08'),
+          ],
+        },
+        async ({ homePage, page }) => {
+          await homePage.open();
+          for (let i = 0; i < clics; i += 1) await homePage.header.cycleTheme();
+          // Attendre l'état plutôt que le clic : la capture partirait sinon
+          // avant que la cascade ait basculé les libellés.
+          expect(await homePage.header.themeMode()).toBe(etat);
+          await stabilise(page);
+
+          await expect(homePage.header.themeToggle).toHaveScreenshot(fichier);
+        },
+      );
+    }
+  });
 });
