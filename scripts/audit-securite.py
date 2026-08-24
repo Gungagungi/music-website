@@ -7,10 +7,11 @@ casser au renouvellement d'un paquet transforme une surveillance en angle mort
 silencieux. Les seuls binaires externes sont optionnels et détectés à l'exécution
 (`trivy`, `nuclei`) — leur absence dégrade le rapport, elle ne l'interrompt pas.
 
-Quatre familles de contrôles, activables séparément :
+Cinq familles de contrôles, activables séparément :
 
   hote        sshd, nftables, fail2ban, mises à jour, permissions des secrets
   images      CVE des images de la pile (trivy)
+  eol         fin de support des briques déployées (endoflife.date)
   depot       CVE des dépendances de production, secrets committés, .env
   web         en-têtes, TLS, endpoints de test, cookies, signatures (nuclei)
 
@@ -445,6 +446,203 @@ def controler_images(seuil_trivy: str = "HIGH,CRITICAL") -> list[Constat]:
                         f"Repousser le tag de {image} et redéployer.",
                     )
                 )
+
+    return constats
+
+
+# --- Famille « eol » --------------------------------------------------------
+#
+# Ce que la famille « images » ne peut pas voir. Trivy compare des paquets à une
+# base de CVE publiées : une version dont le support de sécurité est terminé n'y
+# apparaît pas plus vulnérable qu'une autre, parce que personne ne publie plus
+# d'avis pour elle. L'angle mort est exactement inverse du scan de CVE — plus la
+# version est morte, plus le rapport est silencieux.
+#
+# Les cycles et leurs dates viennent d'endoflife.date. Une table figée ici
+# vieillirait sans bruit, et une table qui ment sur une date de fin de support
+# est pire que pas de contrôle du tout : elle rassure.
+
+# Nom d'image Docker → produit endoflife.date. Les images tierces de la pile
+# sont lues dans le compose, pas listées ici : c'est le fichier qui déploie qui
+# fait foi, et une seconde liste finirait par diverger de la première.
+PRODUITS_EOL = {
+    "postgres": "postgresql",
+    "mariadb": "mariadb",
+    "matomo": "matomo",
+    "caddy": "caddy",
+    "node": "nodejs",
+}
+
+# En deçà, la fin de support est assez proche pour qu'une montée de version
+# doive être planifiée plutôt que subie. Une majeure de PostgreSQL ou de MariaDB
+# se migre avec une fenêtre d'indisponibilité : 90 jours sont un délai court.
+JOURS_AVANT_EOL = 90
+
+
+def versions_de_la_pile(racine: Path) -> list[tuple[str, str, str]]:
+    """Rend (produit endoflife.date, cycle, origine) pour chaque brique déployée.
+
+    Tout est lu dans les fichiers qui déploient — compose, Dockerfile,
+    package.json, /etc/os-release — et rien n'est écrit en dur : le jour où un
+    tag est repoussé, le contrôle suit sans qu'on y pense.
+    """
+    releves: list[tuple[str, str, str]] = []
+
+    def ajouter(image: str, origine: str) -> None:
+        nom, _, tag = image.partition(":")
+        produit = PRODUITS_EOL.get(nom.rsplit("/", 1)[-1])
+        if not produit:
+            return
+        # `17-alpine`, `5-apache`, `11` → `17`, `5`, `11`. Le suffixe de
+        # distribution ne dit rien du cycle de support.
+        cycle = re.match(r"(\d+(?:\.\d+)*)", tag or "")
+        if cycle:
+            releves.append((produit, cycle.group(1), origine))
+
+    compose = racine / "docker-compose.yml"
+    if compose.is_file():
+        for image in re.findall(r"^\s*image:\s*([^\s#]+)", compose.read_text(encoding="utf-8"), re.M):
+            ajouter(image, "docker-compose.yml")
+
+    fichier_docker = racine / "Dockerfile"
+    if fichier_docker.is_file():
+        version = re.search(r"^ARG\s+NODE_VERSION=(\S+)", fichier_docker.read_text(encoding="utf-8"), re.M)
+        if version:
+            ajouter(f"node:{version.group(1)}", "Dockerfile")
+
+    paquet = racine / "app" / "package.json"
+    if paquet.is_file():
+        try:
+            donnees = json.loads(paquet.read_text(encoding="utf-8"))
+            brut = (donnees.get("dependencies") or {}).get("next", "")
+            majeure = re.match(r"[^\d]*(\d+)", brut)
+            if majeure:
+                releves.append(("nextjs", majeure.group(1), "app/package.json"))
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    # Le système de l'hôte. Il porte le noyau, OpenSSL et le démon SSH : une
+    # Debian hors support ne reçoit plus de correctif pour aucun des trois.
+    osrelease = Path("/etc/os-release")
+    if osrelease.is_file():
+        texte = osrelease.read_text(encoding="utf-8")
+        identifiant = re.search(r'^ID=("?)(\w+)\1', texte, re.M)
+        version = re.search(r'^VERSION_ID="?(\d+(?:\.\d+)?)"?', texte, re.M)
+        if identifiant and version and identifiant.group(2) in ("debian", "ubuntu"):
+            releves.append((identifiant.group(2), version.group(1), "/etc/os-release"))
+
+    return releves
+
+
+def cycle_correspondant(cycles: list[dict], cycle: str) -> dict | None:
+    """Retrouve l'entrée endoflife.date d'un cycle, tag Docker compris.
+
+    Une correspondance exacte ne suffit pas : le tag `mariadb:11` suit la
+    dernière 11.x publiée, or endoflife.date ne connaît pas de cycle « 11 » —
+    seulement 11.0 à 11.8. Sans le repli par préfixe, la brique la plus exposée
+    de la pile serait silencieusement exclue du contrôle.
+    """
+    for entree in cycles:
+        if entree.get("cycle") == cycle:
+            return entree
+
+    familles = [e for e in cycles if str(e.get("cycle", "")).startswith(f"{cycle}.")]
+    if not familles:
+        return None
+    return max(familles, key=lambda e: [int(n) for n in str(e["cycle"]).split(".") if n.isdigit()])
+
+
+def controler_eol(racine: Path) -> list[Constat]:
+    constats: list[Constat] = []
+    releves = versions_de_la_pile(racine)
+    if not releves:
+        return [Constat("info", "eol", "Aucune version relevée", "Ni compose, ni Dockerfile, ni os-release exploitables.", "")]
+
+    aujourdhui = datetime.now(timezone.utc).date()
+    # Ce que le contrôle a effectivement couvert. Sans cette trace, une brique
+    # sortie du relevé — un service renommé, un tag qui perd son numéro — rend
+    # le rapport plus vert, pas plus rouge : le silence d'un contrôle et son
+    # succès s'écrivent de la même façon.
+    couvertes: list[str] = []
+
+    for produit, cycle, origine in sorted(set(releves)):
+        reponse = requete(f"https://endoflife.date/api/{produit}.json", delai=20)
+        if reponse is None or getattr(reponse, "status", 0) != 200:
+            constats.append(
+                Constat(
+                    "info",
+                    "eol",
+                    f"Veille de fin de support indisponible : {produit}",
+                    "endoflife.date n'a pas répondu. Le contrôle est ignoré pour ce produit, "
+                    "pas concluant.",
+                    "",
+                )
+            )
+            continue
+
+        try:
+            entree = cycle_correspondant(json.loads(reponse.read().decode("utf-8")), cycle)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            entree = None
+
+        if entree is None:
+            constats.append(
+                Constat(
+                    "info",
+                    "eol",
+                    f"Cycle inconnu d'endoflife.date : {produit} {cycle}",
+                    f"Relevé dans {origine}. Vérifier manuellement, ou corriger PRODUITS_EOL.",
+                    "",
+                )
+            )
+            continue
+
+        # `eol` vaut `false` tant qu'aucune date n'est annoncée, et `true` quand
+        # le cycle est déjà mort sans date connue. Seule une chaîne se compare.
+        echeance = entree.get("eol")
+        connu = f"{produit} {entree.get('cycle')} (relevé {cycle} dans {origine})"
+
+        if echeance is True:
+            constats.append(
+                Constat("eleve", "eol", f"Fin de support atteinte : {connu}",
+                        "endoflife.date marque ce cycle comme terminé.",
+                        f"Monter vers un cycle maintenu (dernier publié : {entree.get('latest', '?')}).")
+            )
+            continue
+        if not isinstance(echeance, str):
+            continue
+
+        try:
+            date_eol = datetime.strptime(echeance, "%Y-%m-%d").date()
+        except ValueError:
+            continue
+
+        restants = (date_eol - aujourdhui).days
+        couvertes.append(f"{produit} {entree.get('cycle')} → {echeance}")
+        if restants < 0:
+            constats.append(
+                Constat("eleve", "eol", f"Fin de support dépassée depuis {-restants} j : {connu}",
+                        f"Support de sécurité terminé le {echeance}. Les CVE publiées depuis ne "
+                        "seront pas corrigées, et un scan de CVE ne les verra pas davantage.",
+                        f"Monter vers un cycle maintenu (dernier publié : {entree.get('latest', '?')}).")
+            )
+        elif restants <= JOURS_AVANT_EOL:
+            constats.append(
+                Constat("moyen", "eol", f"Fin de support dans {restants} j : {connu}",
+                        f"Support de sécurité jusqu'au {echeance}.",
+                        "Planifier la montée de version avant cette date.")
+            )
+
+    if couvertes:
+        constats.append(
+            Constat(
+                "info",
+                "eol",
+                f"Briques dont la fin de support est datée : {len(couvertes)}",
+                " ; ".join(couvertes),
+                "",
+            )
+        )
 
     return constats
 
@@ -1000,7 +1198,7 @@ def main() -> int:
     )
     analyseur.add_argument(
         "--familles",
-        default="hote,images,depot,web",
+        default="hote,images,eol,depot,web",
         help="Familles à exécuter, séparées par des virgules.",
     )
     analyseur.add_argument(
@@ -1039,6 +1237,9 @@ def main() -> int:
 
     if "images" in familles:
         rapport.ajouter(*controler_images())
+
+    if "eol" in familles:
+        rapport.ajouter(*controler_eol(arguments.racine))
 
     if "depot" in familles:
         rapport.ajouter(*controler_depot(arguments.racine))

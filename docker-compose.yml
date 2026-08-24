@@ -148,6 +148,40 @@ services:
       matomo-db:
         condition: service_healthy
 
+  # --- Notifications d'exploitation -----------------------------------------
+  #
+  # Destinataire des alertes de l'audit de sécurité (scripts/notifier-audit.py).
+  # Auto-hébergé plutôt que ntfy.sh : le contenu d'une alerte est la liste des
+  # CVE non corrigées de cette machine et des services qu'elle expose, c'est-à-
+  # dire une carte de ce qu'il faut attaquer. Sur le serveur public, un topic se
+  # lit sans compte dès qu'on en connaît le nom.
+  #
+  # Ce service ne fait pas partie de la boutique et rien dans l'application ne
+  # l'appelle : il vit ici parce que Caddy, les certificats et le réseau y sont
+  # déjà, et qu'une seconde pile pour un conteneur de 20 Mo coûterait plus à
+  # tenir qu'elle ne rapporte.
+  ntfy:
+    image: binwiederhier/ntfy:v2
+    restart: unless-stopped
+    command: ['serve']
+    environment:
+      # ntfy construit les URL qu'il publie (liens de souscription, pièces
+      # jointes) à partir de cette base : sans elle il annonce son adresse
+      # interne, injoignable depuis un téléphone.
+      NTFY_BASE_URL: ${NTFY_BASE_URL:-http://localhost:8082}
+      NTFY_BEHIND_PROXY: 'true'
+      NTFY_CACHE_FILE: /var/lib/ntfy/cache.db
+      NTFY_AUTH_FILE: /var/lib/ntfy/auth.db
+      # Sans compte, aucun accès : ni lecture, ni écriture. C'est le réglage qui
+      # justifie d'auto-héberger — le laisser à `read-write` rendrait le serveur
+      # public équivalent à ntfy.sh, en moins bien tenu.
+      NTFY_AUTH_DEFAULT_ACCESS: deny-all
+      NTFY_ATTACHMENT_CACHE_DIR: ''
+    volumes:
+      - ntfy-data:/var/lib/ntfy
+    expose:
+      - '80'
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -169,8 +203,14 @@ services:
       # application PHP qui a la main sur sa base. Depuis un poste distant,
       # passer par un tunnel : ssh -L 8081:localhost:8081 <serveur>
       - '127.0.0.1:${FRETLINE_ANALYTICS_PORT:-8081}:8081'
+      # Même raison, même précaution que pour Matomo : sans nom de domaine, ntfy
+      # est servi en clair sur 8082 et ce port reste sur la boucle locale. Un
+      # serveur de notifications en clair sur l'extérieur laisserait passer le
+      # jeton de publication en clair avec.
+      - '127.0.0.1:${FRETLINE_NTFY_PORT:-8082}:8082'
     environment:
       FRETLINE_DOMAIN: ${FRETLINE_DOMAIN:?FRETLINE_DOMAIN est obligatoire}
+      FRETLINE_NTFY_DOMAIN: ${FRETLINE_NTFY_DOMAIN:-:8082}
       # Le Caddyfile ne voit que ce qu'on lui passe : sans cette ligne, le
       # `{$FRETLINE_ANALYTICS_DOMAIN}` du bloc analytics retomberait toujours sur
       # son défaut, et un domaine renseigné dans .env serait ignoré en silence.
@@ -184,6 +224,7 @@ services:
     depends_on:
       - app
       - matomo
+      - ntfy
 
 volumes:
   pgdata:
@@ -194,3 +235,7 @@ volumes:
   # l'installation guidée depuis zéro.
   matomo-data:
   matomo-dbdata:
+  # Base des comptes et jeton de publication de ntfy, plus son cache de
+  # messages. Sans ce volume, chaque redémarrage repartirait de `deny-all` sans
+  # aucun compte : plus personne ne pourrait publier ni lire.
+  ntfy-data:

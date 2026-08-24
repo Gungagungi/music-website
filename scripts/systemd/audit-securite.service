@@ -12,7 +12,7 @@
 # qui, par définition, ne modifie rien.
 
 [Unit]
-Description=Audit de sécurité Fretline (hôte, images, dépôt, cible publique)
+Description=Audit de sécurité Fretline (hôte, images, fin de support, dépôt, cible publique)
 Documentation=file:/home/debian/dev/pro/music-website/docs/security.md
 After=network-online.target docker.service
 Wants=network-online.target
@@ -30,6 +30,17 @@ EnvironmentFile=/home/debian/dev/pro/music-website/.env.production
 
 # Le rapport JSON est horodaté et conservé ; `dernier.json` pointe toujours sur
 # la dernière exécution, pour qu'un contrôle externe n'ait pas à deviner un nom.
+#
+# La notification est enchaînée ici et non en `ExecStartPost=`, ce qui serait
+# pourtant sa place naturelle. systemd n'exécute pas les `ExecStartPost` quand
+# `ExecStart` sort en erreur — or l'audit sort en 1 exactement quand un constat
+# dépasse le seuil, c'est-à-dire dans le seul cas qui mérite d'alerter. La
+# notification n'aurait jamais été envoyée que les jours où tout allait bien.
+#
+# Le `|| true` garde la même logique dans l'autre sens : c'est le code de
+# l'audit, préservé dans $$CODE, qui décide de l'état de l'unité. Un serveur de
+# notifications éteint est un incident d'exploitation, pas un verdict de
+# sécurité, et il ne doit ni faire rougir ni faire verdir cette unité.
 ExecStart=/bin/sh -c '\
   REP="$${HOME}/.local/share/audit-securite"; \
   mkdir -p "$$REP"; \
@@ -41,6 +52,7 @@ ExecStart=/bin/sh -c '\
   CODE=$$?; \
   ln -sf "$$REP/audit-$${HORODATAGE}.json" "$$REP/dernier.json"; \
   find "$$REP" -name "audit-*.json" -mtime +90 -delete; \
+  /home/debian/dev/pro/music-website/scripts/notifier-audit.py --rapports "$$REP" || true; \
   exit $$CODE'
 
 # Le scan nuclei est bridé à 20 requêtes par seconde mais parcourt plus de

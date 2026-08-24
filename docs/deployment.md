@@ -86,6 +86,7 @@ On a server, none of this applies: the file is `.env` and the command is plain
 | `purge` | Applies the cart retention policy on a loop |
 | `matomo-db` | MariaDB 11 for Matomo, named volume, no published port |
 | `matomo` | Matomo 5, the analytics interface, reached only through Caddy |
+| `ntfy` | Notification server for the security audit's alerts (`docs/security.md`); nothing in the store calls it |
 | `caddy` | TLS termination and reverse proxy, the only service bound to host ports |
 
 Migrations run in `migrate`, not at application startup. Both work today with one container;

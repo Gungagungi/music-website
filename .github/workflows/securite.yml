@@ -104,6 +104,27 @@ jobs:
             echo "::endgroup::"
           done
 
+  fin-de-support:
+    name: Fin de support
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Aucune dépendance : le contrôle lit le compose, le Dockerfile et
+      # app/package.json, puis interroge endoflife.date. C'est le seul job de ce
+      # workflow qui n'a besoin ni de npm ni de Docker, et c'est aussi celui qui
+      # justifie le mieux la cadence hebdomadaire — une fin de support arrive à
+      # une date, pas à un commit.
+      #
+      # `--seuil eleve` : le job rougit sur un cycle déjà mort, pas sur une
+      # échéance à 90 jours, qui se planifie sans arrêter la chaîne.
+      - name: Cycles de support des briques déployées
+        run: |
+          python3 scripts/audit-securite.py \
+            --familles eol \
+            --seuil eleve \
+            --format texte
+
   cible:
     name: Cible publique
     runs-on: ubuntu-latest

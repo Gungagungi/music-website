@@ -86,23 +86,81 @@ never `NODE_ENV`, because Playwright's `webServer` runs in production mode.
 `trivy` and `nuclei` are optional and detected at runtime; their absence
 degrades the report rather than interrupting it.
 
-Four families:
+Five families:
 
 | Family | Covers |
 | --- | --- |
 | `hote` | Effective sshd config, nftables policy, unexpected TCP listeners, fail2ban, unattended-upgrades, pending security updates, permissions on `.env*` |
 | `images` | Fixable HIGH/CRITICAL CVEs in every running image (trivy) |
+| `eol` | End of security support for every deployed component (endoflife.date) |
 | `depot` | Production dependency CVEs, committed secrets, demo `AUTH_SECRET` |
 | `web` | Security headers, http→https redirect, test endpoints, `/api/health` flags, cookie attributes, TLS version and expiry, signature scan (nuclei) |
 
 ```bash
 npm run securite:audit -- --cible https://exemple.fr   # tout
 npm run securite:depot                                 # dépendances et images
+npm run securite:eol                                   # cycles de support
 npm run securite:cible https://exemple.fr              # cible publique seule
 ```
 
 Exit code is 1 when any finding reaches `--seuil` (default `eleve`), which is
 what turns the systemd unit red.
+
+### End of support is the blind spot of CVE scanning
+
+A CVE scanner compares installed packages against published advisories. Once a
+release line stops receiving security support, advisories stop being published
+for it — so the scan gets *quieter* as the risk rises. The `eol` family exists
+to close exactly that gap, and it is the only check here whose finding cannot be
+derived from anything inside the machine.
+
+Versions are read from the files that deploy them — image tags in
+`docker-compose.yml`, `ARG NODE_VERSION` in the `Dockerfile`, `next` in
+`app/package.json`, `/etc/os-release` for the host — never from a list inside the
+script. A second list is a list that drifts, and one that lies about a support
+date is worse than no check at all: it reassures.
+
+Two details are load-bearing. Docker tags are not endoflife.date cycles:
+`mariadb:11` follows the latest 11.x, and endoflife.date knows 11.0 through 11.8
+but no cycle named "11" — without the prefix fallback in `cycle_correspondant()`,
+the most exposed component in the stack would be silently skipped. And the check
+emits an informational finding listing what it covered, because a control that
+stops seeing a component reports success exactly the way a passing control does.
+
+### Notifications
+
+`scripts/notifier-audit.py` diffs the two most recent reports and publishes the
+**difference** to ntfy: findings that disappeared (a fix landed), findings that
+appeared, and findings whose severity moved. Nothing is sent when nothing
+changed.
+
+That framing is the whole point. The daily report barely moves — the same image
+CVEs sit there until a tag is bumped — so a notification per run would be a
+notification per day saying the same thing, and an alert people learn to swipe
+away protects nothing. Finding titles carry counters ("19 fixable HIGH CVEs
+in …"), so identity is computed with digits normalised away; otherwise one CVE
+more or less would read as a fix *and* a regression in the same breath.
+
+ntfy is self-hosted (a `ntfy` service in `docker-compose.yml`, behind Caddy on
+its own subdomain, `NTFY_AUTH_DEFAULT_ACCESS=deny-all`) rather than ntfy.sh: the
+body of these alerts is a list of this machine's unpatched CVEs and exposed
+services, which is a map of what to attack. On the public server, knowing a topic
+name is enough to read it.
+
+Setup, once the stack is up:
+
+```bash
+docker compose --env-file .env.production exec ntfy ntfy user add --role=user audit
+docker compose --env-file .env.production exec ntfy ntfy access audit fretline-securite rw
+docker compose --env-file .env.production exec ntfy ntfy token add audit   # → NTFY_TOKEN
+npm run securite:notifier -- --forcer      # end-to-end check
+```
+
+The systemd unit chains the notifier inside `ExecStart` rather than using
+`ExecStartPost`, which would be its natural place. systemd skips `ExecStartPost`
+when `ExecStart` fails — and this audit exits 1 precisely when a finding crosses
+the threshold, i.e. in the only case worth alerting about. The notification would
+have been sent only on days when nothing was wrong.
 
 ### Two lessons the checks themselves encode
 
@@ -119,7 +177,7 @@ now verified before the scan, and its absence is reported as a skipped check.
 ### Schedule
 
 - **VPS, daily 04:00 UTC** — `scripts/systemd/audit-securite.{service,timer}`,
-  all four families. After the CI-autofix agent and after the
+  all five families, then the ntfy notification. After the CI-autofix agent and after the
   `unattended-upgrades` window, so the "pending updates" check judges a system
   that has already had its chance to refresh. Reports land in
   `~/.local/share/audit-securite/`, with `dernier.json` symlinked to the newest
@@ -136,7 +194,8 @@ now verified before the scan, and its absence is reported as a skipped check.
   `sudo -n` for exactly two privileged reads, `sshd -T` and `nft list ruleset`.
 
 - **GitHub Actions, Mondays 05:00 UTC** — `.github/workflows/securite.yml`,
-  the families a runner can actually see. The host family is absent by
+  the families a runner can actually see, `eol` included — it needs neither
+  Docker nor npm, only the repository and one HTTP call. The host family is absent by
   necessity: no runner reaches the VPS. The `cible` job is skipped unless the
   `FRETLINE_URL` repository variable is set, because a job that passes by doing
   nothing is worse than no job.
