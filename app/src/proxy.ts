@@ -42,7 +42,7 @@ function matomoOrigin(): string {
   }
 }
 
-function policy(nonce: string): string {
+function policy(nonce: string, chiffre: boolean): string {
   const matomo = matomoOrigin();
   const developpement = process.env.NODE_ENV === 'development';
 
@@ -68,13 +68,29 @@ function policy(nonce: string): string {
     // Remplace X-Frame-Options, qui ne sait pas exprimer autre chose que
     // « jamais » ou « même origine ».
     "frame-ancestors 'none'",
-    'upgrade-insecure-requests',
+    // Seulement sur un document déjà servi en TLS. Sur une origine en clair la
+    // directive n'a rien à durcir, mais WebKit l'applique quand même à
+    // `http://localhost` là où Chromium et Firefox exemptent les origines
+    // locales : les chunks de `_next/static` partaient en `https://` vers un
+    // port sans TLS, l'hydratation n'arrivait jamais, et toute la suite WebKit
+    // échouait sur `waitForHydration()` sans qu'aucune assertion ne soit fausse.
+    ...(chiffre ? ['upgrade-insecure-requests'] : []),
   ].join('; ');
+}
+
+/**
+ * Le protocole vu par le navigateur, et non celui du saut jusqu'à l'application :
+ * en production Caddy termine le TLS et parle en clair au container.
+ */
+function requeteChiffree(request: NextRequest): boolean {
+  const transmis = request.headers.get('x-forwarded-proto');
+  if (transmis) return transmis.split(',')[0].trim() === 'https';
+  return request.nextUrl.protocol === 'https:';
 }
 
 export function proxy(request: NextRequest) {
   const nonce = crypto.randomUUID().replace(/-/g, '');
-  const csp = policy(nonce);
+  const csp = policy(nonce, requeteChiffree(request));
 
   // Le nonce voyage par un en-tête de requête : c'est ainsi que le layout le
   // récupère (`headers().get('x-nonce')`) pour le poser sur le script de thème
