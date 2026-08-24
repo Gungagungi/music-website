@@ -72,7 +72,11 @@ jobs:
         run: docker build -t fretline-app:audit .
 
       - name: Scanner l'image applicative
-        uses: aquasecurity/trivy-action@v0.28.0
+        # Pas seulement « une version plus récente » : jusqu'à la v0.28.0 l'action
+        # appelait `setup-trivy` par un tag (`v0.2.1`) depuis supprimé en amont,
+        # ce qui la casse rétroactivement sans qu'aucun commit d'ici ne bouge.
+        # Les versions récentes épinglent cette dépendance par hash de commit.
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: fretline-app:audit
           severity: 'HIGH,CRITICAL'
