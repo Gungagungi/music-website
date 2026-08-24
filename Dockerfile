@@ -77,6 +77,17 @@ COPY --from=builder --chown=node:node /build/app/.next/static ./app/.next/static
 COPY --from=builder --chown=node:node /build/app/dist ./app/dist
 COPY --from=builder --chown=node:node /build/app/drizzle ./app/drizzle
 
+# npm et yarn sont livrés par l'image de base, et aucun point d'entrée de la
+# pile ne les appelle : le serveur, le bootstrap et la purge sont tous lancés
+# par `node` sur du code déjà bundlé. Ils ne sont donc que de la surface
+# d'attaque, et pas en théorie — le scan Trivy de l'image remontait 9 CVE
+# (1 critique, 8 élevées) toutes situées dans les dépendances embarquées du
+# CLI npm, aucune dans les dépendances de l'application. Les supprimer traite
+# la cause ; les filtrer du rapport n'aurait traité que le symptôme.
+RUN rm -rf /usr/local/lib/node_modules/npm \
+           /usr/local/bin/npm /usr/local/bin/npx \
+           /opt/yarn-v* /usr/local/bin/yarn /usr/local/bin/yarnpkg
+
 USER node
 EXPOSE 3000
 

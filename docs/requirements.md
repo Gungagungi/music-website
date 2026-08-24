@@ -246,6 +246,13 @@ push.
 | `REQ-SEC-14` | No response ever exposes a password hash | `.strict()` schemas reject any extra field, `passwordHash` included |
 | `REQ-SEC-15` | Test-created accounts are isolated from each other | Each worker's account sees only its own profile |
 | `REQ-SEC-16` | The audience tracker never loads under test | No Matomo tag is served while `E2E_TEST_MODE=1`, whatever the build carries |
+| `REQ-SEC-17` | The CSP is strict without forcing TLS on a cleartext origin | Per-request nonce, `object-src`/`frame-ancestors 'none'`, and `upgrade-insecure-requests` only when the document itself was served over HTTPS |
+
+`REQ-SEC-17` is a determinism requirement as much as a security one. WebKit, unlike Chromium and
+Firefox, does not exempt local origins from `upgrade-insecure-requests`: served unconditionally, the
+directive sent every `_next/static` chunk to `https://` on a port with no TLS, so nothing hydrated
+and the whole WebKit suite timed out on `waitForHydration()` — 28 red specs, not one of them
+asserting anything false.
 
 `REQ-SEC-16` guards determinism as much as privacy: a third-party script slipping into the suite
 would add an uncontrolled network request between assertions, and pixel-compared screenshots would

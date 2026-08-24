@@ -33,7 +33,7 @@ function baseUrl(url: string): string {
  * développement local n'a pas d'instance Matomo en face, et une requête vers un
  * hôte injoignable à chaque navigation n'apprendrait rien à personne.
  */
-export function Matomo() {
+export function Matomo({ nonce }: { nonce?: string }) {
   if (!MATOMO_URL || !MATOMO_SITE_ID) return null;
 
   const base = baseUrl(MATOMO_URL);
@@ -67,7 +67,7 @@ export function Matomo() {
         Aucun `trackPageView` ici : SuiviDeNavigation l'émet, pour la première
         vue comme pour les suivantes.
       */}
-      <Script id="matomo-init" strategy="afterInteractive">
+      <Script id="matomo-init" strategy="afterInteractive" nonce={nonce}>
         {`
           (function() {
             var reglages = [

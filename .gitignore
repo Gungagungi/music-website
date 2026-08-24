@@ -6,6 +6,9 @@ node_modules/
 app/.next/
 app/out/
 app/next-env.d.ts
+# `npm run build` construit aussi depuis la racine dans certains flux locaux ;
+# le seul build versionné passe par app/.next/ ci-dessus.
+/.next/
 
 # Commandes de base compilées pour l'image de production (npm run db:build)
 app/dist/
@@ -22,6 +25,8 @@ app/reports/
 app/.stryker-tmp/
 e2e/.auth/
 e2e/.cache/
+# storageState laissé par un run Playwright lancé depuis la racine
+/.auth/
 
 # k6 — le dossier est conservé, son contenu non
 perf/results/*
@@ -38,6 +43,7 @@ perf/results/*
 # Environnement de la pile de production, quand on l'essaie depuis un poste qui a
 # déjà un .env de développement. Les .example, eux, sont versionnés.
 .env.production
+.env.production.bak
 
 # OS / editors
 .DS_Store
@@ -50,6 +56,9 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Surveillance CI locale, non versionnée
+scratchpad/
 
 # Instructions pour agents, générées par `next dev`
 #

@@ -10,13 +10,13 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 146 |
-| — covered by this suite | 145 |
+| Requirements declared | 147 |
+| — covered by this suite | 146 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 200 |
+| Automated test cases | 201 |
 | — Accessibility | 20 |
-| — API | 74 |
+| — API | 75 |
 | — UI | 96 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
@@ -157,6 +157,7 @@ if the committed copy differs.
 | `REQ-SEC-14` | `TC-301` | API | @contract @critical @security |
 | `REQ-SEC-15` | `TC-204` | API | @regression |
 | `REQ-SEC-16` | `TC-425` | UI | @security @smoke |
+| `REQ-SEC-17` | `TC-447` | API | @regression @security |
 | `REQ-SORT-01` | `TC-040`, `TC-041`, `TC-043` | UI | @critical @regression @smoke |
 | `REQ-SORT-02` | `TC-042` | UI | @regression |
 | `REQ-THEME-01` | `TC-426`, `TC-429` | UI | @smoke |
@@ -375,6 +376,7 @@ if the committed copy differs.
 | `TC-444` | Scan a11y sombre — connexion | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
 | `TC-445` | Scan a11y sombre — inscription | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
 | `TC-446` | Scan a11y sombre — comparateur | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
+| `TC-447` | CSP sur origine en clair | `REQ-SEC-17` | `api/negatifs-securite.spec.ts` |
 
 ## Verified outside the automated suite
 

@@ -1,3 +1,5 @@
+import { timingSafeEqual } from 'node:crypto';
+
 import { fail, ok } from '@/lib/api';
 import { currentUserFromRequest } from '@/lib/auth';
 import { findOrderByIdOrReference } from '@/lib/repositories/orders';
@@ -15,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   if (!order) return fail('NOT_FOUND', 'Commande introuvable.');
 
   const providedToken = request.headers.get('x-order-token');
-  if (providedToken && providedToken === order.accessToken) {
+  if (providedToken && matchesAccessToken(providedToken, order.accessToken)) {
     return ok(order);
   }
 
@@ -26,4 +28,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 
   return ok(order);
+}
+
+/**
+ * Compare le jeton présenté à celui de la commande, à temps constant.
+ *
+ * Le jeton est un UUID v4 : le deviner de bout en bout est hors de portée, mais
+ * `===` sort au premier caractère différent, ce qui en fait un oracle qui se
+ * remonte caractère par caractère. Le coût de la parade est nul, l'assumer ne
+ * l'était pas.
+ */
+function matchesAccessToken(provided: string, expected: string): boolean {
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
 }

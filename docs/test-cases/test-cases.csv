@@ -199,3 +199,4 @@ TC-443,Scan a11y sombre — recherche,Accessibility,Accessibilité — thème so
 TC-444,Scan a11y sombre — connexion,Accessibility,Accessibilité — thème sombre,la page connexion reste exempte de violations sérieuses en thème sombre,a11y/accessibilite.spec.ts,@regression,REQ-A11Y-07,
 TC-445,Scan a11y sombre — inscription,Accessibility,Accessibilité — thème sombre,la page inscription reste exempte de violations sérieuses en thème sombre,a11y/accessibilite.spec.ts,@regression,REQ-A11Y-07,
 TC-446,Scan a11y sombre — comparateur,Accessibility,Accessibilité — thème sombre,la page comparateur reste exempte de violations sérieuses en thème sombre,a11y/accessibilite.spec.ts,@regression,REQ-A11Y-07,
+TC-447,CSP sur origine en clair,API,API — robustesse et sécurité,la CSP est stricte sans forcer le TLS sur une origine en clair,api/negatifs-securite.spec.ts,@regression @security,REQ-SEC-17,

@@ -24,6 +24,12 @@ Les scripts sont dans `package.json` (racine et workspaces). Ce que leurs noms n
 - Les seuils k6 sont dérivés de `perf/baseline.json`, mesuré sur le runner CI par le workflow
   dédié — ne jamais éditer ce fichier à la main, et ne jamais relever un seuil pour faire passer
   un run : c'est la mesure qu'on refait, pas la borne qu'on déplace.
+- `npm run perf:rupture` est la seule exception à la règle précédente, et il est manuel. Il ne
+  se compare pas à `perf/baseline.json` : ses seuils sont des **détecteurs de rupture**, portés
+  par `abortOnFail`, et un run qui les franchit a réussi. Le brancher sur un workflow qui garde
+  un merge le rendrait rouge par construction. Il vise une cible déployée (`BASE_URL`), et
+  `PART_ECRITURE=0` limite le parcours aux lectures — contre une production réelle, la valeur
+  par défaut y crée des milliers de paniers invités.
 - Depuis `e2e/` : `npm run test:bugs` = `SEED_BUGS=1`, `--grep @known-bug`.
 
 Le `webServer` de Playwright lance `npm run start -w app` (build de production, **pas** le serveur de dev, dont les délais de compilation rendent la première navigation imprévisible) et réutilise un serveur déjà présent hors CI. Il faut donc avoir buildé au préalable, et avoir une base joignable via `DATABASE_URL`. Il injecte `E2E_TEST_MODE=1` et `TEST_API_TOKEN`.

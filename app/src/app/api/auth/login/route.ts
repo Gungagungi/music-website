@@ -1,7 +1,13 @@
 import { cookies } from 'next/headers';
 
-import { fail, ok, parseBody } from '@/lib/api';
-import { AUTH_COOKIE, TOKEN_TTL_SECONDS, signToken, toPublicUser } from '@/lib/auth';
+import { enforceRateLimit, fail, ok, parseBody } from '@/lib/api';
+import {
+  AUTH_COOKIE,
+  TOKEN_TTL_SECONDS,
+  sessionCookieOptions,
+  signToken,
+  toPublicUser,
+} from '@/lib/auth';
 import { verifyPassword } from '@/lib/password';
 import { findUserByEmail } from '@/lib/repositories/users';
 import { loginSchema } from '@/lib/schemas';
@@ -9,6 +15,12 @@ import { loginSchema } from '@/lib/schemas';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Avant tout le reste : refuser coûte alors une comparaison de compteur, là
+  // où laisser passer engage un scrypt de 50 à 100 ms. Placer la limite après
+  // la validation du corps rendrait le refus aussi cher que l'acceptation.
+  const limited = enforceRateLimit('login', request);
+  if (limited) return limited;
+
   const parsed = await parseBody(request, loginSchema);
   if (!parsed.ok) return parsed.response;
 
@@ -22,12 +34,7 @@ export async function POST(request: Request) {
   }
 
   const token = await signToken(user);
-  (await cookies()).set(AUTH_COOKIE, token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: TOKEN_TTL_SECONDS,
-  });
+  (await cookies()).set(AUTH_COOKIE, token, sessionCookieOptions(TOKEN_TTL_SECONDS));
 
   return ok({ user: toPublicUser(user), token });
 }
