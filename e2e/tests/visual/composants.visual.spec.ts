@@ -308,6 +308,11 @@ test.describe('Régression visuelle', () => {
         async ({ homePage, page }) => {
           await homePage.open();
           for (let i = 0; i < clics; i += 1) await homePage.header.cycleTheme();
+          // Le curseur reste sur le bouton après le clic, et la règle `hover:`
+          // le repeint en ambre : sans ce déplacement, « Clair » et « Sombre »
+          // seraient capturées survolées et « Système », jamais cliquée, au
+          // repos — trois références dont deux ne décriraient pas le même état.
+          await page.mouse.move(0, 0);
           // Attendre l'état plutôt que le clic : la capture partirait sinon
           // avant que la cascade ait basculé les libellés.
           expect(await homePage.header.themeMode()).toBe(etat);
