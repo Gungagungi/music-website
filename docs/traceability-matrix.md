@@ -10,15 +10,15 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 147 |
-| — covered by this suite | 146 |
+| Requirements declared | 149 |
+| — covered by this suite | 148 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 201 |
+| Automated test cases | 209 |
 | — Accessibility | 20 |
 | — API | 75 |
 | — UI | 96 |
-| — Visual | 10 |
+| — Visual | 18 |
 | Test cases without a requirement | 0 |
 
 ## Requirement → test cases
@@ -171,6 +171,8 @@ if the committed copy differs.
 | `REQ-VIS-04` | `TC-335` | Visual | @critical @regression |
 | `REQ-VIS-05` | `TC-336` | Visual | @critical @regression |
 | `REQ-VIS-06` | `TC-337`, `TC-338` | Visual | @regression |
+| `REQ-VIS-07` | `TC-340`, `TC-341`, `TC-342`, `TC-343`, `TC-344` | Visual | @regression |
+| `REQ-VIS-08` | `TC-345`, `TC-346`, `TC-347` | Visual | @regression |
 
 ## Test case → requirement
 
@@ -348,6 +350,14 @@ if the committed copy differs.
 | `TC-337` | Baseline — panier vide | `REQ-VIS-06` | `visual/composants.visual.spec.ts` |
 | `TC-338` | Baseline — catalogue vide | `REQ-VIS-06` | `visual/composants.visual.spec.ts` |
 | `TC-339` | Baseline — pied de page | `REQ-VIS-01` | `visual/composants.visual.spec.ts` |
+| `TC-340` | Baseline sombre — en-tête | `REQ-VIS-07` | `visual/composants.visual.spec.ts` |
+| `TC-341` | Baseline sombre — hero | `REQ-VIS-07` | `visual/composants.visual.spec.ts` |
+| `TC-342` | Baseline sombre — carte produit | `REQ-VIS-07` | `visual/composants.visual.spec.ts` |
+| `TC-343` | Baseline sombre — bloc d’achat | `REQ-VIS-07` | `visual/composants.visual.spec.ts` |
+| `TC-344` | Baseline sombre — récapitulatif panier | `REQ-VIS-07` | `visual/composants.visual.spec.ts` |
+| `TC-345` | Baseline — bouton de thème, état Système | `REQ-VIS-08` | `visual/composants.visual.spec.ts` |
+| `TC-346` | Baseline — bouton de thème, état Clair | `REQ-VIS-08` | `visual/composants.visual.spec.ts` |
+| `TC-347` | Baseline — bouton de thème, état Sombre | `REQ-VIS-08` | `visual/composants.visual.spec.ts` |
 | `TC-350` | Arrondi de la remise | `REQ-COUPON-01` | `ui/bugs-connus.spec.ts` |
 | `TC-351` | Portée du tri en pagination | `REQ-PAGE-02` | `ui/bugs-connus.spec.ts` |
 | `TC-352` | Libellés de formulaire | `REQ-A11Y-03` | `ui/bugs-connus.spec.ts` |

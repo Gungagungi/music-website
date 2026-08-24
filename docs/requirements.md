@@ -289,3 +289,11 @@ Baselines are captured in the CI container on one engine — see
 | `REQ-VIS-04` | The product buy box is visually stable | Matches its baseline |
 | `REQ-VIS-05` | The cart summary with a discount is visually stable | Matches its baseline |
 | `REQ-VIS-06` | Empty states are visually stable | Empty cart and empty catalogue match their baselines |
+| `REQ-VIS-07` | The dark theme is visually stable | Header, hero, product card, buy box and cart summary match their dark baselines |
+| `REQ-VIS-08` | The theme toggle is visually stable in each of its three states | System, Light and Dark each match their baseline |
+
+`REQ-VIS-07` and `REQ-VIS-08` cover what `REQ-A11Y-07` cannot. The axe scan in `colorScheme:
+'dark'` judges luminance ratios, so a semantic token falling back to a raw palette value, or a
+panel losing its surface colour, stays accessible while being wrong. And the toggle is the one
+switch in the interface that is not expressed with `light-dark()`: its three labels are all
+rendered and the cascade shows one, which a screenshot guards and a colour assertion does not.
