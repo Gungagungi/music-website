@@ -69,3 +69,30 @@
 		format console
 	}
 }
+
+# Serveur de notifications ntfy, destinataire des alertes de l'audit de sécurité.
+#
+# Même motif que le bloc Matomo : sous-domaine dédié, et défaut en clair sur
+# 8082 pour l'essai local, où le port reste sur la boucle locale.
+{$FRETLINE_NTFY_DOMAIN::8082} {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Content-Security-Policy "frame-ancestors 'none'"
+		-Server
+	}
+
+	# Pas de `encode` ici, contrairement aux deux autres blocs : la souscription
+	# ntfy est un flux d'événements qui reste ouvert, et une couche de
+	# compression tamponne — le message n'arrive alors qu'une fois le tampon
+	# plein, c'est-à-dire à la prochaine alerte.
+	reverse_proxy ntfy:80 {
+		flush_interval -1
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

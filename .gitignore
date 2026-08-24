@@ -69,3 +69,4 @@ scratchpad/
 # prochaine montée de version, silencieusement.
 app/AGENTS.md
 app/CLAUDE.md
+__pycache__/
