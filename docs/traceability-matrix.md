@@ -10,13 +10,13 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 147 |
-| — covered by this suite | 146 |
+| Requirements declared | 148 |
+| — covered by this suite | 147 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 201 |
+| Automated test cases | 204 |
 | — Accessibility | 20 |
-| — API | 75 |
+| — API | 78 |
 | — UI | 96 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
@@ -60,6 +60,7 @@ if the committed copy differs.
 | `REQ-API-34` | `TC-254` | API | @contract @regression |
 | `REQ-API-35` | `TC-255` | API | @regression |
 | `REQ-API-36` | `TC-256` | API | @regression |
+| `REQ-API-37` | `TC-448`, `TC-449` | API | @contract @regression |
 | `REQ-API-40` | `TC-270` | API | @critical @smoke |
 | `REQ-API-41` | `TC-271`, `TC-276`, `TC-277` | API | @contract @regression |
 | `REQ-API-42` | `TC-272` | API | @regression |
@@ -145,7 +146,7 @@ if the committed copy differs.
 | `REQ-SEC-02` | `TC-203`, `TC-260` | API | @security @smoke |
 | `REQ-SEC-03` | `TC-128` | UI | @regression @security |
 | `REQ-SEC-04` | `TC-241` | API | @critical @regression @security |
-| `REQ-SEC-05` | `TC-257` | API | @critical @regression @security |
+| `REQ-SEC-05` | `TC-257`, `TC-450` | API | @critical @regression @security |
 | `REQ-SEC-06` | `TC-258`, `TC-259` | API | @contract @critical @security |
 | `REQ-SEC-07` | `TC-280` | API | @regression @security |
 | `REQ-SEC-08` | `TC-292` | API | @critical @regression @security |
@@ -377,6 +378,9 @@ if the committed copy differs.
 | `TC-445` | Scan a11y sombre — inscription | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
 | `TC-446` | Scan a11y sombre — comparateur | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
 | `TC-447` | CSP sur origine en clair | `REQ-SEC-17` | `api/negatifs-securite.spec.ts` |
+| `TC-448` | Commande lue par sa référence | `REQ-API-37` | `api/commandes.spec.ts` |
+| `TC-449` | Commande introuvable | `REQ-API-37` | `api/commandes.spec.ts` |
+| `TC-450` | Jeton de commande falsifié | `REQ-SEC-05` | `api/commandes.spec.ts` |
 
 ## Verified outside the automated suite
 

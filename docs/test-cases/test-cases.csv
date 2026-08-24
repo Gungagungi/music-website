@@ -200,3 +200,6 @@ TC-444,Scan a11y sombre — connexion,Accessibility,Accessibilité — thème so
 TC-445,Scan a11y sombre — inscription,Accessibility,Accessibilité — thème sombre,la page inscription reste exempte de violations sérieuses en thème sombre,a11y/accessibilite.spec.ts,@regression,REQ-A11Y-07,
 TC-446,Scan a11y sombre — comparateur,Accessibility,Accessibilité — thème sombre,la page comparateur reste exempte de violations sérieuses en thème sombre,a11y/accessibilite.spec.ts,@regression,REQ-A11Y-07,
 TC-447,CSP sur origine en clair,API,API — robustesse et sécurité,la CSP est stricte sans forcer le TLS sur une origine en clair,api/negatifs-securite.spec.ts,@regression @security,REQ-SEC-17,
+TC-448,Commande lue par sa référence,API,API — commandes,GET /api/orders/{id} accepte la référence lisible autant que l’identifiant,api/commandes.spec.ts,@contract @regression,REQ-API-37,
+TC-449,Commande introuvable,API,API — commandes,GET /api/orders/{id} distingue la commande absente de la commande interdite,api/commandes.spec.ts,@contract @regression,REQ-API-37,
+TC-450,Jeton de commande falsifié,API,API — commandes,un jeton de commande erroné ne vaut pas mieux qu’un jeton absent,api/commandes.spec.ts,@regression @security,REQ-SEC-05,

@@ -180,6 +180,7 @@ undocumented extra field fails the test rather than passing unnoticed.
 | `REQ-API-34` | Order addresses are validated | Missing or malformed fields are reported in `details` |
 | `REQ-API-35` | Terms acceptance is enforced server-side | Refused without it |
 | `REQ-API-36` | A guest order requires an email address | Refused without it |
+| `REQ-API-37` | `GET /api/orders/{id}` resolves an order by id or by reference | Both identifiers return the same order; an unknown or malformed identifier returns 404, distinct from the 403 an existing order returns to a caller who has no right to it |
 | `REQ-API-40` | `POST /api/cart/coupon` applies a coupon | The discount matches the percentage, in cents |
 | `REQ-API-41` | Invalid coupons are refused with a distinct code | `COUPON_UNKNOWN` (404), `COUPON_EXPIRED`, `COUPON_MIN_SUBTOTAL` (422) |
 | `REQ-API-42` | A category-scoped coupon is refused off-category | 422 with `COUPON_CATEGORY` |
