@@ -171,6 +171,14 @@ TC-336,Baseline — récapitulatif panier,Visual,Régression visuelle,récapitul
 TC-337,Baseline — panier vide,Visual,Régression visuelle,état vide du panier,visual/composants.visual.spec.ts,@regression,REQ-VIS-06,
 TC-338,Baseline — catalogue vide,Visual,Régression visuelle,état vide du catalogue,visual/composants.visual.spec.ts,@regression,REQ-VIS-06,
 TC-339,Baseline — pied de page,Visual,Régression visuelle,pied de page,visual/composants.visual.spec.ts,@regression,REQ-VIS-01,
+TC-340,Baseline sombre — en-tête,Visual,Régression visuelle › thème sombre,en-tête du site,visual/composants.visual.spec.ts,@regression,REQ-VIS-07,
+TC-341,Baseline sombre — hero,Visual,Régression visuelle › thème sombre,bandeau d’accueil,visual/composants.visual.spec.ts,@regression,REQ-VIS-07,
+TC-342,Baseline sombre — carte produit,Visual,Régression visuelle › thème sombre,carte produit avec promotion,visual/composants.visual.spec.ts,@regression,REQ-VIS-07,
+TC-343,Baseline sombre — bloc d’achat,Visual,Régression visuelle › thème sombre,bloc d’achat de la fiche produit,visual/composants.visual.spec.ts,@regression,REQ-VIS-07,
+TC-344,Baseline sombre — récapitulatif panier,Visual,Régression visuelle › thème sombre,récapitulatif du panier avec remise,visual/composants.visual.spec.ts,@regression,REQ-VIS-07,
+TC-345,"Baseline — bouton de thème, état Système",Visual,Régression visuelle › bouton de thème,bouton de thème — état Système,visual/composants.visual.spec.ts,@regression,REQ-VIS-08,
+TC-346,"Baseline — bouton de thème, état Clair",Visual,Régression visuelle › bouton de thème,bouton de thème — état Clair,visual/composants.visual.spec.ts,@regression,REQ-VIS-08,
+TC-347,"Baseline — bouton de thème, état Sombre",Visual,Régression visuelle › bouton de thème,bouton de thème — état Sombre,visual/composants.visual.spec.ts,@regression,REQ-VIS-08,
 TC-350,Arrondi de la remise,UI,Défauts connus — preuve de détection,la remise en pourcentage est calculée au centime près,ui/bugs-connus.spec.ts,@critical @known-bug,REQ-COUPON-01,BUG-001
 TC-351,Portée du tri en pagination,UI,Défauts connus — preuve de détection,"le tri par prix s’applique à l’ensemble du rayon, pas page par page",ui/bugs-connus.spec.ts,@critical @known-bug,REQ-PAGE-02,BUG-002
 TC-352,Libellés de formulaire,UI,Défauts connus — preuve de détection,tous les champs de formulaire portent un libellé programmatique,ui/bugs-connus.spec.ts,@known-bug,REQ-A11Y-03,BUG-003
