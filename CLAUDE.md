@@ -31,6 +31,9 @@ Les scripts sont dans `package.json` (racine et workspaces). Ce que leurs noms n
   `PART_ECRITURE=0` limite le parcours aux lectures — contre une production réelle, la valeur
   par défaut y crée des milliers de paniers invités.
 - Depuis `e2e/` : `npm run test:bugs` = `SEED_BUGS=1`, `--grep @known-bug`.
+- `npm run securite:*` enveloppe `scripts/audit-securite.py` (`securite:depot`, `securite:eol`,
+  `securite:cible <url>`) et `scripts/notifier-audit.py` (`securite:notifier`) — voir la section
+  *Audit de sécurité*.
 
 Le `webServer` de Playwright lance `npm run start -w app` (build de production, **pas** le serveur de dev, dont les délais de compilation rendent la première navigation imprévisible) et réutilise un serveur déjà présent hors CI. Il faut donc avoir buildé au préalable, et avoir une base joignable via `DATABASE_URL`. Il injecte `E2E_TEST_MODE=1` et `TEST_API_TOKEN`.
 
@@ -105,7 +108,7 @@ Les baselines (`e2e/tests/visual/__screenshots__/`) sont capturées dans **le co
 
 ## Intégration continue
 
-Cinq workflows, deux cadences. `ci.yml` garde les merges et doit rester rapide : régression
+Six workflows, deux cadences. `ci.yml` garde les merges et doit rester rapide : régression
 complète sur un seul moteur, smoke sur les deux autres. L'exhaustif est renvoyé à la nuit.
 
 **`ci.yml`** — push sur `main`, toute PR, `workflow_dispatch`. Les jobs, et l'équivalent local :
@@ -135,11 +138,48 @@ régénèrent et recommitent des références (PNG, `perf/baseline.json`) dans l
 les compare. Jamais automatiques : une référence acceptée sans être regardée entérine la
 régression qu'elle devait détecter.
 
+**`securite.yml`** (lundi 05:00 UTC, `workflow_dispatch`, et sur PR touchant
+`package-lock.json`/`Dockerfile`/`docker-compose.yml`/`Caddyfile`/le script lui-même) — versant
+dépôt de l'audit de sécurité, voir la section dédiée ci-dessous. Cadence hebdomadaire assumée :
+les CVE bougent sans que le dépôt bouge, donc l'échéance utile est le calendrier, pas le commit.
+
 ### Protection de `main`
 
 `main` exige les checks de `ci.yml` et interdit force-push et suppression. `enforce_admins` est
 **désactivé** : le propriétaire du dépôt peut encore pousser directement, ce qui est nécessaire
 aux workflows de baselines. La règle bloque les PR, pas un administrateur déterminé.
+
+## Audit de sécurité
+
+`scripts/audit-securite.py` (voir `docs/security.md`) couvre cinq familles indépendantes,
+activables séparément (`--familles hote,depot,images,eol,web`) :
+
+- **`hote`** et **`depot`** — état du VPS (sshd, nftables, mises à jour en attente) et du dépôt
+  (secrets committés, permissions). `hote` ne peut tourner que sur la machine elle-même.
+- **`images`** — CVE publiées sur l'image applicative (buildée puis scannée par Trivy) et sur
+  les images tierces de la pile (`postgres`, `mariadb`, `matomo`, `caddy`), ces dernières en
+  `continue-on-error` : leur correctif est un redéploiement, pas un changement de code.
+- **`eol`** — ferme l'angle mort de `images` : une version dont le support de sécurité est
+  terminé n'accumule plus de CVE, donc le scan devient silencieux juste quand le risque monte.
+  Compare à endoflife.date les versions lues dans les fichiers qui déploient (tags du compose,
+  `ARG NODE_VERSION`, `next` de `app/package.json`, `/etc/os-release`), jamais dans une liste
+  tenue à la main. Un tag Docker n'est pas un cycle endoflife.date (`mariadb:11` suit la
+  dernière 11.x, seuls 11.0 à 11.8 existent en amont) : un repli par préfixe est nécessaire.
+- **`web`** — en-têtes, TLS, endpoints de test contre `vars.FRETLINE_URL` (CI) ou
+  `FRETLINE_DOMAIN` (VPS). Ignorée sans cible.
+
+**Le versant machine ne peut pas vivre en CI** : un runner GitHub n'a aucun accès au VPS.
+`scripts/systemd/audit-securite.timer` l'exécute quotidiennement à 04:00 UTC sur le serveur —
+après l'agent d'autoréparation CI (03:00) et après la fenêtre d'`unattended-upgrades`, pour
+juger un système déjà rafraîchi. Le service tourne sous `debian`, pas root : `sudo -n` limité à
+`sshd -T` et `nft list ruleset`, seules les deux lectures privilégiées dont il a besoin.
+
+**`scripts/notifier-audit.py`** publie sur ntfy le *diff* entre les deux derniers rapports
+(corrigé / nouveau / aggravé), jamais l'état complet à chaque exécution : le même rapport
+resterait identique tant qu'aucune image n'est repoussée, et une alerte quotidienne qui répète
+la veille s'apprend à ignorer. Enchaîné dans le même `ExecStart` que l'audit plutôt qu'en
+`ExecStartPost` — systemd n'exécute pas ce dernier quand `ExecStart` sort en erreur, or l'audit
+sort en 1 exactement quand un constat dépasse le seuil, le seul cas qui mérite d'alerter.
 
 ## Autoréparation CI — branches `ci-autofix/<date>`
 
