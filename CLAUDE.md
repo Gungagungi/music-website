@@ -12,12 +12,18 @@ Les scripts sont dans `package.json` (racine et workspaces). Ce que leurs noms n
 
 - `npm run build` est requis avant les tests.
 - `npm run test:api` ne lance aucun navigateur (~10 s).
-- `npm run test:unit` (Vitest, ~2 s) ne lance ni navigateur ni base : c'est le seul endroit du
-  dépôt où un test parle directement à une fonction. Périmètre volontairement étroit — `money.ts`
-  et les fonctions pures de `cart.ts`. Tout ce qui touche la base reste couvert par la suite d'API,
-  contre un vrai PostgreSQL plutôt que contre une doublure.
-- `npm run test:mutation` (Stryker, ~45 s) éprouve ces tests-là. Seuil à 100 % sur le périmètre :
-  le job CI échoue dès qu'un mutant survit.
+- `npm run test:unit` (Vitest, ~5 s) ne lance ni navigateur ni base : c'est le seul endroit du
+  dépôt où un test parle directement à une fonction. Le périmètre est celui des modules **purs ou
+  purement environnementaux** de `src/lib` — `money.ts` et les fonctions pures de `cart.ts`,
+  `rate-limit.ts`, `search-params.ts`, `theme.ts`, `deployment.ts`, `api.ts`, `password.ts`. Tout
+  ce qui touche la base reste couvert par la suite d'API, contre un vrai PostgreSQL plutôt que
+  contre une doublure : le critère d'admission ici est qu'un test n'ait besoin d'aucun service,
+  d'aucun réseau et d'aucune horloge réelle.
+- `npm run test:mutation` (Stryker, ~1 min 40) éprouve les tests de l'arithmétique monétaire, et
+  eux seuls : `mutate` reste `money.ts` + les plages pures de `cart.ts`, malgré l'élargissement de
+  la suite unitaire. Seuil à 100 % sur ce périmètre, le job CI échoue dès qu'un mutant survit.
+  Étendre `mutate` aux autres modules imposerait la même exhaustivité là où elle n'a pas la même
+  valeur — un mutant survivant dans un parseur d'URL ne coûte pas un centime faux sur une facture.
 - `npm run test:visual` échoue hors container CI (voir plus bas).
 - `npm run db:reset` emprunte le même chemin que `POST /api/test/reset` ; `db:generate` après toute modification du schéma.
 - `npm run perf:*` exige k6 installé ; `npm run prod:*` exige un `.env` de développement présent.

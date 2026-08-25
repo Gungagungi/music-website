@@ -35,6 +35,12 @@ from pathlib import Path
 
 SEVERITES = ("critique", "eleve", "moyen", "faible", "info")
 
+# L'API JSON de ntfy veut un entier là où l'API par en-têtes accepte le nom.
+# Une chaîne y est refusée par un 400 « request body must be valid JSON », qui
+# désigne le corps entier plutôt que le champ fautif : la traduction est faite
+# ici une fois, et le reste du script continue de raisonner en noms.
+PRIORITES = {"min": 1, "low": 2, "default": 3, "high": 4, "urgent": 5}
+
 
 def cle(constat: dict) -> tuple[str, str]:
     """Identité d'un constat, insensible aux nombres qu'il contient.
@@ -141,7 +147,7 @@ def publier(base: str, topic: str, token: str, titre: str, message: str, priorit
     JSON est en UTF-8 par construction.
     """
     corps = json.dumps(
-        {"topic": topic, "title": titre, "message": message, "priority": priorite, "tags": tags},
+        {"topic": topic, "title": titre, "message": message, "priority": PRIORITES[priorite], "tags": tags},
         ensure_ascii=False,
     ).encode("utf-8")
     entetes = {"Content-Type": "application/json"}
