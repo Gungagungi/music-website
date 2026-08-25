@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 147 |
-| — covered by this suite | 146 |
+| Requirements declared | 148 |
+| — covered by this suite | 147 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 201 |
+| Automated test cases | 202 |
 | — Accessibility | 20 |
 | — API | 75 |
-| — UI | 96 |
+| — UI | 97 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -124,6 +124,7 @@ if the committed copy differs.
 | `REQ-ORDER-06` | `TC-126` | UI | @critical @regression |
 | `REQ-ORDER-07` | `TC-127` | UI | @critical @regression |
 | `REQ-ORDER-08` | `TC-129` | UI | @regression |
+| `REQ-ORDER-09` | `TC-130` | UI | @critical @smoke |
 | `REQ-PAGE-01` | `TC-044`, `TC-048` | UI | @regression @smoke |
 | `REQ-PAGE-02` | `TC-045`, `TC-351` | UI | @critical @known-bug @regression |
 | `REQ-PAGE-03` | `TC-046` | UI | @regression |
@@ -256,6 +257,7 @@ if the committed copy differs.
 | `TC-127` | Panier vidé après commande | `REQ-ORDER-07` | `ui/commande.spec.ts` |
 | `TC-128` | Confirmation protégée | `REQ-SEC-03` | `ui/commande.spec.ts` |
 | `TC-129` | Commande sans panier | `REQ-ORDER-08` | `ui/commande.spec.ts` |
+| `TC-130` | Parcours d’achat de bout en bout | `REQ-ORDER-09` | `ui/parcours-achat.spec.ts` |
 | `TC-140` | Comparaison de deux produits | `REQ-CMP-01` | `ui/comparateur.spec.ts` |
 | `TC-141` | Limite du comparateur | `REQ-CMP-02` | `ui/comparateur.spec.ts` |
 | `TC-142` | Caractéristiques hétérogènes | `REQ-CMP-03` | `ui/comparateur.spec.ts` |
