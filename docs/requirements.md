@@ -129,6 +129,7 @@ concatenation for exactly that reason.
 | `REQ-ORDER-06` | A cart discount carries through to the order | The order total matches the discounted cart total |
 | `REQ-ORDER-07` | The cart is emptied by a successful order | The badge returns to zero |
 | `REQ-ORDER-08` | Checkout with an empty cart offers a way back | An explicit state with a link to the catalogue, not an error |
+| `REQ-ORDER-09` | The purchase journey holds together in one session | Landing, product page, add to cart, cart and checkout chain through the UI alone, and the price shown on the catalogue card is the one charged on the confirmation |
 
 `REQ-COUPON-01` states "to the cent" because that is precisely what
 [BUG-001](bug-reports/BUG-001-coupon-rounding.md) breaks — a requirement written as "reduces the total" would be

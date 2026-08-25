@@ -79,6 +79,7 @@ TC-126,Remise reportée à la commande,UI,Tunnel de commande,la remise appliqué
 TC-127,Panier vidé après commande,UI,Tunnel de commande,le panier est vidé après validation de la commande,ui/commande.spec.ts,@critical @regression,REQ-ORDER-07,
 TC-128,Confirmation protégée,UI,Tunnel de commande,la confirmation d’une commande n’est pas accessible sans jeton,ui/commande.spec.ts,@regression @security,REQ-SEC-03,
 TC-129,Commande sans panier,UI,Tunnel de commande,accéder au tunnel avec un panier vide propose un retour à la boutique,ui/commande.spec.ts,@regression,REQ-ORDER-08,
+TC-130,Parcours d’achat de bout en bout,UI,Parcours d’achat complet,"un visiteur arrive, choisit un article, l’ajoute au panier et commande",ui/parcours-achat.spec.ts,@critical @smoke,REQ-ORDER-09,
 TC-140,Comparaison de deux produits,UI,Comparateur,compare deux produits colonne par colonne,ui/comparateur.spec.ts,@smoke,REQ-CMP-01,
 TC-141,Limite du comparateur,UI,Comparateur,la comparaison est plafonnée à trois produits,ui/comparateur.spec.ts,@regression,REQ-CMP-02,
 TC-142,Caractéristiques hétérogènes,UI,Comparateur,les caractéristiques absentes d’un modèle sont explicitement vides,ui/comparateur.spec.ts,@regression,REQ-CMP-03,
