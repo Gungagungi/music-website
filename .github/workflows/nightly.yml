@@ -215,8 +215,12 @@ jobs:
       # trois premiers mois ne dit plus rien de la dérive qu'elle sert à voir.
       - name: Enregistrer le run dans l’historique
         # `!cancelled()` et non `success()` : un run rouge est exactement celui
-        # que la tendance doit garder.
-        if: ${{ !cancelled() }}
+        # que la tendance doit garder. Mais un run rouge produit un résumé, et
+        # un rapport non produit n'en produit aucun : sans le test sur le
+        # fichier, un échec de `download-artifact` faisait échouer cette étape
+        # sur « Résumé introuvable », et cette seconde erreur — la plus visible
+        # dans l'annotation du job — masquait la vraie panne.
+        if: ${{ !cancelled() && hashFiles('e2e/reports/summary.json') != '' }}
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name  'github-actions[bot]'
