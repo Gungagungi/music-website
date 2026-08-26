@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Fretline">
+  <!-- Marque Fretline : la corde vibrante du logo (⌇), tendue entre sillet et
+       chevalet. Ambre de marque sur l'ink-950 de l'en-tête ; le fond est opaque
+       et sombre dans les deux thèmes, comme le bandeau. -->
+  <rect width="64" height="64" rx="14" fill="#0b1220"/>
+  <g fill="#f5b170">
+    <rect x="18" y="7" width="28" height="4" rx="2"/>
+    <rect x="18" y="53" width="28" height="4" rx="2"/>
+  </g>
+  <path d="M 32.0 11.0 L 32.51 12.05 L 33.45 13.1 L 34.62 14.15 L 35.89 15.2 L 37.15 16.25 L 38.28 17.3 L 39.21 18.35 L 39.84 19.4 L 40.12 20.45 L 40.02 21.5 L 39.51 22.55 L 38.61 23.6 L 37.34 24.65 L 35.77 25.7 L 33.96 26.75 L 32.0 27.8 L 29.98 28.85 L 28.01 29.9 L 26.18 30.95 L 24.58 32.0 L 23.28 33.05 L 22.37 34.1 L 21.86 35.15 L 21.79 36.2 L 22.14 37.25 L 22.9 38.3 L 24.0 39.35 L 25.39 40.4 L 26.98 41.45 L 28.68 42.5 L 30.38 43.55 L 32.0 44.6 L 33.43 45.65 L 34.6 46.7 L 35.44 47.75 L 35.89 48.8 L 35.92 49.85 L 35.5 50.9 L 34.54 51.95 L 32.0 53.0" fill="none" stroke="#e0872b" stroke-width="6.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
