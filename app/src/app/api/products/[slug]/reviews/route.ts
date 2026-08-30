@@ -1,18 +1,23 @@
 import { randomUUID } from 'node:crypto';
 
-import { created, enforceRateLimit, fail, ok, parseBody } from '@/lib/api';
+import { created, enforceRateLimit, fail, ok, parseBody, parseQuery } from '@/lib/api';
 import { currentUserFromRequest } from '@/lib/auth';
-import { getProductBySlug, reviewsForProduct } from '@/lib/catalog';
+import { getProductBySlug, reviewPage } from '@/lib/catalog';
 import { createReview, hasReviewed } from '@/lib/repositories/reviews';
-import { createReviewSchema } from '@/lib/schemas';
+import { createReviewSchema, reviewQuerySchema } from '@/lib/schemas';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return fail('NOT_FOUND', 'Produit introuvable.');
-  return ok({ items: await reviewsForProduct(product.id) });
+
+  const parsed = parseQuery(new URL(request.url).searchParams, reviewQuerySchema);
+  if (!parsed.ok) return parsed.response;
+
+  const { note, ...rest } = parsed.data;
+  return ok(await reviewPage(product.id, { ...rest, rating: note }));
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {

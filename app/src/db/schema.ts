@@ -308,10 +308,25 @@ export const reviews = pgTable(
     rating: integer('rating').notNull(),
     title: text('title').notNull(),
     body: text('body').notNull(),
+    /**
+     * Frozen when the review is published — see the `Review` type. A read-time
+     * join would move the badge on an old review the day its author finally
+     * bought the product.
+     */
+    verifiedPurchase: boolean('verified_purchase').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (table) => [
     index('reviews_product_idx').on(table.productId),
+    // The review list sorts by date and by rating, and pages through the result.
+    // Both orders break the tie on `id`, so the index carries it too.
+    index('reviews_product_created_idx').on(table.productId, table.createdAt, table.id),
+    index('reviews_product_rating_idx').on(table.productId, table.rating, table.id),
     check('reviews_rating_range', sql`${table.rating} BETWEEN 1 AND 5`),
+    // One opinion per customer and per product. The application checks it first
+    // to answer 409 rather than 500, but two concurrent posts would both pass
+    // that check — this is what actually makes it true. Anonymous seed reviews
+    // carry a NULL user, and NULLs stay distinct here, deliberately.
+    uniqueIndex('reviews_product_user_key').on(table.productId, table.userId),
   ],
 );

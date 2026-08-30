@@ -19,6 +19,15 @@ export class ProductPage extends BasePage {
   readonly specs: Locator;
   readonly reviews: Locator;
   readonly noReviews: Locator;
+  readonly reviewsSummary: Locator;
+  readonly reviewsCount: Locator;
+  readonly reviewHistogram: Locator;
+  readonly reviewSort: Locator;
+  readonly reviewPagination: Locator;
+  readonly reviewForm: Locator;
+  readonly reviewStatus: Locator;
+  readonly reviewSigninHint: Locator;
+  readonly verifiedBadges: Locator;
   readonly colorSelect: Locator;
   readonly quantityInput: Locator;
   readonly addToCartButton: Locator;
@@ -51,6 +60,15 @@ export class ProductPage extends BasePage {
     this.specs = page.getByTestId('product-specs');
     this.reviews = page.getByTestId('review-item');
     this.noReviews = page.getByTestId('no-reviews');
+    this.reviewsSummary = page.getByTestId('reviews-summary');
+    this.reviewsCount = page.getByTestId('reviews-count');
+    this.reviewHistogram = page.getByTestId('review-histogram');
+    this.reviewSort = page.getByTestId('review-sort');
+    this.reviewPagination = page.getByTestId('pagination');
+    this.reviewForm = page.getByTestId('review-form');
+    this.reviewStatus = page.getByTestId('review-status');
+    this.reviewSigninHint = page.getByTestId('review-signin-hint');
+    this.verifiedBadges = page.getByTestId('verified-badge');
     this.colorSelect = page.getByTestId('product-color');
     this.quantityInput = page.getByTestId('product-quantity');
     this.addToCartButton = page.getByTestId('add-to-cart');
@@ -63,9 +81,12 @@ export class ProductPage extends BasePage {
     return `/p/${this.slug}`;
   }
 
-  openProduct(slug: string): Promise<Response | null> {
+  openProduct(
+    slug: string,
+    query: Record<string, string | string[]> = {},
+  ): Promise<Response | null> {
     this.slug = slug;
-    return this.open();
+    return this.open(query);
   }
 
   async stockLevel(): Promise<number> {
@@ -99,6 +120,44 @@ export class ProductPage extends BasePage {
 
   relatedCard(index: number): ProductCardComponent {
     return new ProductCardComponent(this.relatedProducts.nth(index));
+  }
+
+  /** One bar of the rating histogram; it doubles as the filter control. */
+  histogramBar(level: number): Locator {
+    return this.page.getByTestId(`histogram-bar-${level}`);
+  }
+
+  /** Count of reviews the histogram reports for a level, filter-independent. */
+  async histogramCount(level: number): Promise<number> {
+    return Number.parseInt((await this.histogramBar(level).getAttribute('data-count')) ?? '0', 10);
+  }
+
+  /**
+   * Sorts the review list and waits for the server-rendered result.
+   *
+   * The select pushes a new URL, so the wait is on the URL the block will be
+   * rendered from — not on a timeout, and not on the list itself, which may
+   * legitimately come back identical.
+   */
+  async sortReviews(value: string): Promise<void> {
+    await this.reviewSort.selectOption(value);
+    await this.page.waitForURL(value === 'recents' ? /\/p\// : new RegExp(`avis-tri=${value}`));
+    await this.waitForHydration();
+  }
+
+  /** Publishes a review; returns what the status region ended up saying. */
+  async submitReview(input: {
+    rating: number;
+    title: string;
+    body: string;
+  }): Promise<'success' | 'error'> {
+    await this.page.getByTestId('review-rating').selectOption(String(input.rating));
+    await fillOnceHydrated(this.page.getByTestId('review-title'), input.title);
+    await fillOnceHydrated(this.page.getByTestId('review-body'), input.body);
+    await this.page.getByTestId('review-submit').click();
+    await this.page.locator('[data-testid="review-status"]:not([data-status="idle"])').waitFor();
+    await this.page.waitForLoadState('networkidle');
+    return (await this.reviewStatus.getAttribute('data-status')) === 'success' ? 'success' : 'error';
   }
 
   specValue(label: string): Locator {

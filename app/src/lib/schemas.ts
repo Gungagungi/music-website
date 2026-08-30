@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { CATEGORY_SLUGS } from '@/lib/types';
+import { CATEGORY_SLUGS, REVIEW_SORT_KEYS } from '@/lib/types';
 
 /** Query string values always arrive as strings; these helpers keep coercion explicit. */
 const numeric = z.coerce.number();
@@ -88,6 +88,15 @@ export const createOrderSchema = z.object({
   acceptTerms: z
     .boolean()
     .refine((value) => value, { message: 'Vous devez accepter les conditions générales de vente.' }),
+});
+
+export const reviewQuerySchema = z.object({
+  sort: z.enum(REVIEW_SORT_KEYS).optional(),
+  // Named `note` rather than `rating` because it also travels in the page URL,
+  // which is French like the rest of the storefront.
+  note: numeric.int().min(1).max(5).optional(),
+  page: numeric.int().min(1).optional(),
+  limit: numeric.int().min(1).max(50).optional(),
 });
 
 export const createReviewSchema = z.object({

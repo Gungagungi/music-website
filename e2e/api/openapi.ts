@@ -15,6 +15,7 @@ import {
   paginatedProductsSchema,
   productDetailSchema,
   publicUserSchema,
+  reviewPageSchema,
   reviewSchema,
 } from '@/api/schemas';
 
@@ -110,6 +111,24 @@ export const OPERATIONS: Operation[] = [
   },
   {
     chemin: '/api/products/{slug}/reviews',
+    methode: 'get',
+    resume: 'Lister les avis d’un produit',
+    etiquette: 'Catalogue',
+    parametres: [
+      parametreChemin('slug', 'Identifiant lisible du produit.', z.string()),
+      parametreQuery('sort', 'recents | anciens | note-desc | note-asc.', z.string()),
+      parametreQuery('note', 'Ne garder que les avis à ce nombre d’étoiles.', z.number().int()),
+      parametreQuery('page', 'Page demandée, à partir de 1.', z.number().int().positive()),
+      parametreQuery('limit', 'Taille de page, 50 au maximum.', z.number().int().positive()),
+    ],
+    reponses: [
+      { code: 200, description: 'Page d’avis et répartition des notes.', schema: reviewPageSchema },
+      erreur(404, 'Aucun produit pour ce slug.'),
+      erreur(422, 'Paramètre hors du schéma attendu.'),
+    ],
+  },
+  {
+    chemin: '/api/products/{slug}/reviews',
     methode: 'post',
     resume: 'Déposer un avis',
     etiquette: 'Catalogue',
@@ -126,6 +145,7 @@ export const OPERATIONS: Operation[] = [
       { code: 201, description: 'Avis enregistré.', schema: reviewSchema },
       erreur(401, 'Porteur absent ou invalide.'),
       erreur(404, 'Aucun produit pour ce slug.'),
+      erreur(409, 'Ce client a déjà publié un avis sur ce produit.'),
       erreur(422, 'Corps hors du schéma attendu.'),
     ],
   },

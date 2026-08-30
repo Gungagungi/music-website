@@ -79,6 +79,7 @@ export function toReview(row: ReviewRow): Review {
     rating: row.rating,
     title: row.title,
     body: row.body,
+    verifiedPurchase: row.verifiedPurchase,
     createdAt: row.createdAt.toISOString(),
   };
 }

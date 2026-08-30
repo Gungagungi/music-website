@@ -1,5 +1,5 @@
 import { expect, test } from '@/fixtures/test-fixtures';
-import { CATEGORIES, PRODUCTS, RULES } from '@/data/seed';
+import { CATEGORIES, PRODUCTS, REVIEWS, RULES } from '@/data/seed';
 import { TAGS, covers, testCase } from '@/utils/tags';
 
 test.describe('Fiche produit', () => {
@@ -108,11 +108,14 @@ test.describe('Fiche produit', () => {
       annotation: [testCase('TC-066', 'Cohérence note / avis'), covers('REQ-PDP-05')],
     },
     async ({ productPage, page }) => {
-      await productPage.openProduct(PRODUCTS.outOfStock.slug);
+      await productPage.openProduct(REVIEWS.product);
 
       const summary = page.getByTestId('reviews-summary');
-      await expect(summary).toContainText('avis détaillé');
-      await expect(productPage.reviews).toHaveCount(2);
+      // Two figures that are expected to disagree: the average covers the
+      // product's whole history, the list only its most recent slice, and the
+      // list itself is paginated on top of that.
+      await expect(summary).toContainText(`${REVIEWS.stored} avis détaillé`);
+      await expect(productPage.reviews).toHaveCount(REVIEWS.pageSize);
     },
   );
 

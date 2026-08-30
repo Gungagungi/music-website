@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 148 |
-| — covered by this suite | 147 |
+| Requirements declared | 158 |
+| — covered by this suite | 157 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 202 |
+| Automated test cases | 217 |
 | — Accessibility | 20 |
-| — API | 75 |
-| — UI | 97 |
+| — API | 81 |
+| — UI | 106 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -69,6 +69,10 @@ if the committed copy differs.
 | `REQ-API-50` | `TC-281` | API | @contract @regression |
 | `REQ-API-51` | `TC-282` | API | @regression |
 | `REQ-API-52` | `TC-283` | API | @contract @regression |
+| `REQ-API-53` | `TC-284`, `TC-285` | API | @contract @regression |
+| `REQ-API-54` | `TC-286` | API | @regression |
+| `REQ-API-55` | `TC-287`, `TC-288` | API | @contract @regression |
+| `REQ-API-56` | `TC-289` | API | @regression |
 | `REQ-API-60` | `TC-290`, `TC-291` | API | @contract @regression |
 | `REQ-API-61` | `TC-294`, `TC-295`, `TC-296` | API | @contract @regression |
 | `REQ-AUTH-01` | `TC-080`, `TC-200` | UI, API | @contract @critical @smoke |
@@ -136,6 +140,12 @@ if the committed copy differs.
 | `REQ-PDP-05` | `TC-066` | UI | @regression |
 | `REQ-PDP-06` | `TC-070` | UI | @regression |
 | `REQ-PDP-07` | `TC-071` | UI | @regression |
+| `REQ-REV-01` | `TC-448` | UI | @regression @smoke |
+| `REQ-REV-02` | `TC-449` | UI | @regression |
+| `REQ-REV-03` | `TC-450` | UI | @regression |
+| `REQ-REV-04` | `TC-451`, `TC-452` | UI | @regression |
+| `REQ-REV-05` | `TC-453` | UI | @regression |
+| `REQ-REV-06` | `TC-454`, `TC-455`, `TC-456` | UI | @critical @regression |
 | `REQ-SEARCH-01` | `TC-050` | UI | @critical @smoke |
 | `REQ-SEARCH-02` | `TC-051`, `TC-052` | UI | @regression |
 | `REQ-SEARCH-03` | `TC-053` | UI | @regression |
@@ -315,6 +325,12 @@ if the committed copy differs.
 | `TC-281` | Publication d’un avis | `REQ-API-50` | `api/coupons-avis.spec.ts` |
 | `TC-282` | Avis en doublon | `REQ-API-51` | `api/coupons-avis.spec.ts` |
 | `TC-283` | Note invalide | `REQ-API-52` | `api/coupons-avis.spec.ts` |
+| `TC-284` | Pagination des avis | `REQ-API-53` | `api/coupons-avis.spec.ts` |
+| `TC-285` | Étanchéité des pages d’avis | `REQ-API-53` | `api/coupons-avis.spec.ts` |
+| `TC-286` | Tri des avis par note | `REQ-API-54` | `api/coupons-avis.spec.ts` |
+| `TC-287` | Filtre des avis par note | `REQ-API-55` | `api/coupons-avis.spec.ts` |
+| `TC-288` | Filtre d’avis invalide | `REQ-API-55` | `api/coupons-avis.spec.ts` |
+| `TC-289` | Badge achat vérifié | `REQ-API-56` | `api/coupons-avis.spec.ts` |
 | `TC-290` | JSON malformé | `REQ-API-60` | `api/negatifs-securite.spec.ts` |
 | `TC-291` | Type de champ incorrect | `REQ-API-60` | `api/negatifs-securite.spec.ts` |
 | `TC-292` | Quantité négative | `REQ-SEC-08` | `api/negatifs-securite.spec.ts` |
@@ -379,6 +395,15 @@ if the committed copy differs.
 | `TC-445` | Scan a11y sombre — inscription | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
 | `TC-446` | Scan a11y sombre — comparateur | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
 | `TC-447` | CSP sur origine en clair | `REQ-SEC-17` | `api/negatifs-securite.spec.ts` |
+| `TC-448` | Histogramme des notes | `REQ-REV-01` | `ui/avis.spec.ts` |
+| `TC-449` | Pagination des avis | `REQ-REV-02` | `ui/avis.spec.ts` |
+| `TC-450` | Tri des avis | `REQ-REV-03` | `ui/avis.spec.ts` |
+| `TC-451` | Filtre des avis par note | `REQ-REV-04` | `ui/avis.spec.ts` |
+| `TC-452` | Filtre d’avis sans résultat | `REQ-REV-04` | `ui/avis.spec.ts` |
+| `TC-453` | Mention achat vérifié | `REQ-REV-05` | `ui/avis.spec.ts` |
+| `TC-454` | Dépôt d’avis sans compte | `REQ-REV-06` | `ui/avis.spec.ts` |
+| `TC-455` | Publication d’un avis depuis la fiche | `REQ-REV-06` | `ui/avis.spec.ts` |
+| `TC-456` | Avis en doublon depuis la fiche | `REQ-REV-06` | `ui/avis.spec.ts` |
 
 ## Verified outside the automated suite
 

@@ -11,8 +11,18 @@ import {
   priceRangeFor as priceRangeForRepo,
   queryProducts as queryProductsRepo,
 } from '@/lib/repositories/products';
-import { reviewsForProduct as reviewsForProductRepo } from '@/lib/repositories/reviews';
-import type { Paginated, Product, ProductQuery, Review } from '@/lib/types';
+import {
+  reviewPage as reviewPageRepo,
+  reviewsForProduct as reviewsForProductRepo,
+} from '@/lib/repositories/reviews';
+import type {
+  Paginated,
+  Product,
+  ProductQuery,
+  Review,
+  ReviewPage,
+  ReviewQuery,
+} from '@/lib/types';
 
 /**
  * Catalogue reads.
@@ -26,6 +36,10 @@ import type { Paginated, Product, ProductQuery, Review } from '@/lib/types';
  */
 
 export { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/lib/repositories/products';
+export {
+  DEFAULT_REVIEW_PAGE_SIZE,
+  MAX_REVIEW_PAGE_SIZE,
+} from '@/lib/repositories/reviews';
 
 export function queryProducts(query: ProductQuery = {}): Promise<Paginated<Product>> {
   return queryProductsRepo(query);
@@ -63,6 +77,10 @@ export async function categoryCounts(): Promise<{ slug: string; label: string; c
 
 export function reviewsForProduct(productId: string): Promise<Review[]> {
   return reviewsForProductRepo(productId);
+}
+
+export function reviewPage(productId: string, query: ReviewQuery = {}): Promise<ReviewPage> {
+  return reviewPageRepo(productId, query);
 }
 
 export function bestSellers(limit = 8): Promise<Product[]> {

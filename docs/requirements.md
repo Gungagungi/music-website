@@ -95,6 +95,21 @@ concatenation for exactly that reason.
 | `REQ-PDP-06` | Related products are suggested | Suggestions exist and exclude the current product |
 | `REQ-PDP-07` | An unknown product returns 404 | The response status is 404 and a not-found page is shown |
 
+### Customer reviews
+
+The rating shown on a product covers its whole history; only the most recent reviews are stored
+individually. The two figures are therefore expected to disagree, and the page has to state both —
+`REQ-REV-01` is what keeps that from reading as a bug.
+
+| ID | Requirement | Acceptance criteria |
+| --- | --- | --- |
+| `REQ-REV-01` | The rating distribution is shown | A bar per level, counted over every stored review, alongside the historical average |
+| `REQ-REV-02` | Long review lists are paginated | Pages share no review and lose none |
+| `REQ-REV-03` | Reviews can be sorted | The chosen order applies to the whole set |
+| `REQ-REV-04` | Reviews can be filtered by rating | The distribution stays whole so the filter can be changed or cleared, and an empty result offers a way back |
+| `REQ-REV-05` | A purchase behind a review is stated | Reviews written by a customer who had ordered the product carry the mention |
+| `REQ-REV-06` | Publishing a review requires an account, once per product | A visitor is offered sign-in rather than a form; a second review by the same customer is refused |
+
 ### Comparator
 
 | ID | Requirement | Acceptance criteria |
@@ -190,6 +205,10 @@ undocumented extra field fails the test rather than passing unnoticed.
 | `REQ-API-50` | `POST /api/reviews` publishes a review | 201; the aggregate rating and count move by one review |
 | `REQ-API-51` | One review per customer per product | The second is refused |
 | `REQ-API-52` | Ratings are bounded | Out-of-range values are refused with 422 |
+| `REQ-API-53` | The review list is paginated | A page carries its own total and page count; consecutive pages share no review |
+| `REQ-API-54` | Reviews can be sorted | The chosen order applies to the whole set, not to the current page |
+| `REQ-API-55` | Reviews can be filtered by rating | Only that level is returned; the rating distribution stays whole, and an out-of-range level is refused with 422 |
+| `REQ-API-56` | A verified purchase is stated, not assumed | The badge is set only when the reviewer had already ordered the product |
 | `REQ-API-60` | Malformed input is distinguished from invalid input | Malformed JSON returns 400 `INVALID_JSON`; a schema violation returns 422 `VALIDATION_ERROR` |
 | `REQ-API-61` | Out-of-range query parameters degrade gracefully | An excessive limit, a page past the end and an unknown sort are handled without a 500 |
 | `REQ-OPS-01` | `GET /api/health` reports service state | 200 with a status field, no authentication required |
