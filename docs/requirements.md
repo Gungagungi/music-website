@@ -112,6 +112,18 @@ individually. The two figures are therefore expected to disagree, and the page h
 | `REQ-REV-05` | A purchase behind a review is stated | Reviews written by a customer who had ordered the product carry the mention |
 | `REQ-REV-06` | Publishing a review requires an account, once per product | A visitor is offered sign-in rather than a form; a second review by the same customer is refused |
 
+### Restock alerts
+
+Sending the mail is out of scope — a fictional shop with a real SMTP dependency would make the
+suite need a mail server. What is modelled, and tested, is the part that carries rules: which
+alerts fire, and that each fires exactly once.
+
+| ID | Requirement | Acceptance criteria |
+| --- | --- | --- |
+| `REQ-ALERT-01` | A restock fires pending alerts exactly once | The sweep marks alerts whose product is back; a second sweep changes nothing, and an alert on a still-empty shelf stays pending |
+| `REQ-ALERT-02` | The alert is offered only where it means something | Absent on an available product; a visitor without an account is offered sign-in, and the alerts page is not reachable without one |
+| `REQ-ALERT-03` | A customer manages their own alerts | Subscribing and cancelling happen from the product page; the alerts page lists them with their state |
+
 ### Comparator
 
 | ID | Requirement | Acceptance criteria |
@@ -213,6 +225,9 @@ undocumented extra field fails the test rather than passing unnoticed.
 | `REQ-API-54` | Reviews can be sorted | The chosen order applies to the whole set, not to the current page |
 | `REQ-API-55` | Reviews can be filtered by rating | Only that level is returned; the rating distribution stays whole, and an out-of-range level is refused with 422 |
 | `REQ-API-56` | A verified purchase is stated, not assumed | The badge is set only when the reviewer had already ordered the product |
+| `REQ-API-57` | A restock alert requires an account and an empty shelf | 401 without a token, 409 on an available product |
+| `REQ-API-58` | Subscribing is idempotent and reversible | A second subscription returns the same alert; cancelling twice returns 404 |
+| `REQ-API-59` | Alerts are partitioned by customer | A customer sees only their own alerts |
 | `REQ-API-60` | Malformed input is distinguished from invalid input | Malformed JSON returns 400 `INVALID_JSON`; a schema violation returns 422 `VALIDATION_ERROR` |
 | `REQ-API-61` | Out-of-range query parameters degrade gracefully | An excessive limit, a page past the end and an unknown sort are handled without a 500 |
 | `REQ-OPS-01` | `GET /api/health` reports service state | 200 with a status field, no authentication required |

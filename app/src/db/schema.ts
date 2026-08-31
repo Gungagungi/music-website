@@ -330,3 +330,47 @@ export const reviews = pgTable(
     uniqueIndex('reviews_product_user_key').on(table.productId, table.userId),
   ],
 );
+
+/* -------------------------------------------------------------------------- */
+/* stock_alerts                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * "Tell me when this is back in stock."
+ *
+ * Attached to an account rather than to a bare e-mail address, deliberately.
+ * An address alone is a subscription anybody can create for somebody else, and
+ * unsubscribing it needs a token, a link and a whole flow of its own. Requiring
+ * an account makes the owner of the alert the person who asked for it, which is
+ * also what makes "my alerts" listable and removable.
+ *
+ * `notified_at` is the whole state machine: NULL means waiting, a timestamp
+ * means the restock mail went out. The row is kept afterwards rather than
+ * deleted, so a second restock does not silently re-notify someone who never
+ * asked twice.
+ */
+export const stockAlerts = pgTable(
+  'stock_alerts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    productId: text('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    notifiedAt: timestamp('notified_at', { withTimezone: true, mode: 'date' }),
+  },
+  (table) => [
+    index('stock_alerts_user_idx').on(table.userId),
+    // The sweep looks for pending alerts on products that came back: both
+    // columns, and the NULL check, are in this index.
+    index('stock_alerts_pending_idx')
+      .on(table.productId)
+      .where(sql`${table.notifiedAt} IS NULL`),
+    // One pending alert per customer and per product. Subscribing twice is a
+    // double-click, not a request to be told twice.
+    uniqueIndex('stock_alerts_unique').on(table.productId, table.userId),
+  ],
+);
