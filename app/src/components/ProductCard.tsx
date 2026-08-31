@@ -1,12 +1,23 @@
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 
 import { PriceTag } from '@/components/PriceTag';
 import { Rating } from '@/components/Rating';
+import { CompareToggle } from '@/components/compare/CompareToggle';
 import { availabilityFor } from '@/lib/availability';
+import { COMPARE_COOKIE, parseCompareCookie } from '@/lib/compare';
 import type { Product } from '@/lib/types';
 
-export function ProductCard({ product }: { product: Product }) {
+/**
+ * The card reads the comparison cookie itself rather than receiving it as a
+ * prop. Threading it down would mean touching the grid and each of the four
+ * pages that render one, and every one of them would be free to forget.
+ * Reading it here costs nothing — the layout already reads the same cookie on
+ * every request, and these pages are dynamic regardless.
+ */
+export async function ProductCard({ product }: { product: Product }) {
   const availability = availabilityFor(product.stock);
+  const compared = parseCompareCookie((await cookies()).get(COMPARE_COOKIE)?.value);
 
   return (
     <article
@@ -58,6 +69,8 @@ export function ProductCard({ product }: { product: Product }) {
           >
             {availability.label}
           </p>
+
+          <CompareToggle slug={product.slug} selected={compared.includes(product.slug)} />
         </div>
       </div>
     </article>
