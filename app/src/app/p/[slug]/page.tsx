@@ -9,6 +9,7 @@ import { ProductGrid } from '@/components/ProductGrid';
 import { Rating } from '@/components/Rating';
 import { ProductTabs, parseProductTab } from '@/components/ProductTabs';
 import { StockAlertForm } from '@/components/StockAlertForm';
+import { WishlistToggle } from '@/components/WishlistToggle';
 import { CompareToggle } from '@/components/compare/CompareToggle';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { TrackProductView } from '@/components/analytics/TrackProductView';
@@ -17,6 +18,7 @@ import { availabilityFor } from '@/lib/availability';
 import { COMPARE_COOKIE, parseCompareCookie } from '@/lib/compare';
 import { hasAlert } from '@/lib/repositories/stock-alerts';
 import { accessoriesFor, boughtTogetherWith } from '@/lib/repositories/suggestions';
+import { isWishlisted } from '@/lib/repositories/wishlist';
 import { currentUser } from '@/lib/auth';
 import { getProductBySlug, queryProducts, reviewPage } from '@/lib/catalog';
 import { formatPrice } from '@/lib/money';
@@ -62,6 +64,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   // so there is nothing to reflect.
   const subscribedToRestock =
     user && product.stock <= 0 ? await hasAlert(product.id, user.id) : false;
+  const wishlisted = user ? await isWishlisted(product.id, user.id) : false;
   // Five fetched to keep four after dropping the product being viewed.
   const related = sameCategory.items
     .filter((candidate) => candidate.id !== product.id)
@@ -206,6 +209,15 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           </ul>
 
           <div className="mt-4">
+            <WishlistToggle
+              slug={product.slug}
+              saved={wishlisted}
+              canSave={Boolean(user)}
+              variant="button"
+            />
+          </div>
+
+          <div className="mt-2">
             <CompareToggle
               slug={product.slug}
               selected={comparedSlugs.includes(product.slug)}

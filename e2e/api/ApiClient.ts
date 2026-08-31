@@ -275,6 +275,18 @@ export class ApiClient {
     return this.request.get('/api/alerts', { headers: this.headers() });
   }
 
+  saveToWishlist(slug: string): Promise<APIResponse> {
+    return this.request.post(`/api/products/${slug}/wishlist`, { headers: this.headers() });
+  }
+
+  removeFromWishlist(slug: string): Promise<APIResponse> {
+    return this.request.delete(`/api/products/${slug}/wishlist`, { headers: this.headers() });
+  }
+
+  wishlist(): Promise<APIResponse> {
+    return this.request.get('/api/wishlist', { headers: this.headers() });
+  }
+
   /** Runs the restock sweep — the same function the scheduled command runs. */
   sweepRestockAlerts(): Promise<APIResponse> {
     return this.request.post('/api/test/alerts', {

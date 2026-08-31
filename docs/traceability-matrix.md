@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 171 |
-| — covered by this suite | 170 |
+| Requirements declared | 176 |
+| — covered by this suite | 175 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 247 |
+| Automated test cases | 257 |
 | — Accessibility | 20 |
-| — API | 88 |
-| — UI | 129 |
+| — API | 93 |
+| — UI | 134 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -81,6 +81,9 @@ if the committed copy differs.
 | `REQ-API-59` | `TC-476` | API | @regression @security |
 | `REQ-API-60` | `TC-290`, `TC-291` | API | @contract @regression |
 | `REQ-API-61` | `TC-294`, `TC-295`, `TC-296` | API | @contract @regression |
+| `REQ-API-62` | `TC-487` | API | @regression @security |
+| `REQ-API-63` | `TC-488`, `TC-489`, `TC-491` | API | @contract @regression |
+| `REQ-API-64` | `TC-490` | API | @regression @security |
 | `REQ-AUTH-01` | `TC-080`, `TC-200` | UI, API | @contract @critical @smoke |
 | `REQ-AUTH-02` | `TC-083`, `TC-201` | UI, API | @regression |
 | `REQ-AUTH-03` | `TC-081`, `TC-082` | UI | @regression |
@@ -195,6 +198,8 @@ if the committed copy differs.
 | `REQ-VIS-04` | `TC-335` | Visual | @critical @regression |
 | `REQ-VIS-05` | `TC-336` | Visual | @critical @regression |
 | `REQ-VIS-06` | `TC-337`, `TC-338` | Visual | @regression |
+| `REQ-WISH-01` | `TC-493`, `TC-494`, `TC-495` | UI | @regression @smoke |
+| `REQ-WISH-02` | `TC-492`, `TC-496` | UI | @regression @security |
 
 ## Test case → requirement
 
@@ -447,6 +452,16 @@ if the committed copy differs.
 | `TC-484` | Ordre total des accessoires | `REQ-PDP-11` | `ui/fiche-details.spec.ts` |
 | `TC-485` | Co-achat sans donnée | `REQ-PDP-12` | `ui/fiche-details.spec.ts` |
 | `TC-486` | Co-achat observé | `REQ-PDP-12` | `ui/fiche-details.spec.ts` |
+| `TC-487` | Favori sans authentification | `REQ-API-62` | `api/favoris.spec.ts` |
+| `TC-488` | Enregistrement idempotent | `REQ-API-63` | `api/favoris.spec.ts` |
+| `TC-489` | Retrait d’un favori | `REQ-API-63` | `api/favoris.spec.ts` |
+| `TC-490` | Cloisonnement des favoris | `REQ-API-64` | `api/favoris.spec.ts` |
+| `TC-491` | Favori et état courant | `REQ-API-63` | `api/favoris.spec.ts` |
+| `TC-492` | Favori sans compte | `REQ-WISH-02` | `ui/favoris.spec.ts` |
+| `TC-493` | Enregistrement d’un favori | `REQ-WISH-01` | `ui/favoris.spec.ts` |
+| `TC-494` | Retrait d’un favori | `REQ-WISH-01` | `ui/favoris.spec.ts` |
+| `TC-495` | Aucun favori | `REQ-WISH-01` | `ui/favoris.spec.ts` |
+| `TC-496` | Favoris protégés | `REQ-WISH-02` | `ui/favoris.spec.ts` |
 
 ## Verified outside the automated suite
 
