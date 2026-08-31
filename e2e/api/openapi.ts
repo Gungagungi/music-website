@@ -17,6 +17,8 @@ import {
   publicUserSchema,
   reviewPageSchema,
   reviewSchema,
+  stockAlertListSchema,
+  stockAlertSchema,
 } from '@/api/schemas';
 
 /**
@@ -147,6 +149,44 @@ export const OPERATIONS: Operation[] = [
       erreur(404, 'Aucun produit pour ce slug.'),
       erreur(409, 'Ce client a déjà publié un avis sur ce produit.'),
       erreur(422, 'Corps hors du schéma attendu.'),
+    ],
+  },
+  {
+    chemin: '/api/products/{slug}/alerts',
+    methode: 'post',
+    resume: 'Être prévenu du retour en stock',
+    etiquette: 'Catalogue',
+    authentification: 'cookie-ou-bearer',
+    parametres: [parametreChemin('slug', 'Identifiant lisible du produit.', z.string())],
+    reponses: [
+      { code: 201, description: 'Alerte enregistrée.', schema: stockAlertSchema },
+      erreur(401, 'Porteur absent ou invalide.'),
+      erreur(404, 'Aucun produit pour ce slug.'),
+      erreur(409, 'Le produit est déjà disponible.'),
+    ],
+  },
+  {
+    chemin: '/api/products/{slug}/alerts',
+    methode: 'delete',
+    resume: 'Annuler une alerte de retour en stock',
+    etiquette: 'Catalogue',
+    authentification: 'cookie-ou-bearer',
+    parametres: [parametreChemin('slug', 'Identifiant lisible du produit.', z.string())],
+    reponses: [
+      { code: 200, description: 'Alerte retirée.', schema: z.object({ removed: z.literal(true) }).strict() },
+      erreur(401, 'Porteur absent ou invalide.'),
+      erreur(404, 'Aucune alerte sur ce produit, ou produit inconnu.'),
+    ],
+  },
+  {
+    chemin: '/api/alerts',
+    methode: 'get',
+    resume: 'Lister ses alertes de retour en stock',
+    etiquette: 'Compte',
+    authentification: 'cookie-ou-bearer',
+    reponses: [
+      { code: 200, description: 'Les alertes du client connecté.', schema: stockAlertListSchema },
+      erreur(401, 'Porteur absent ou invalide.'),
     ],
   },
   {

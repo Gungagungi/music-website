@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 162 |
-| — covered by this suite | 161 |
+| Requirements declared | 168 |
+| — covered by this suite | 167 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 227 |
+| Automated test cases | 240 |
 | — Accessibility | 20 |
-| — API | 81 |
-| — UI | 116 |
+| — API | 88 |
+| — UI | 122 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -33,6 +33,9 @@ if the committed copy differs.
 | `REQ-A11Y-06` | `TC-322` | Accessibility | @regression |
 | `REQ-A11Y-07` | `TC-440`, `TC-441`, `TC-442`, `TC-443`, `TC-444`, `TC-445`, `TC-446` | Accessibility | @regression |
 | `REQ-ACC-01` | `TC-088` | UI | @regression |
+| `REQ-ALERT-01` | `TC-478`, `TC-479` | API | @critical @regression |
+| `REQ-ALERT-02` | `TC-467`, `TC-468`, `TC-472` | UI | @regression @security |
+| `REQ-ALERT-03` | `TC-469`, `TC-470`, `TC-471` | UI | @regression @smoke |
 | `REQ-API-01` | `TC-210` | API | @contract @critical @smoke |
 | `REQ-API-02` | `TC-211` | API | @regression |
 | `REQ-API-03` | `TC-212` | API | @regression |
@@ -73,6 +76,9 @@ if the committed copy differs.
 | `REQ-API-54` | `TC-286` | API | @regression |
 | `REQ-API-55` | `TC-287`, `TC-288` | API | @contract @regression |
 | `REQ-API-56` | `TC-289` | API | @regression |
+| `REQ-API-57` | `TC-473`, `TC-474` | API | @regression @security |
+| `REQ-API-58` | `TC-475`, `TC-477` | API | @contract @regression |
+| `REQ-API-59` | `TC-476` | API | @regression @security |
 | `REQ-API-60` | `TC-290`, `TC-291` | API | @contract @regression |
 | `REQ-API-61` | `TC-294`, `TC-295`, `TC-296` | API | @contract @regression |
 | `REQ-AUTH-01` | `TC-080`, `TC-200` | UI, API | @contract @critical @smoke |
@@ -418,6 +424,19 @@ if the committed copy differs.
 | `TC-464` | Limite atteinte | `REQ-CMP-02` | `ui/comparateur.spec.ts` |
 | `TC-465` | Vidage de la sélection | `REQ-CMP-05` | `ui/comparateur.spec.ts` |
 | `TC-466` | Lien de comparaison partagé | `REQ-CMP-06` | `ui/comparateur.spec.ts` |
+| `TC-467` | Pas d’alerte sur produit disponible | `REQ-ALERT-02` | `ui/alerte-stock.spec.ts` |
+| `TC-468` | Alerte sans compte | `REQ-ALERT-02` | `ui/alerte-stock.spec.ts` |
+| `TC-469` | Inscription à une alerte | `REQ-ALERT-03` | `ui/alerte-stock.spec.ts` |
+| `TC-470` | Annulation depuis la fiche | `REQ-ALERT-03` | `ui/alerte-stock.spec.ts` |
+| `TC-471` | Aucune alerte | `REQ-ALERT-03` | `ui/alerte-stock.spec.ts` |
+| `TC-472` | Alertes protégées | `REQ-ALERT-02` | `ui/alerte-stock.spec.ts` |
+| `TC-473` | Alerte sans authentification | `REQ-API-57` | `api/alertes.spec.ts` |
+| `TC-474` | Alerte sur produit disponible | `REQ-API-57` | `api/alertes.spec.ts` |
+| `TC-475` | Inscription idempotente | `REQ-API-58` | `api/alertes.spec.ts` |
+| `TC-476` | Cloisonnement des alertes | `REQ-API-59` | `api/alertes.spec.ts` |
+| `TC-477` | Annulation d’une alerte | `REQ-API-58` | `api/alertes.spec.ts` |
+| `TC-478` | Déclenchement au retour en stock | `REQ-ALERT-01` | `api/alertes.spec.ts` |
+| `TC-479` | Balayage sans retour en stock | `REQ-ALERT-01` | `api/alertes.spec.ts` |
 
 ## Verified outside the automated suite
 
