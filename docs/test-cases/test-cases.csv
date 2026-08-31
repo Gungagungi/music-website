@@ -216,3 +216,8 @@ TC-453,Mention achat vérifié,UI,Fiche produit — avis clients,les avis issus 
 TC-454,Dépôt d’avis sans compte,UI,Fiche produit — avis clients,un visiteur non connecté est invité à se connecter plutôt qu’à saisir un avis,ui/avis.spec.ts,@regression,REQ-REV-06,
 TC-455,Publication d’un avis depuis la fiche,UI,Fiche produit — avis clients,un client connecté publie un avis qui apparaît aussitôt sur la fiche,ui/avis.spec.ts,@critical @regression,REQ-REV-06,
 TC-456,Avis en doublon depuis la fiche,UI,Fiche produit — avis clients,un second avis du même client sur le même produit est refusé,ui/avis.spec.ts,@regression,REQ-REV-06,
+TC-457,"Délai d’expédition, produit disponible",UI,Disponibilité et délai d’expédition,un produit disponible annonce son délai d’expédition,ui/disponibilite.spec.ts,@regression @smoke,REQ-PDP-08,
+TC-458,Délai de réapprovisionnement,UI,Disponibilité et délai d’expédition,une rupture annonce un réapprovisionnement plutôt qu’un simple « indisponible »,ui/disponibilite.spec.ts,@regression,REQ-PDP-08,
+TC-459,Mention de stock faible,UI,Disponibilité et délai d’expédition,un stock au seuil nomme le nombre d’unités restantes,ui/disponibilite.spec.ts,@regression,REQ-PDP-09,
+TC-460,Frontière du stock faible,UI,Disponibilité et délai d’expédition,"juste au-dessus du seuil, la fiche ne compte plus les unités",ui/disponibilite.spec.ts,@regression,REQ-PDP-09,
+TC-461,Cohérence catalogue / fiche,UI,Disponibilité et délai d’expédition,la carte du catalogue porte la même disponibilité que la fiche,ui/disponibilite.spec.ts,@regression,REQ-PDP-09,

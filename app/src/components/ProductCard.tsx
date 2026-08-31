@@ -2,10 +2,11 @@ import Link from 'next/link';
 
 import { PriceTag } from '@/components/PriceTag';
 import { Rating } from '@/components/Rating';
+import { availabilityFor } from '@/lib/availability';
 import type { Product } from '@/lib/types';
 
 export function ProductCard({ product }: { product: Product }) {
-  const inStock = product.stock > 0;
+  const availability = availabilityFor(product.stock);
 
   return (
     <article
@@ -47,10 +48,15 @@ export function ProductCard({ product }: { product: Product }) {
             discountPct={product.discountPct}
           />
           <p
-            className={inStock ? 'text-xs font-semibold text-success' : 'text-xs font-semibold text-danger'}
+            className={
+              availability.orderable
+                ? 'text-xs font-semibold text-success'
+                : 'text-xs font-semibold text-danger'
+            }
             data-testid="product-availability"
+            data-availability={availability.level}
           >
-            {inStock ? 'En stock' : 'Rupture de stock'}
+            {availability.label}
           </p>
         </div>
       </div>

@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 158 |
-| — covered by this suite | 157 |
+| Requirements declared | 160 |
+| — covered by this suite | 159 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 217 |
+| Automated test cases | 222 |
 | — Accessibility | 20 |
 | — API | 81 |
-| — UI | 106 |
+| — UI | 111 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -140,6 +140,8 @@ if the committed copy differs.
 | `REQ-PDP-05` | `TC-066` | UI | @regression |
 | `REQ-PDP-06` | `TC-070` | UI | @regression |
 | `REQ-PDP-07` | `TC-071` | UI | @regression |
+| `REQ-PDP-08` | `TC-457`, `TC-458` | UI | @regression @smoke |
+| `REQ-PDP-09` | `TC-459`, `TC-460`, `TC-461` | UI | @regression |
 | `REQ-REV-01` | `TC-448` | UI | @regression @smoke |
 | `REQ-REV-02` | `TC-449` | UI | @regression |
 | `REQ-REV-03` | `TC-450` | UI | @regression |
@@ -404,6 +406,11 @@ if the committed copy differs.
 | `TC-454` | Dépôt d’avis sans compte | `REQ-REV-06` | `ui/avis.spec.ts` |
 | `TC-455` | Publication d’un avis depuis la fiche | `REQ-REV-06` | `ui/avis.spec.ts` |
 | `TC-456` | Avis en doublon depuis la fiche | `REQ-REV-06` | `ui/avis.spec.ts` |
+| `TC-457` | Délai d’expédition, produit disponible | `REQ-PDP-08` | `ui/disponibilite.spec.ts` |
+| `TC-458` | Délai de réapprovisionnement | `REQ-PDP-08` | `ui/disponibilite.spec.ts` |
+| `TC-459` | Mention de stock faible | `REQ-PDP-09` | `ui/disponibilite.spec.ts` |
+| `TC-460` | Frontière du stock faible | `REQ-PDP-09` | `ui/disponibilite.spec.ts` |
+| `TC-461` | Cohérence catalogue / fiche | `REQ-PDP-09` | `ui/disponibilite.spec.ts` |
 
 ## Verified outside the automated suite
 
