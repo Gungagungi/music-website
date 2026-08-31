@@ -9,6 +9,7 @@ import { ProductGrid } from '@/components/ProductGrid';
 import { Rating } from '@/components/Rating';
 import { ProductTabs, parseProductTab } from '@/components/ProductTabs';
 import { StockAlertForm } from '@/components/StockAlertForm';
+import { TrackRecentlyViewed } from '@/components/TrackRecentlyViewed';
 import { WishlistToggle } from '@/components/WishlistToggle';
 import { CompareToggle } from '@/components/compare/CompareToggle';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
@@ -19,6 +20,10 @@ import { COMPARE_COOKIE, parseCompareCookie } from '@/lib/compare';
 import { hasAlert } from '@/lib/repositories/stock-alerts';
 import { accessoriesFor, boughtTogetherWith } from '@/lib/repositories/suggestions';
 import { isWishlisted } from '@/lib/repositories/wishlist';
+import {
+  RECENTLY_VIEWED_COOKIE,
+  parseRecentlyViewed,
+} from '@/lib/recently-viewed';
 import { currentUser } from '@/lib/auth';
 import { getProductBySlug, queryProducts, reviewPage } from '@/lib/catalog';
 import { formatPrice } from '@/lib/money';
@@ -50,7 +55,13 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   const reviewQuery = parseReviewParams(search);
   const tab = parseProductTab(search.onglet);
   const availability = availabilityFor(product.stock);
-  const comparedSlugs = parseCompareCookie((await cookies()).get(COMPARE_COOKIE)?.value);
+  const jar = await cookies();
+  const comparedSlugs = parseCompareCookie(jar.get(COMPARE_COOKIE)?.value);
+  // Read before the visit is recorded, and the product being viewed is dropped:
+  // "vus récemment" that lists the page you are on says nothing.
+  const recentSlugs = parseRecentlyViewed(jar.get(RECENTLY_VIEWED_COOKIE)?.value).filter(
+    (candidate) => candidate !== product.slug,
+  );
   const category = CATEGORY_BY_SLUG.get(product.category);
   const [reviews, sameCategory, user, accessories, boughtTogether] = await Promise.all([
     reviewPage(product.id, reviewQuery),
@@ -59,6 +70,10 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     accessoriesFor(product),
     boughtTogetherWith(product.id),
   ]);
+
+  const recentlyViewed = (
+    await Promise.all(recentSlugs.map((candidate) => getProductBySlug(candidate)))
+  ).filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate));
 
   // Only asked when it can matter: an available product shows no alert control,
   // so there is nothing to reflect.
@@ -74,6 +89,8 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     <div className="mx-auto max-w-7xl px-4 py-8" data-testid="product-page" data-sku={product.sku}>
       {/* Inerte sans tracker : les commandes empilées vers un `_paq` absent sont
           ignorées (lib/analytics.ts). */}
+      <TrackRecentlyViewed slug={product.slug} />
+
       <TrackProductView
         sku={product.sku}
         name={`${product.brand} ${product.name}`}
@@ -236,6 +253,17 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
               section says something true or is not rendered at all. */}
           <div className="mt-4">
             <ProductGrid products={boughtTogether} testId="bought-together" />
+          </div>
+        </section>
+      )}
+
+      {recentlyViewed.length > 0 && (
+        <section className="mt-14" aria-labelledby="recently-viewed-title">
+          <h2 id="recently-viewed-title" className="text-2xl font-bold">
+            Vus récemment
+          </h2>
+          <div className="mt-4">
+            <ProductGrid products={recentlyViewed} testId="recently-viewed" />
           </div>
         </section>
       )}
