@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 176 |
-| — covered by this suite | 175 |
+| Requirements declared | 179 |
+| — covered by this suite | 178 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 257 |
+| Automated test cases | 263 |
 | — Accessibility | 20 |
 | — API | 93 |
-| — UI | 134 |
+| — UI | 140 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -127,6 +127,9 @@ if the committed copy differs.
 | `REQ-DATA-12` | `TC-422` | API | @critical @regression |
 | `REQ-DATA-13` | `TC-423` | API | @critical @regression |
 | `REQ-DATA-14` | `TC-424` | API | @regression |
+| `REQ-GUIDE-01` | `TC-497`, `TC-500` | UI | @regression @smoke |
+| `REQ-GUIDE-02` | `TC-498`, `TC-499` | UI | @regression |
+| `REQ-GUIDE-03` | `TC-501`, `TC-502` | UI | @regression |
 | `REQ-HOME-01` | `TC-010` | UI | @critical @smoke |
 | `REQ-NAV-01` | `TC-012` | UI | @smoke |
 | `REQ-NAV-02` | `TC-062` | UI | @regression |
@@ -462,6 +465,12 @@ if the committed copy differs.
 | `TC-494` | Retrait d’un favori | `REQ-WISH-01` | `ui/favoris.spec.ts` |
 | `TC-495` | Aucun favori | `REQ-WISH-01` | `ui/favoris.spec.ts` |
 | `TC-496` | Favoris protégés | `REQ-WISH-02` | `ui/favoris.spec.ts` |
+| `TC-497` | Accès aux guides | `REQ-GUIDE-01` | `ui/guides.spec.ts` |
+| `TC-498` | Guide relié à son rayon | `REQ-GUIDE-02` | `ui/guides.spec.ts` |
+| `TC-499` | Guide depuis le rayon | `REQ-GUIDE-02` | `ui/guides.spec.ts` |
+| `TC-500` | Guide inconnu | `REQ-GUIDE-01` | `ui/guides.spec.ts` |
+| `TC-501` | Historique de consultation | `REQ-GUIDE-03` | `ui/guides.spec.ts` |
+| `TC-502` | Ordre de l’historique | `REQ-GUIDE-03` | `ui/guides.spec.ts` |
 
 ## Verified outside the automated suite
 
