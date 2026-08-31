@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 160 |
-| — covered by this suite | 159 |
+| Requirements declared | 162 |
+| — covered by this suite | 161 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 222 |
+| Automated test cases | 227 |
 | — Accessibility | 20 |
 | — API | 81 |
-| — UI | 111 |
+| — UI | 116 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -98,10 +98,12 @@ if the committed copy differs.
 | `REQ-CAT-07` | `TC-030` | UI | @smoke |
 | `REQ-CAT-08` | `TC-031` | UI | @critical @regression |
 | `REQ-CAT-09` | `TC-032`, `TC-033` | UI | @regression |
-| `REQ-CMP-01` | `TC-140`, `TC-143`, `TC-145` | UI | @regression @smoke |
-| `REQ-CMP-02` | `TC-141` | UI | @regression |
+| `REQ-CMP-01` | `TC-140`, `TC-143` | UI | @regression @smoke |
+| `REQ-CMP-02` | `TC-141`, `TC-464` | UI | @regression |
 | `REQ-CMP-03` | `TC-142` | UI | @regression |
 | `REQ-CMP-04` | `TC-144` | UI | @regression |
+| `REQ-CMP-05` | `TC-145`, `TC-462`, `TC-463`, `TC-465` | UI | @regression @smoke |
+| `REQ-CMP-06` | `TC-466` | UI | @regression |
 | `REQ-COUPON-01` | `TC-110`, `TC-350` | UI | @critical @known-bug @smoke |
 | `REQ-COUPON-02` | `TC-111` | UI | @regression |
 | `REQ-COUPON-03` | `TC-112`, `TC-113` | UI | @regression |
@@ -275,7 +277,7 @@ if the committed copy differs.
 | `TC-142` | Caractéristiques hétérogènes | `REQ-CMP-03` | `ui/comparateur.spec.ts` |
 | `TC-143` | Retrait du comparateur | `REQ-CMP-01` | `ui/comparateur.spec.ts` |
 | `TC-144` | Comparateur vide | `REQ-CMP-04` | `ui/comparateur.spec.ts` |
-| `TC-145` | Ajout au comparateur depuis la fiche | `REQ-CMP-01` | `ui/comparateur.spec.ts` |
+| `TC-145` | Ajout au comparateur depuis la fiche | `REQ-CMP-05` | `ui/comparateur.spec.ts` |
 | `TC-200` | Inscription nominale | `REQ-AUTH-01` | `api/auth.spec.ts` |
 | `TC-201` | Inscription en doublon | `REQ-AUTH-02` | `api/auth.spec.ts` |
 | `TC-202` | Non-divulgation des comptes | `REQ-SEC-01` | `api/auth.spec.ts` |
@@ -411,6 +413,11 @@ if the committed copy differs.
 | `TC-459` | Mention de stock faible | `REQ-PDP-09` | `ui/disponibilite.spec.ts` |
 | `TC-460` | Frontière du stock faible | `REQ-PDP-09` | `ui/disponibilite.spec.ts` |
 | `TC-461` | Cohérence catalogue / fiche | `REQ-PDP-09` | `ui/disponibilite.spec.ts` |
+| `TC-462` | Persistance de la sélection | `REQ-CMP-05` | `ui/comparateur.spec.ts` |
+| `TC-463` | Retrait depuis le bouton | `REQ-CMP-05` | `ui/comparateur.spec.ts` |
+| `TC-464` | Limite atteinte | `REQ-CMP-02` | `ui/comparateur.spec.ts` |
+| `TC-465` | Vidage de la sélection | `REQ-CMP-05` | `ui/comparateur.spec.ts` |
+| `TC-466` | Lien de comparaison partagé | `REQ-CMP-06` | `ui/comparateur.spec.ts` |
 
 ## Verified outside the automated suite
 

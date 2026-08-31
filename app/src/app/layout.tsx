@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { HydrationMarker } from '@/components/HydrationMarker';
 import { Matomo } from '@/components/analytics/Matomo';
+import { CompareBar } from '@/components/compare/CompareBar';
+import { COMPARE_COOKIE } from '@/lib/compare';
+import { comparedProducts } from '@/lib/compare-session';
 import { isTestMode } from '@/lib/deployment';
 import { THEME_BOOTSTRAP_SCRIPT } from '@/lib/theme';
 
@@ -24,6 +27,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // seuls scripts inline du document — l'amorçage du thème et celui de Matomo —
   // sans ouvrir `script-src` à tout le reste.
   const nonce = (await headers()).get('x-nonce') ?? undefined;
+
+  // Lue ici plutôt que dans chaque page : la barre suit le visiteur d'une page
+  // à l'autre, c'est tout son intérêt. Sans sélection, `comparedProducts` ne
+  // touche pas la base et la barre n'est pas rendue du tout.
+  const compared = await comparedProducts((await cookies()).get(COMPARE_COOKIE)?.value);
 
   return (
     <html lang="fr">
@@ -53,6 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {children}
         </main>
         <Footer />
+        <CompareBar products={compared} />
         <HydrationMarker />
         {/*
           Le tracker est absent de la suite, et la garde est ici plutôt que dans

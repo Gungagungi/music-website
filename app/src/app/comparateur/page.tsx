@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 
 import { Breadcrumb } from '@/components/Breadcrumb';
+import { CompareToggle } from '@/components/compare/CompareToggle';
 import { PriceTag } from '@/components/PriceTag';
 import { Rating } from '@/components/Rating';
 import { getProductBySlug } from '@/lib/catalog';
+import { COMPARE_COOKIE, MAX_COMPARED, parseCompareCookie } from '@/lib/compare';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = { title: 'Comparateur' };
-
-export const MAX_COMPARED = 3;
 
 export default async function ComparePage({
   searchParams,
@@ -18,11 +19,15 @@ export default async function ComparePage({
   searchParams: Promise<{ refs?: string }>;
 }) {
   const { refs } = await searchParams;
-  const slugs = (refs ?? '')
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean)
-    .slice(0, MAX_COMPARED);
+
+  // The URL wins when it carries a selection — a comparison link has to keep
+  // meaning something when it is shared or bookmarked. Without one, the page
+  // falls back to what the visitor has been collecting as they browsed, so
+  // reaching the comparator from the navigation is not an empty page.
+  const fromUrl = Boolean(refs);
+  const slugs = fromUrl
+    ? parseCompareCookie(refs!.split(',').map((value) => value.trim()).join(','))
+    : parseCompareCookie((await cookies()).get(COMPARE_COOKIE)?.value);
 
   // Fetched in parallel, then the unknown slugs are dropped — the comparator is
   // reached by hand-edited URLs, so a stale reference must narrow the table
@@ -53,7 +58,7 @@ export default async function ComparePage({
         >
           <p className="text-lg font-semibold">Aucun produit à comparer.</p>
           <p className="mt-2 text-sm text-fg-muted">
-            Depuis une fiche produit, utilisez le lien « Comparer ce produit ».
+            Depuis une fiche produit ou le catalogue, utilisez « Comparer ce produit ».
           </p>
         </div>
       ) : (
@@ -85,17 +90,26 @@ export default async function ComparePage({
                     <Link href={`/p/${product.slug}`} className="font-semibold hover:text-amber-brand">
                       {product.name}
                     </Link>
+                    {/* Two modes, two controls, and the difference is real. A
+                        `refs` URL is somebody's shared comparison: removing a
+                        column has to narrow *that link*, not silently edit the
+                        reader's own selection. Without one, the page shows what
+                        the visitor collected, and removal writes the cookie. */}
                     <p className="mt-2">
-                      <Link
-                        href={`/comparateur?refs=${products
-                          .filter((candidate) => candidate.slug !== product.slug)
-                          .map((candidate) => candidate.slug)
-                          .join(',')}`}
-                        className="text-xs underline text-fg-muted"
-                        data-testid="compare-remove"
-                      >
-                        Retirer
-                      </Link>
+                      {fromUrl ? (
+                        <Link
+                          href={`/comparateur?refs=${products
+                            .filter((candidate) => candidate.slug !== product.slug)
+                            .map((candidate) => candidate.slug)
+                            .join(',')}`}
+                          className="text-xs underline text-fg-muted"
+                          data-testid="compare-remove"
+                        >
+                          Retirer
+                        </Link>
+                      ) : (
+                        <CompareToggle slug={product.slug} selected />
+                      )}
                     </p>
                   </th>
                 ))}
