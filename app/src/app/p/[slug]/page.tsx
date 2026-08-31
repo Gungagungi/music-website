@@ -7,12 +7,14 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { PriceTag } from '@/components/PriceTag';
 import { ProductGrid } from '@/components/ProductGrid';
 import { Rating } from '@/components/Rating';
+import { StockAlertForm } from '@/components/StockAlertForm';
 import { CompareToggle } from '@/components/compare/CompareToggle';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { TrackProductView } from '@/components/analytics/TrackProductView';
 import { CATEGORY_BY_SLUG } from '@/data/categories';
 import { availabilityFor } from '@/lib/availability';
 import { COMPARE_COOKIE, parseCompareCookie } from '@/lib/compare';
+import { hasAlert } from '@/lib/repositories/stock-alerts';
 import { currentUser } from '@/lib/auth';
 import { getProductBySlug, queryProducts, reviewPage } from '@/lib/catalog';
 import { formatPrice } from '@/lib/money';
@@ -49,6 +51,11 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     queryProducts({ category: product.category, limit: 5 }),
     currentUser(),
   ]);
+
+  // Only asked when it can matter: an available product shows no alert control,
+  // so there is nothing to reflect.
+  const subscribedToRestock =
+    user && product.stock <= 0 ? await hasAlert(product.id, user.id) : false;
   // Five fetched to keep four after dropping the product being viewed.
   const related = sameCategory.items
     .filter((candidate) => candidate.id !== product.id)
@@ -181,6 +188,17 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           <div className="mt-6">
             <AddToCartForm product={product} />
           </div>
+
+          {/* Only on an unavailable product: on an available one the alert
+              would fire on the very next sweep, which is not what "prévenez-moi
+              quand il revient" asks for. The API refuses it too. */}
+          {!availability.orderable && (
+            <StockAlertForm
+              slug={product.slug}
+              subscribed={subscribedToRestock}
+              canSubscribe={Boolean(user)}
+            />
+          )}
 
           <ul className="mt-6 space-y-1 text-xs text-fg-muted">
             <li>Livraison offerte dès {formatPrice(19900)}</li>

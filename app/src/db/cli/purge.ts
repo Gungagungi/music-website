@@ -1,5 +1,6 @@
 import { runCommand } from '@/db/cli/run';
 import { purgeStaleCarts } from '@/lib/repositories/carts';
+import { notifyRestocked } from '@/lib/repositories/stock-alerts';
 
 /**
  * Applies the cart retention policy. Intended to run on a schedule — see
@@ -17,4 +18,10 @@ runCommand('purge des paniers', async () => {
       `${summary.guestCarts} invités expirés, ` +
       `${summary.dormantAccountCarts} rattachés à un compte dormant`,
   );
+
+  // Attaché à la même commande planifiée plutôt qu'à un timer supplémentaire :
+  // les deux balaient la base à intervalle régulier, et un second planificateur
+  // serait un second endroit où oublier de le lancer.
+  const notified = await notifyRestocked();
+  console.log(`[db] alertes de retour en stock — ${notified.length} déclenchée(s)`);
 });

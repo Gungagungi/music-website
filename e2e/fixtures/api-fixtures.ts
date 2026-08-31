@@ -9,6 +9,8 @@ interface ApiFixtures {
   /** Second, independent client — for the "another user cannot read this" cases. */
   otherApi: ApiClient;
   authedApi: ApiClient;
+  /** A second, *authenticated* client — for "another customer cannot see mine". */
+  otherAuthedApi: ApiClient;
   authedUser: { credentials: NewUser; token: string; userId: string };
 }
 
@@ -46,6 +48,19 @@ export const test = base.extend<ApiFixtures>({
   authedApi: async ({ playwright, baseURL, authedUser }, use) => {
     const context = await playwright.request.newContext({ baseURL });
     await use(new ApiClient(context).withToken(authedUser.token));
+    await context.dispose();
+  },
+
+  /**
+   * A different account, not merely a different cookie jar. `otherApi` is
+   * anonymous, which would make a partitioning assertion pass on the 401 rather
+   * than on the partitioning.
+   */
+  otherAuthedApi: async ({ playwright, baseURL }, use) => {
+    const context = await playwright.request.newContext({ baseURL });
+    const client = new ApiClient(context);
+    const { token } = await client.registerAndAuthenticate(new UserBuilder().build());
+    await use(client.withToken(token));
     await context.dispose();
   },
 });

@@ -263,6 +263,25 @@ export class ApiClient {
     });
   }
 
+  subscribeToRestock(slug: string): Promise<APIResponse> {
+    return this.request.post(`/api/products/${slug}/alerts`, { headers: this.headers() });
+  }
+
+  cancelRestockAlert(slug: string): Promise<APIResponse> {
+    return this.request.delete(`/api/products/${slug}/alerts`, { headers: this.headers() });
+  }
+
+  myAlerts(): Promise<APIResponse> {
+    return this.request.get('/api/alerts', { headers: this.headers() });
+  }
+
+  /** Runs the restock sweep — the same function the scheduled command runs. */
+  sweepRestockAlerts(): Promise<APIResponse> {
+    return this.request.post('/api/test/alerts', {
+      headers: { 'x-test-token': TEST_API_TOKEN },
+    });
+  }
+
   /** Runs the cart retention policy — the same function the `purge` service runs. */
   purgeCarts(): Promise<APIResponse> {
     return this.request.post('/api/test/purge', {
