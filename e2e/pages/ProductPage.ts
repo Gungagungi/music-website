@@ -34,6 +34,10 @@ export class ProductPage extends BasePage {
   readonly addToCartStatus: Locator;
   readonly compareToggle: Locator;
   readonly relatedProducts: Locator;
+  readonly tabs: Locator;
+  readonly tabPanel: Locator;
+  readonly accessories: Locator;
+  readonly boughtTogether: Locator;
 
   private slug = '';
 
@@ -75,6 +79,10 @@ export class ProductPage extends BasePage {
     this.addToCartStatus = page.getByTestId('add-to-cart-status');
     this.compareToggle = buyBox.getByTestId('compare-toggle');
     this.relatedProducts = page.getByTestId('related-products').getByTestId('product-card');
+    this.tabs = page.getByTestId('product-tabs');
+    this.tabPanel = page.getByTestId('product-tab-panel');
+    this.accessories = page.getByTestId('accessories').getByTestId('product-card');
+    this.boughtTogether = page.getByTestId('bought-together').getByTestId('product-card');
   }
 
   protected path(): string {
@@ -120,6 +128,16 @@ export class ProductPage extends BasePage {
 
   relatedCard(index: number): ProductCardComponent {
     return new ProductCardComponent(this.relatedProducts.nth(index));
+  }
+
+  /** A detail tab, addressed by its query value. */
+  tab(name: string): Locator {
+    return this.page.getByTestId(`product-tab-${name}`);
+  }
+
+  /** Slugs of the cards inside a suggestion block, in the order rendered. */
+  static async slugsOf(cards: Locator): Promise<string[]> {
+    return cards.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-slug') ?? ''));
   }
 
   /** One bar of the rating histogram; it doubles as the filter control. */

@@ -95,6 +95,9 @@ concatenation for exactly that reason.
 | `REQ-PDP-06` | Related products are suggested | Suggestions exist and exclude the current product |
 | `REQ-PDP-07` | An unknown product returns 404 | The response status is 404 and a not-found page is shown |
 | `REQ-PDP-08` | A shipping delay is stated, not only availability | An available product ships within 24 h; an unavailable one states a restocking delay and stays unorderable |
+| `REQ-PDP-10` | Product details are organised into shareable tabs | The active tab lives in the URL and survives a reload; an unknown tab falls back to the specifications |
+| `REQ-PDP-11` | Compatible accessories are suggested | Suggestions come from the shelves that match the instrument, exclude the product itself, and are ordered totally |
+| `REQ-PDP-12` | Co-purchases are observed, not invented | The block is built from orders that contain the product, and is absent when there are none |
 | `REQ-PDP-09` | A dwindling stock is named | At or below the threshold the remaining units are stated, above it they are not, and the catalogue card agrees with the product page |
 
 ### Customer reviews
