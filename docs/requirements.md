@@ -127,6 +127,13 @@ alerts fire, and that each fires exactly once.
 | `REQ-ALERT-02` | The alert is offered only where it means something | Absent on an available product; a visitor without an account is offered sign-in, and the alerts page is not reachable without one |
 | `REQ-ALERT-03` | A customer manages their own alerts | Subscribing and cancelling happen from the product page; the alerts page lists them with their state |
 
+### Favourites
+
+| ID | Requirement | Acceptance criteria |
+| --- | --- | --- |
+| `REQ-WISH-01` | A customer keeps a list of saved products | The same control saves and removes; the list shows the products with today's price and stock, and an empty list explains how to fill it |
+| `REQ-WISH-02` | Favourites belong to an account | A visitor is offered sign-in rather than a control that fails, and the list is unreachable without one |
+
 ### Comparator
 
 | ID | Requirement | Acceptance criteria |
@@ -231,6 +238,9 @@ undocumented extra field fails the test rather than passing unnoticed.
 | `REQ-API-57` | A restock alert requires an account and an empty shelf | 401 without a token, 409 on an available product |
 | `REQ-API-58` | Subscribing is idempotent and reversible | A second subscription returns the same alert; cancelling twice returns 404 |
 | `REQ-API-59` | Alerts are partitioned by customer | A customer sees only their own alerts |
+| `REQ-API-62` | Saving a favourite requires an account | 401 without a token |
+| `REQ-API-63` | Favourites are idempotent, reversible and current | Saving twice keeps one entry; removing twice returns 404; the list reflects today's price and stock |
+| `REQ-API-64` | Favourites are partitioned by customer | A customer sees only their own |
 | `REQ-API-60` | Malformed input is distinguished from invalid input | Malformed JSON returns 400 `INVALID_JSON`; a schema violation returns 422 `VALIDATION_ERROR` |
 | `REQ-API-61` | Out-of-range query parameters degrade gracefully | An excessive limit, a page past the end and an unknown sort are handled without a 500 |
 | `REQ-OPS-01` | `GET /api/health` reports service state | 200 with a status field, no authentication required |
