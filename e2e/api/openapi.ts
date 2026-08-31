@@ -19,6 +19,7 @@ import {
   reviewSchema,
   stockAlertListSchema,
   stockAlertSchema,
+  wishlistSchema,
 } from '@/api/schemas';
 
 /**
@@ -186,6 +187,43 @@ export const OPERATIONS: Operation[] = [
     authentification: 'cookie-ou-bearer',
     reponses: [
       { code: 200, description: 'Les alertes du client connecté.', schema: stockAlertListSchema },
+      erreur(401, 'Porteur absent ou invalide.'),
+    ],
+  },
+  {
+    chemin: '/api/products/{slug}/wishlist',
+    methode: 'post',
+    resume: 'Enregistrer un produit en favori',
+    etiquette: 'Compte',
+    authentification: 'cookie-ou-bearer',
+    parametres: [parametreChemin('slug', 'Identifiant lisible du produit.', z.string())],
+    reponses: [
+      { code: 201, description: 'Favori enregistré.', schema: z.object({ saved: z.literal(true) }).strict() },
+      erreur(401, 'Porteur absent ou invalide.'),
+      erreur(404, 'Aucun produit pour ce slug.'),
+    ],
+  },
+  {
+    chemin: '/api/products/{slug}/wishlist',
+    methode: 'delete',
+    resume: 'Retirer un produit des favoris',
+    etiquette: 'Compte',
+    authentification: 'cookie-ou-bearer',
+    parametres: [parametreChemin('slug', 'Identifiant lisible du produit.', z.string())],
+    reponses: [
+      { code: 200, description: 'Favori retiré.', schema: z.object({ removed: z.literal(true) }).strict() },
+      erreur(401, 'Porteur absent ou invalide.'),
+      erreur(404, 'Produit inconnu, ou absent des favoris.'),
+    ],
+  },
+  {
+    chemin: '/api/wishlist',
+    methode: 'get',
+    resume: 'Lister ses favoris',
+    etiquette: 'Compte',
+    authentification: 'cookie-ou-bearer',
+    reponses: [
+      { code: 200, description: 'Les favoris du client connecté.', schema: wishlistSchema },
       erreur(401, 'Porteur absent ou invalide.'),
     ],
   },

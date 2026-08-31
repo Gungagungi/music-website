@@ -374,3 +374,40 @@ export const stockAlerts = pgTable(
     uniqueIndex('stock_alerts_unique').on(table.productId, table.userId),
   ],
 );
+
+/* -------------------------------------------------------------------------- */
+/* wishlist_items                                                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Saved products — "j'y reviendrai".
+ *
+ * Attached to an account, like a restock alert, and for a plainer reason: a
+ * wish list is worth having precisely because it survives the browser it was
+ * made in. A cookie-backed list would be lost by the visitor who cleared their
+ * cookies, which is the moment they would most want it back.
+ *
+ * Distinct from `stock_alerts` despite the identical shape. They answer
+ * different questions — "remind me it exists" against "tell me when it returns"
+ * — a product can legitimately be in one and not the other, and merging them
+ * would make removing a wish silently cancel a notification.
+ */
+export const wishlistItems = pgTable(
+  'wishlist_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    productId: text('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (table) => [
+    // The list is read by owner, newest first, and the tiebreaker is in the
+    // index for the same reason every other listing here has one.
+    index('wishlist_user_idx').on(table.userId, table.createdAt, table.id),
+    unique('wishlist_unique').on(table.productId, table.userId),
+  ],
+);

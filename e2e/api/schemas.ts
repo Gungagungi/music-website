@@ -102,6 +102,9 @@ export const stockAlertSchema = z
 
 export const stockAlertListSchema = z.object({ items: z.array(stockAlertSchema) }).strict();
 
+/** Favourites come back as full products: the point is to see today's price. */
+export const wishlistSchema = z.object({ items: z.array(productSchema) }).strict();
+
 export const productDetailSchema = productSchema.extend({
   reviews: z.array(reviewSchema),
 });
