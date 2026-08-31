@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 168 |
-| — covered by this suite | 167 |
+| Requirements declared | 171 |
+| — covered by this suite | 170 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 240 |
+| Automated test cases | 247 |
 | — Accessibility | 20 |
 | — API | 88 |
-| — UI | 122 |
+| — UI | 129 |
 | — Visual | 10 |
 | Test cases without a requirement | 0 |
 
@@ -150,6 +150,9 @@ if the committed copy differs.
 | `REQ-PDP-07` | `TC-071` | UI | @regression |
 | `REQ-PDP-08` | `TC-457`, `TC-458` | UI | @regression @smoke |
 | `REQ-PDP-09` | `TC-459`, `TC-460`, `TC-461` | UI | @regression |
+| `REQ-PDP-10` | `TC-480`, `TC-481`, `TC-482` | UI | @regression @smoke |
+| `REQ-PDP-11` | `TC-483`, `TC-484` | UI | @regression |
+| `REQ-PDP-12` | `TC-485`, `TC-486` | UI | @critical @regression |
 | `REQ-REV-01` | `TC-448` | UI | @regression @smoke |
 | `REQ-REV-02` | `TC-449` | UI | @regression |
 | `REQ-REV-03` | `TC-450` | UI | @regression |
@@ -437,6 +440,13 @@ if the committed copy differs.
 | `TC-477` | Annulation d’une alerte | `REQ-API-58` | `api/alertes.spec.ts` |
 | `TC-478` | Déclenchement au retour en stock | `REQ-ALERT-01` | `api/alertes.spec.ts` |
 | `TC-479` | Balayage sans retour en stock | `REQ-ALERT-01` | `api/alertes.spec.ts` |
+| `TC-480` | Onglet par défaut | `REQ-PDP-10` | `ui/fiche-details.spec.ts` |
+| `TC-481` | Onglet dans l’URL | `REQ-PDP-10` | `ui/fiche-details.spec.ts` |
+| `TC-482` | Onglet inconnu | `REQ-PDP-10` | `ui/fiche-details.spec.ts` |
+| `TC-483` | Accessoires compatibles | `REQ-PDP-11` | `ui/fiche-details.spec.ts` |
+| `TC-484` | Ordre total des accessoires | `REQ-PDP-11` | `ui/fiche-details.spec.ts` |
+| `TC-485` | Co-achat sans donnée | `REQ-PDP-12` | `ui/fiche-details.spec.ts` |
+| `TC-486` | Co-achat observé | `REQ-PDP-12` | `ui/fiche-details.spec.ts` |
 
 ## Verified outside the automated suite
 
