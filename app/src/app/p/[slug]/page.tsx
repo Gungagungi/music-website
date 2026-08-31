@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import { AddToCartForm } from '@/components/AddToCartForm';
@@ -7,10 +7,12 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { PriceTag } from '@/components/PriceTag';
 import { ProductGrid } from '@/components/ProductGrid';
 import { Rating } from '@/components/Rating';
+import { CompareToggle } from '@/components/compare/CompareToggle';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { TrackProductView } from '@/components/analytics/TrackProductView';
 import { CATEGORY_BY_SLUG } from '@/data/categories';
 import { availabilityFor } from '@/lib/availability';
+import { COMPARE_COOKIE, parseCompareCookie } from '@/lib/compare';
 import { currentUser } from '@/lib/auth';
 import { getProductBySlug, queryProducts, reviewPage } from '@/lib/catalog';
 import { formatPrice } from '@/lib/money';
@@ -40,6 +42,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
 
   const reviewQuery = parseReviewParams(await searchParams);
   const availability = availabilityFor(product.stock);
+  const comparedSlugs = parseCompareCookie((await cookies()).get(COMPARE_COOKIE)?.value);
   const category = CATEGORY_BY_SLUG.get(product.category);
   const [reviews, sameCategory, user] = await Promise.all([
     reviewPage(product.id, reviewQuery),
@@ -185,13 +188,13 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
             <li>Garantie 3 ans</li>
           </ul>
 
-          <Link
-            href={`/comparateur?refs=${product.slug}`}
-            className="mt-4 inline-block text-sm underline hover:text-amber-brand"
-            data-testid="add-to-compare"
-          >
-            Comparer ce produit
-          </Link>
+          <div className="mt-4">
+            <CompareToggle
+              slug={product.slug}
+              selected={comparedSlugs.includes(product.slug)}
+              variant="button"
+            />
+          </div>
         </aside>
       </div>
 
