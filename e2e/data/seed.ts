@@ -30,6 +30,22 @@ export const SEEDED_USERS = {
   },
 } as const;
 
+/**
+ * Stored reviews of `PRODUCTS.reviewed`, level by level. The suite asserts the
+ * histogram against these counts, so a seed change that forgets the suite fails
+ * loudly instead of quietly weakening the assertions.
+ */
+export const REVIEWS = {
+  product: 'fender-player-ii-stratocaster-mn',
+  pageSize: 5,
+  stored: 10,
+  histogram: { 1: 1, 2: 1, 3: 2, 4: 3, 5: 3 },
+  verified: 7,
+  /** Most recent review — the first row under the default `recents` sort. */
+  newest: 'Hugo L.',
+  oldest: 'Inès F.',
+} as const;
+
 export const COUPONS = {
   valid: { code: 'BIENVENUE10', minSubtotalCents: 5000, percent: 10 },
   categoryScoped: { code: 'CORDES5', category: 'cordes', amountCents: 500 },
@@ -52,6 +68,18 @@ export const PRODUCTS = {
     category: 'guitares-electriques',
   },
   outOfStock: {
+    slug: 'fender-player-ii-stratocaster-mn',
+    sku: 'FEN-PLAYER-001',
+    brand: 'Fender',
+    name: 'Player II Stratocaster MN',
+  },
+  /**
+   * The only product seeded with enough reviews to page through and to draw a
+   * histogram covering all five levels. Its aggregates (`rating`,
+   * `reviewCount`) still describe a longer history than the ten stored reviews
+   * — that gap is deliberate, and `REVIEWS` records what is actually stored.
+   */
+  reviewed: {
     slug: 'fender-player-ii-stratocaster-mn',
     sku: 'FEN-PLAYER-001',
     brand: 'Fender',
@@ -109,6 +137,17 @@ export const PRODUCTS = {
     slug: 'epiphone-les-paul-classic',
     sku: 'EPI-LESPAU-005',
     brand: 'Epiphone',
+  },
+  /**
+   * Reserved for the UI review-publishing specs, and used by nothing else.
+   * Publishing moves the product's average and its stored review count, both of
+   * which those specs assert on — a second spot writing here would make them
+   * fail for a reason unrelated to the behaviour under test.
+   */
+  reviewTarget: {
+    slug: 'martin-guitar-d-28-standard',
+    sku: 'MAR-D28STA-014',
+    brand: 'Martin Guitar',
   },
   /** Reserved for the checkout atomicity spec — the line that must survive. */
   atomicityIntact: {

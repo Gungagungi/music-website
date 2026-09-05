@@ -91,6 +91,7 @@ function reviewRows() {
         rating: seed.rating,
         title: seed.title,
         body: seed.body,
+        verifiedPurchase: seed.verifiedPurchase ?? false,
         createdAt: new Date(seed.createdAt),
       },
     ];

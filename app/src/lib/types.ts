@@ -144,6 +144,39 @@ export interface Review {
   title: string;
   body: string;
   createdAt: string;
+  /**
+   * Snapshot, taken when the review is published: did that customer already own
+   * the product? Recomputing it at read time would let a later order rewrite the
+   * badge on an old review, and the badge claims something about the moment the
+   * opinion was written.
+   */
+  verifiedPurchase: boolean;
+}
+
+export type ReviewSortKey = 'recents' | 'anciens' | 'note-desc' | 'note-asc';
+
+export const REVIEW_SORT_KEYS = ['recents', 'anciens', 'note-desc', 'note-asc'] as const;
+
+export interface ReviewQuery {
+  sort?: ReviewSortKey;
+  /** Keeps only the reviews carrying exactly that many stars. */
+  rating?: number;
+  page?: number;
+  limit?: number;
+}
+
+/** Count of stored reviews per star level, always five entries, 5 down to 1. */
+export type RatingHistogram = Record<1 | 2 | 3 | 4 | 5, number>;
+
+export interface ReviewPage extends Paginated<Review> {
+  /**
+   * Computed over *every* stored review of the product, not over the current
+   * page, and never over the filtered subset — a histogram that redrew itself
+   * to match the filter would stop being the thing you filter with.
+   */
+  histogram: RatingHistogram;
+  /** Total number of stored reviews, filter-independent, for the same reason. */
+  storedCount: number;
 }
 
 export type SortKey = 'pertinence' | 'prix-asc' | 'prix-desc' | 'note' | 'nouveautes';

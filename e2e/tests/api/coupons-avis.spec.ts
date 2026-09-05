@@ -4,9 +4,10 @@ import {
   cartSchema,
   couponPreviewSchema,
   productDetailSchema,
+  reviewPageSchema,
   reviewSchema,
 } from '@/api/schemas';
-import { COUPONS, PRODUCTS } from '@/data/seed';
+import { COUPONS, PRODUCTS, REVIEWS } from '@/data/seed';
 import { percentOf } from '@/utils/money';
 import { TAGS, covers, testCase } from '@/utils/tags';
 
@@ -258,6 +259,131 @@ test.describe('API — avis clients', () => {
         422,
       );
       expect(body.error.details?.[0]?.field).toBe('rating');
+    },
+  );
+});
+
+test.describe('API — liste des avis', () => {
+  test(
+    'la liste est paginée et porte la répartition des notes',
+    {
+      tag: [TAGS.regression, TAGS.contract],
+      annotation: [testCase('TC-284', 'Pagination des avis'), covers('REQ-API-53')],
+    },
+    async ({ api }) => {
+      const page = await api.expectOk(
+        await api.reviews(REVIEWS.product, { limit: REVIEWS.pageSize }),
+        reviewPageSchema,
+      );
+
+      expect(page.items).toHaveLength(REVIEWS.pageSize);
+      expect(page.total).toBe(REVIEWS.stored);
+      expect(page.totalPages).toBe(REVIEWS.stored / REVIEWS.pageSize);
+      expect(page.storedCount).toBe(REVIEWS.stored);
+      expect(page.histogram).toEqual(REVIEWS.histogram);
+    },
+  );
+
+  test(
+    'deux pages consécutives ne partagent aucun avis',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-285', 'Étanchéité des pages d’avis'), covers('REQ-API-53')],
+    },
+    async ({ api }) => {
+      // Sorted by rating, where ten reviews share five values: without the tie
+      // broken on a unique column, the same row can surface on both pages.
+      const first = await api.expectOk(
+        await api.reviews(REVIEWS.product, { limit: 5, sort: 'note-desc', page: 1 }),
+        reviewPageSchema,
+      );
+      const second = await api.expectOk(
+        await api.reviews(REVIEWS.product, { limit: 5, sort: 'note-desc', page: 2 }),
+        reviewPageSchema,
+      );
+
+      const ids = new Set([...first.items, ...second.items].map((review) => review.id));
+      expect(ids.size).toBe(REVIEWS.stored);
+    },
+  );
+
+  test(
+    'le tri par note ordonne bien la liste entière',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-286', 'Tri des avis par note'), covers('REQ-API-54')],
+    },
+    async ({ api }) => {
+      const page = await api.expectOk(
+        await api.reviews(REVIEWS.product, { sort: 'note-asc', limit: REVIEWS.stored }),
+        reviewPageSchema,
+      );
+
+      const notes = page.items.map((review) => review.rating);
+      expect(notes).toEqual([...notes].sort((a, b) => a - b));
+      expect(notes[0]).toBe(1);
+      expect(notes.at(-1)).toBe(5);
+    },
+  );
+
+  test(
+    'le filtre par note restreint les avis sans toucher à la répartition',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-287', 'Filtre des avis par note'), covers('REQ-API-55')],
+    },
+    async ({ api }) => {
+      const filtered = await api.expectOk(
+        await api.reviews(REVIEWS.product, { note: 5 }),
+        reviewPageSchema,
+      );
+
+      expect(filtered.total).toBe(REVIEWS.histogram[5]);
+      expect(filtered.items.every((review) => review.rating === 5)).toBe(true);
+      // The histogram is what the filter is applied *from*; recomputing it under
+      // the filter would leave a single bar and no way back.
+      expect(filtered.histogram).toEqual(REVIEWS.histogram);
+      expect(filtered.storedCount).toBe(REVIEWS.stored);
+    },
+  );
+
+  test(
+    'une note de filtre hors de l’échelle est refusée',
+    {
+      tag: [TAGS.regression, TAGS.contract],
+      annotation: [testCase('TC-288', 'Filtre d’avis invalide'), covers('REQ-API-55')],
+    },
+    async ({ api }) => {
+      const body = await api.expectOk(
+        await api.reviews(REVIEWS.product, { note: 9 }),
+        apiErrorSchema,
+        422,
+      );
+      expect(body.error.code).toBe('VALIDATION_ERROR');
+    },
+  );
+
+  test(
+    'un avis publié par un client sans commande n’est pas marqué « achat vérifié »',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-289', 'Badge achat vérifié'), covers('REQ-API-56')],
+    },
+    async ({ authedApi }) => {
+      const review = await authedApi.expectOk(
+        await authedApi.createReview(PRODUCTS.leftHanded.slug, {
+          rating: 4,
+          title: 'Bonne surprise pour une gauchère',
+          body: 'Les modèles gauchers de ce niveau sont rares, celui-ci tient ses promesses.',
+        }),
+        reviewSchema,
+        201,
+      );
+
+      // The account is created by the fixture and has ordered nothing, so the
+      // badge must be absent — it is a claim about the order history, not a
+      // decoration on any signed-in opinion.
+      expect(review.verifiedPurchase).toBe(false);
     },
   );
 });

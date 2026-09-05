@@ -1,4 +1,4 @@
-import type { ProductQuery, SortKey } from '@/lib/types';
+import type { ProductQuery, ReviewQuery, ReviewSortKey, SortKey } from '@/lib/types';
 import { CATEGORY_SLUGS } from '@/lib/types';
 
 export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
@@ -8,6 +8,34 @@ export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'note', label: 'Meilleures notes' },
   { value: 'nouveautes', label: 'Nouveautés' },
 ];
+
+export const REVIEW_SORT_OPTIONS: { value: ReviewSortKey; label: string }[] = [
+  { value: 'recents', label: 'Plus récents' },
+  { value: 'anciens', label: 'Plus anciens' },
+  { value: 'note-desc', label: 'Meilleures notes' },
+  { value: 'note-asc', label: 'Notes les plus basses' },
+];
+
+/**
+ * Reads the reviews block's own query parameters.
+ *
+ * They are prefixed `avis-` because the block shares its URL with the rest of
+ * the product page. An out-of-range or unknown value falls back to the default
+ * rather than erroring: these URLs get hand-edited and shared, and a 500 on a
+ * stale link would be a worse answer than the unfiltered list.
+ */
+export function parseReviewParams(params: RawSearchParams): ReviewQuery & { sort: ReviewSortKey } {
+  const sort = first(params['avis-tri']);
+  const rating = toInt(params['avis-note']);
+
+  return {
+    sort: REVIEW_SORT_OPTIONS.some((option) => option.value === sort)
+      ? (sort as ReviewSortKey)
+      : 'recents',
+    rating: rating !== undefined && rating >= 1 && rating <= 5 ? rating : undefined,
+    page: toInt(params['avis-page']),
+  };
+}
 
 /**
  * Catalog URLs use exactly the same parameter names and units as

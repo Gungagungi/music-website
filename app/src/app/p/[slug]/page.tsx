@@ -7,18 +7,23 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { PriceTag } from '@/components/PriceTag';
 import { ProductGrid } from '@/components/ProductGrid';
 import { Rating } from '@/components/Rating';
+import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { TrackProductView } from '@/components/analytics/TrackProductView';
 import { CATEGORY_BY_SLUG } from '@/data/categories';
-import { getProductBySlug, queryProducts, reviewsForProduct } from '@/lib/catalog';
+import { currentUser } from '@/lib/auth';
+import { getProductBySlug, queryProducts, reviewPage } from '@/lib/catalog';
 import { formatPrice } from '@/lib/money';
+import { parseReviewParams } from '@/lib/search-params';
+import type { RawSearchParams } from '@/lib/search-params';
 
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<RawSearchParams>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Pick<PageProps, 'params'>): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   return {
@@ -27,15 +32,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function ProductPage({ params }: PageProps) {
+export default async function ProductPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
+  const reviewQuery = parseReviewParams(await searchParams);
   const category = CATEGORY_BY_SLUG.get(product.category);
-  const [reviews, sameCategory] = await Promise.all([
-    reviewsForProduct(product.id),
+  const [reviews, sameCategory, user] = await Promise.all([
+    reviewPage(product.id, reviewQuery),
     queryProducts({ category: product.category, limit: 5 }),
+    currentUser(),
   ]);
   // Five fetched to keep four after dropping the product being viewed.
   const related = sameCategory.items
@@ -110,46 +117,14 @@ export default async function ProductPage({ params }: PageProps) {
             </dl>
           </section>
 
-          <section className="mt-10" aria-labelledby="reviews-title">
-            <h2 id="reviews-title" className="text-xl font-bold">
-              Avis clients
-            </h2>
-            {/* The star rating aggregates the product's whole history; only the
-                most recent reviews are kept in full. */}
-            <p className="mt-1 text-sm text-fg-muted" data-testid="reviews-summary">
-              Note moyenne {product.rating.toFixed(1)}/5 sur {product.reviewCount} avis ·{' '}
-              {reviews.length} avis détaillé{reviews.length > 1 ? 's' : ''}
-            </p>
-            {reviews.length === 0 ? (
-              <p className="mt-3 text-fg-muted" data-testid="no-reviews">
-                Aucun avis pour le moment. Soyez le premier à donner le vôtre.
-              </p>
-            ) : (
-              <ul className="mt-4 space-y-4" data-testid="review-list" data-count={reviews.length}>
-                {reviews.map((review) => (
-                  <li
-                    key={review.id}
-                    className="rounded-lg border border-line bg-surface p-4"
-                    data-testid="review-item"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="font-semibold">{review.title}</h3>
-                      <Rating value={review.rating} count={1} />
-                    </div>
-                    <p className="mt-2 text-sm leading-relaxed">{review.body}</p>
-                    <p className="mt-2 text-xs text-fg-muted">
-                      {review.author} ·{' '}
-                      {new Date(review.createdAt).toLocaleDateString('fr-FR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+          <ReviewsSection
+            product={product}
+            page={reviews}
+            sort={reviewQuery.sort}
+            rating={reviewQuery.rating}
+            canReview={Boolean(user)}
+          />
+
         </div>
 
         {/* The buy box carries its own test id: prices and availability labels

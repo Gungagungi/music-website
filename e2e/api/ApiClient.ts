@@ -96,8 +96,16 @@ export class ApiClient {
     return this.request.get('/api/brands', { params: category ? { category } : {} });
   }
 
-  reviews(slug: string): Promise<APIResponse> {
-    return this.request.get(`/api/products/${slug}/reviews`);
+  reviews(
+    slug: string,
+    params: { sort?: string; note?: number; page?: number; limit?: number } = {},
+  ): Promise<APIResponse> {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined) search.set(key, String(value));
+    }
+    const query = search.toString();
+    return this.request.get(`/api/products/${slug}/reviews${query ? `?${query}` : ''}`);
   }
 
   createReview(

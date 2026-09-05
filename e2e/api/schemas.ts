@@ -59,7 +59,31 @@ export const reviewSchema = z
     rating: z.number().int().min(1).max(5),
     title: z.string().min(1),
     body: z.string().min(1),
+    verifiedPurchase: z.boolean(),
     createdAt: z.string().datetime(),
+  })
+  .strict();
+
+/**
+ * One page of reviews. `histogram` and `storedCount` describe the product's whole
+ * stored set, not the page, so a spec can assert that filtering narrows `items`
+ * and `total` while leaving the histogram alone.
+ */
+export const reviewPageSchema = z
+  .object({
+    items: z.array(reviewSchema),
+    page: z.number().int().positive(),
+    limit: z.number().int().positive(),
+    total: z.number().int().nonnegative(),
+    totalPages: z.number().int().positive(),
+    histogram: z.object({
+      1: z.number().int().nonnegative(),
+      2: z.number().int().nonnegative(),
+      3: z.number().int().nonnegative(),
+      4: z.number().int().nonnegative(),
+      5: z.number().int().nonnegative(),
+    }),
+    storedCount: z.number().int().nonnegative(),
   })
   .strict();
 
