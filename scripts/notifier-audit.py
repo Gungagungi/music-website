@@ -35,6 +35,12 @@ from pathlib import Path
 
 SEVERITES = ("critique", "eleve", "moyen", "faible", "info")
 
+# L'API ntfy par en-têtes accepte les mots-clés ("default", "high"...), mais
+# l'API JSON — celle que `publier()` utilise — exige un entier 1-5 et rejette
+# la chaîne avec un 400 « request body must be valid JSON », message trompeur
+# qui ne pointe pas vers le champ fautif.
+PRIORITES_NTFY = {"min": 1, "low": 2, "default": 3, "high": 4, "urgent": 5, "max": 5}
+
 
 def cle(constat: dict) -> tuple[str, str]:
     """Identité d'un constat, insensible aux nombres qu'il contient.
@@ -141,7 +147,13 @@ def publier(base: str, topic: str, token: str, titre: str, message: str, priorit
     JSON est en UTF-8 par construction.
     """
     corps = json.dumps(
-        {"topic": topic, "title": titre, "message": message, "priority": priorite, "tags": tags},
+        {
+            "topic": topic,
+            "title": titre,
+            "message": message,
+            "priority": PRIORITES_NTFY.get(priorite, 3),
+            "tags": tags,
+        },
         ensure_ascii=False,
     ).encode("utf-8")
     entetes = {"Content-Type": "application/json"}
