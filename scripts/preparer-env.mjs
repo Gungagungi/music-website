@@ -19,7 +19,7 @@
  * Node plutôt qu'`openssl` : c'est la seule dépendance dont on soit certain.
  */
 import { randomBytes } from 'node:crypto';
-import { appendFileSync, copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, chmodSync, copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -61,7 +61,12 @@ const renseignee = (contenu, variable) =>
   new RegExp(String.raw`^[ \t]*${variable}[ \t]*=[ \t]*\S`, 'm').test(contenu);
 
 const creation = !existsSync(cible);
-if (creation) copyFileSync(join(repoRoot, modele), cible);
+if (creation) {
+  copyFileSync(join(repoRoot, modele), cible);
+  // `copyFileSync` reprend les droits du modèle, versionné donc lisible par tous
+  // (664) : le fichier de secrets l'était aussi, par le groupe entier.
+  chmodSync(cible, 0o600);
+}
 
 let contenu = readFileSync(cible, 'utf8');
 
