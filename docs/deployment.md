@@ -222,13 +222,17 @@ server or one environment per pull request.
 One-time setup, in `.env.production`, then Caddy alone is recreated:
 
 ```bash
-docker compose exec caddy caddy hash-password --plaintext '<password>'
+docker exec fretline-caddy-1 caddy hash-password --plaintext '<password>'
 $EDITOR .env.production   # FRETLINE_PREPROD_DOMAIN=preprod.your-domain
                           # PREPROD_BASIC_AUTH_HASH='<hash>'   ← single quotes, see below
                           # PREPROD_ACCESS_KEY=<openssl rand -hex 32>
 docker compose --env-file .env.production up -d caddy
 npm run preprod:env       # .env.preprod: database password, signing key, test token
 ```
+
+`docker exec` rather than `docker compose exec`: even an `exec` makes Compose interpolate the
+whole file, and without `--env-file .env.production` it reads the development `.env` and stops
+on `required variable … is missing a value`.
 
 The hash must be single-quoted. It is full of `$`, which Compose would otherwise interpolate:
 `$2a` becomes empty, the hash is truncated, and Caddy rejects the whole configuration — the
