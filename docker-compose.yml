@@ -208,6 +208,9 @@ services:
       # serveur de notifications en clair sur l'extérieur laisserait passer le
       # jeton de publication en clair avec.
       - '127.0.0.1:${FRETLINE_NTFY_PORT:-8082}:8082'
+      # Pré-production sans nom de domaine : même motif, en clair sur la boucle
+      # locale. Voir docker-compose.preprod.yml.
+      - '127.0.0.1:${FRETLINE_PREPROD_PORT:-8083}:8083'
     environment:
       FRETLINE_DOMAIN: ${FRETLINE_DOMAIN:?FRETLINE_DOMAIN est obligatoire}
       FRETLINE_NTFY_DOMAIN: ${FRETLINE_NTFY_DOMAIN:-:8082}
@@ -215,6 +218,19 @@ services:
       # `{$FRETLINE_ANALYTICS_DOMAIN}` du bloc analytics retomberait toujours sur
       # son défaut, et un domaine renseigné dans .env serait ignoré en silence.
       FRETLINE_ANALYTICS_DOMAIN: ${FRETLINE_ANALYTICS_DOMAIN:-:8081}
+      # Pré-production. Les défauts sont posés ici et non seulement dans le
+      # Caddyfile : Caddy n'applique le sien qu'à une variable *absente*, et
+      # Compose transmet une variable vide. Un domaine vide fait refuser toute la
+      # configuration — et tomber la boutique avec. Le hash par défaut est celui
+      # d'une chaîne tirée au hasard puis jetée : personne n'entre (`$$` est
+      # l'échappement Compose du `$` de bcrypt).
+      FRETLINE_PREPROD_DOMAIN: ${FRETLINE_PREPROD_DOMAIN:-:8083}
+      PREPROD_BASIC_AUTH_USER: ${PREPROD_BASIC_AUTH_USER:-fretline}
+      PREPROD_BASIC_AUTH_HASH: ${PREPROD_BASIC_AUTH_HASH:-$$2a$$14$$Bcoh63tinCQaAAH8qPR4teL49GuNTsmWW1dhmSueQ5xHWLqKMKI6e}
+      PREPROD_ACCESS_KEY: ${PREPROD_ACCESS_KEY:-}
+    networks:
+      - default
+      - edge
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       # Les certificats obtenus vivent ici. Sans ce volume, chaque redéploiement
@@ -225,6 +241,16 @@ services:
       - app
       - matomo
       - ntfy
+
+networks:
+  default:
+  # Le seul pont vers la pré-production (docker-compose.preprod.yml), qui s'y
+  # rattache en réseau externe. Nom fixe, puisque l'autre pile le désigne par ce
+  # nom ; créé ici et non à la main, pour que cette pile démarre seule — en CI
+  # comme sur un serveur neuf. Seul Caddy y est branché : la base de production
+  # reste hors de portée des conteneurs de la pré-prod.
+  edge:
+    name: fretline-edge
 
 volumes:
   pgdata:

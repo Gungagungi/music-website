@@ -5,6 +5,7 @@
  *   node scripts/preparer-env.mjs               → .env, depuis .env.example
  *   node scripts/preparer-env.mjs --production  → .env.production, depuis .env.production.example
  *   ... --production --domain=:80               → renseigne aussi FRETLINE_DOMAIN
+ *   node scripts/preparer-env.mjs --preprod     → .env.preprod, depuis .env.preprod.example
  *
  * Rien n'est jamais écrasé : une variable déjà renseignée est laissée telle
  * quelle, quel que soit le nombre de passages.
@@ -24,10 +25,11 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const production = process.argv.includes('--production');
+const preprod = process.argv.includes('--preprod');
 const domaine = process.argv.find((argument) => argument.startsWith('--domain='))?.slice(9);
 
-const nom = production ? '.env.production' : '.env';
-const modele = production ? '.env.production.example' : '.env.example';
+const nom = production ? '.env.production' : preprod ? '.env.preprod' : '.env';
+const modele = `${nom}.example`;
 const cible = join(repoRoot, nom);
 
 /**
@@ -63,37 +65,33 @@ if (creation) copyFileSync(join(repoRoot, modele), cible);
 
 let contenu = readFileSync(cible, 'utf8');
 
-if (production) {
-  // Les modèles de production déclarent les variables sans valeur, pour que le
-  // compose refuse de démarrer tant qu'on ne les a pas remplies. Les deux qui
-  // sont de purs secrets n'ont aucune raison de demander une décision humaine :
-  // on les remplit ici. FRETLINE_DOMAIN, si.
-  const remplies = [];
+// Les modèles de production et de pré-production déclarent les variables sans
+// valeur, pour que le compose refuse de démarrer tant qu'on ne les a pas
+// remplies. Celles qui sont de purs secrets n'ont aucune raison de demander une
+// décision humaine : on les remplit ici. FRETLINE_DOMAIN, si.
+const remplies = [];
 
-  /** Renseigne une variable déclarée vide par le modèle, sans jamais écraser. */
-  function remplir(variable, valeur) {
-    if (valeur === undefined || renseignee(contenu, variable)) return;
-    const declaration = new RegExp(String.raw`^[ \t]*${variable}[ \t]*=.*$`, 'm');
-    // Une variable arrivée après coup n'est pas déclarée par les fichiers créés
-    // avant elle : sans cet ajout, le remplacement ne trouverait rien, le
-    // script sortirait en silence, et le compose échouerait plus loin sur une
-    // interpolation manquante — une erreur qui ne désigne pas le fichier à
-    // corriger.
-    contenu = declaration.test(contenu)
-      ? contenu.replace(declaration, `${variable}=${valeur}`)
-      : `${contenu}\n${variable}=${valeur}\n`;
-    remplies.push(variable);
-  }
+/** Renseigne une variable déclarée vide par le modèle, sans jamais écraser. */
+function remplir(variable, valeur) {
+  if (valeur === undefined || renseignee(contenu, variable)) return;
+  const declaration = new RegExp(String.raw`^[ \t]*${variable}[ \t]*=.*$`, 'm');
+  // Une variable arrivée après coup n'est pas déclarée par les fichiers créés
+  // avant elle : sans cet ajout, le remplacement ne trouverait rien, le
+  // script sortirait en silence, et le compose échouerait plus loin sur une
+  // interpolation manquante — une erreur qui ne désigne pas le fichier à
+  // corriger.
+  contenu = declaration.test(contenu)
+    ? contenu.replace(declaration, `${variable}=${valeur}`)
+    : `${contenu}\n${variable}=${valeur}\n`;
+  remplies.push(variable);
+}
 
-  remplir('POSTGRES_PASSWORD', secret(24));
-  remplir('AUTH_SECRET', secret(36));
-  // Même raison que POSTGRES_PASSWORD : la valeur traverse une chaîne de
-  // connexion. Elle n'appelle aucune décision humaine non plus.
-  remplir('MATOMO_DB_PASSWORD', secret(24));
-
-  // Un mot de passe écrit à la main, lui, peut venir d'un `openssl rand -base64`
-  // et rapporter le problème que la génération vient d'éviter. Autant le dire
-  // ici plutôt que de laisser le conteneur échouer sur « Invalid URL ».
+/**
+ * Un mot de passe écrit à la main, lui, peut venir d'un `openssl rand -base64`
+ * et rapporter le problème que la génération vient d'éviter. Autant le dire
+ * ici plutôt que de laisser le conteneur échouer sur « Invalid URL ».
+ */
+function exigerMotDePasseCompatibleUrl() {
   const motDePasse = valeurDe(contenu, 'POSTGRES_PASSWORD');
   if (motDePasse !== undefined && !traverseUneUrl(motDePasse)) {
     console.error(
@@ -104,14 +102,27 @@ if (production) {
     );
     process.exit(1);
   }
-  // Seule variable que le script ne devine pas — il faut la lui donner.
-  remplir('FRETLINE_DOMAIN', domaine);
+}
 
+function ecrireEtRapporter() {
   if (remplies.length > 0) writeFileSync(cible, contenu);
 
   if (creation) console.log(`${nom} créé depuis ${modele} — ${remplies.join(', ')}`);
   else if (remplies.length > 0) console.log(`${nom} complété : ${remplies.join(', ')}`);
   else console.log(`${nom} existe déjà — inchangé`);
+}
+
+if (production) {
+  remplir('POSTGRES_PASSWORD', secret(24));
+  remplir('AUTH_SECRET', secret(36));
+  // Même raison que POSTGRES_PASSWORD : la valeur traverse une chaîne de
+  // connexion. Elle n'appelle aucune décision humaine non plus.
+  remplir('MATOMO_DB_PASSWORD', secret(24));
+  exigerMotDePasseCompatibleUrl();
+  // Seule variable que le script ne devine pas — il faut la lui donner.
+  remplir('FRETLINE_DOMAIN', domaine);
+
+  ecrireEtRapporter();
 
   // Sortie en échec, et non un simple avertissement : `prod:up` enchaîne sur
   // `docker compose` avec `&&`. Un code 0 laissait la commande suivante
@@ -126,6 +137,15 @@ if (production) {
     );
     process.exit(1);
   }
+} else if (preprod) {
+  // Rien à décider ici : le domaine et l'accès de la pré-prod sont portés par le
+  // Caddy de la production, donc par .env.production.
+  remplir('POSTGRES_PASSWORD', secret(24));
+  remplir('AUTH_SECRET', secret(36));
+  remplir('TEST_API_TOKEN', secret(24));
+  exigerMotDePasseCompatibleUrl();
+
+  ecrireEtRapporter();
 } else {
   // Un `.env` existant est laissé tel quel, à une exception près : la clé de
   // signature. Elle est arrivée après coup, donc les fichiers créés avant ce

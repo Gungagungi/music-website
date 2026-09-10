@@ -1,0 +1,101 @@
+# Pré-production : une branche du dépôt, déployée à côté de la production sur le
+# même serveur, pour l'éprouver sans la faire tourner sur un poste. Voir ADR-007.
+#
+#   npm run preprod:env               # .env.preprod, secrets tirés au hasard
+#   npm run preprod:deploy <branche>  # scripts/deployer-preprod.sh
+#
+# Ne pas lancer ce fichier à la main depuis ce checkout : le script le fait
+# depuis un worktree dédié, positionné sur la branche, et c'est ce worktree qui
+# sert de contexte de build.
+#
+# Trois différences avec docker-compose.yml, chacune voulue :
+#
+# - E2E_TEST_MODE=1. Les endpoints /api/test/* sont ouverts (derrière leur
+#   jeton), pour que la suite Playwright puisse viser la pré-prod. Matomo est
+#   absent d'office dans ce mode : la mesure d'audience de la boutique ne reçoit
+#   pas les visites de test.
+# - Ni Caddy, ni Matomo, ni ntfy, ni purge. Le Caddy de la production sert
+#   aussi ce site, par le réseau `fretline-edge` ; la base est remise à zéro à
+#   chaque déploiement, la rétention n'a rien à y balayer.
+# - Des limites de ressources. Cette pile partage 2 vCPU avec la boutique, dont
+#   le point de rupture mesuré est une saturation CPU : la pré-prod doit
+#   plafonner avant elle.
+
+# Nom distinct de `fretline` et de `fretline-dev` : même raison que dans les deux
+# autres fichiers, Compose rapprocherait sinon les services par leur nom.
+name: fretline-preprod
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: Dockerfile
+  # Jamais `fretline-app:latest`, qui est le tag de la production. Un build de
+  # branche l'écraserait, et le prochain `up` de la production démarrerait cette
+  # branche-là, sans rien reconstruire et sans rien signaler.
+  image: fretline-app:preprod
+  environment:
+    DATABASE_URL: postgresql://fretline:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire — npm run preprod:env}@db:5432/fretline
+    AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET est obligatoire — npm run preprod:env}
+    E2E_TEST_MODE: '1'
+    TEST_API_TOKEN: ${TEST_API_TOKEN:?TEST_API_TOKEN est obligatoire — npm run preprod:env}
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: fretline
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire — npm run preprod:env}
+      POSTGRES_DB: fretline
+    # Volume nommé plutôt que tmpfs : un tmpfs vit en RAM, et la RAM est
+    # précisément ce qui manque sur ce serveur. La remise à zéro est faite par le
+    # script (`down --volumes`), pas par la nature du stockage.
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    mem_limit: 256m
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U fretline -d fretline']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    <<: *app
+    command: ['node', 'app/dist/db/bootstrap.mjs']
+    restart: 'no'
+    # Même raison qu'en production : pas de serveur HTTP dans ce conteneur.
+    healthcheck:
+      disable: true
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    <<: *app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    expose:
+      - '3000'
+    cpus: '0.75'
+    mem_limit: 512m
+    networks:
+      default:
+      # L'alias est ce que le Caddyfile vise. Le nom de service `app` ne peut
+      # pas servir : le conteneur de production porte le même sur ce réseau.
+      edge:
+        aliases:
+          - preprod-app
+
+networks:
+  edge:
+    # Créé par docker-compose.yml. Externe ici : la pré-prod n'a de sens que
+    # derrière le Caddy de la production, et un réseau manquant doit arrêter le
+    # déploiement plutôt qu'en créer un que personne n'écoute.
+    name: fretline-edge
+    external: true
+
+volumes:
+  pgdata:

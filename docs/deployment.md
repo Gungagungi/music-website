@@ -213,6 +213,66 @@ Backing up Matomo is a separate operation from `sauvegarde.sh`, which only dumps
 docker compose exec matomo-db mariadb-dump -umatomo -p"$MATOMO_DB_PASSWORD" matomo > matomo.sql
 ```
 
+## Pre-production
+
+One branch at a time can be deployed next to the store, on the same host, behind the same
+Caddy. See [ADR-007](adr/007-preproduction.md) for why a slot on this host rather than a second
+server or one environment per pull request.
+
+One-time setup, in `.env.production`, then Caddy alone is recreated:
+
+```bash
+docker compose exec caddy caddy hash-password --plaintext '<password>'
+$EDITOR .env.production   # FRETLINE_PREPROD_DOMAIN=preprod.your-domain
+                          # PREPROD_BASIC_AUTH_HASH='<hash>'   ← single quotes, see below
+                          # PREPROD_ACCESS_KEY=<openssl rand -hex 32>
+docker compose --env-file .env.production up -d caddy
+npm run preprod:env       # .env.preprod: database password, signing key, test token
+```
+
+The hash must be single-quoted. It is full of `$`, which Compose would otherwise interpolate:
+`$2a` becomes empty, the hash is truncated, and Caddy rejects the whole configuration — the
+store's included.
+
+Then, for each branch:
+
+```bash
+npm run preprod:deploy -- feature/some-branch
+npm run preprod:logs
+npm run preprod:down
+```
+
+The script fetches `origin/<branch>` into a dedicated worktree, drops the previous deployment
+**and its database**, builds, waits for health, and checks `testMode:true` both inside the
+container and through Caddy.
+
+| | Store | Pre-production |
+| --- | --- | --- |
+| Compose project | `fretline` | `fretline-preprod` |
+| Image tag | `fretline-app:latest` | `fretline-app:preprod` — never share it |
+| Test endpoints | 404 | open, behind `TEST_API_TOKEN` |
+| Analytics | Matomo | none (absent in test mode) |
+| Data | persistent | reset on every deployment |
+| Resources | uncapped | app `cpus: 0.75`, `512m` |
+
+Running the suite against it, from any machine:
+
+```bash
+cd e2e
+BASE_URL=https://preprod.your-domain \
+TEST_API_TOKEN=<from .env.preprod> \
+PREPROD_ACCESS_KEY=<from .env.production> \
+npx playwright test --project=api
+```
+
+`PREPROD_ACCESS_KEY` adds an `x-fretline-preprod` header that exempts the request from basic
+auth. A header rather than the credentials themselves: basic auth lives in `Authorization`,
+where the API suite already sends its `Bearer` token. The `visual` project will fail there as it
+does on any workstation.
+
+With nothing configured, the pre-production host answers 401 to everyone: Compose supplies a
+locked password hash and an empty key, which the Caddyfile never accepts.
+
 ## Cart retention
 
 The `purge` service runs `node app/dist/db/purge.mjs` every `PURGE_INTERVAL_SECONDS`
