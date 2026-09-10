@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import type { ReporterDescription } from '@playwright/test';
 
-import { BASE_URL, IS_CI, STORAGE_STATE_PATH, TIMEOUTS } from './config/env';
+import { BASE_URL, IS_CI, PREPROD_ACCESS_KEY, STORAGE_STATE_PATH, TIMEOUTS } from './config/env';
 
 const reporters: ReporterDescription[] = [
   ['list'],
@@ -58,6 +58,9 @@ export default defineConfig({
     locale: 'fr-FR',
     timezoneId: 'Europe/Paris',
     testIdAttribute: 'data-testid',
+    // Suite lancée contre la pré-production : cet en-tête exempte du basic auth
+    // posé par Caddy — voir docs/deployment.md. Rien n'est ajouté sans la clé.
+    ...(PREPROD_ACCESS_KEY ? { extraHTTPHeaders: { 'x-fretline-preprod': PREPROD_ACCESS_KEY } } : {}),
   },
 
   projects: [
