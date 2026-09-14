@@ -96,3 +96,50 @@
 		format console
 	}
 }
+
+# Pré-production : la branche déployée par scripts/deployer-preprod.sh.
+#
+# Servie par ce Caddy plutôt que par un second : 80 et 443 sont déjà pris, et
+# les certificats sont ici. L'application vit dans une autre pile Compose
+# (docker-compose.preprod.yml), jointe par le réseau `fretline-edge` sous l'alias
+# `preprod-app`. Pré-prod éteinte, ce bloc répond 502 et rien d'autre ne bouge.
+#
+# Même motif que Matomo et ntfy pour le défaut : en clair sur 8083, sur la boucle
+# locale, sans rien demander à Let's Encrypt.
+{$FRETLINE_PREPROD_DOMAIN::8083} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Une pré-prod indexée finit en résultat de recherche à côté de la
+		# boutique, avec ses paniers de test et ses comptes semés.
+		X-Robots-Tag "noindex, nofollow"
+		-Server
+	}
+
+	# Exemption par clé, pour la suite Playwright lancée contre la pré-prod. Le
+	# basic auth occupe l'en-tête `Authorization`, que la suite API remplit déjà
+	# avec son `Bearer` : les deux ne peuvent pas cohabiter sur une même requête.
+	#
+	# Une expression plutôt qu'un matcher `header` : sans PREPROD_ACCESS_KEY, la
+	# substitution donne une chaîne vide, et un en-tête vide ou absent ne doit
+	# jamais passer pour la bonne clé. Le `!= ""` est ce qui ferme cette porte.
+	@verrouille not expression `{header.X-Fretline-Preprod} != "" && {header.X-Fretline-Preprod} == "{$PREPROD_ACCESS_KEY}"`
+
+	# Défauts verrouillés, et non vides : un hash vide ferait refuser toute la
+	# configuration — et tomber avec elle la boutique, servie par ce même Caddy.
+	# Le défaut est le hash d'une chaîne tirée au hasard puis jetée : Caddy
+	# démarre (CI, essai local) et personne n'entre.
+	basic_auth @verrouille {
+		{$PREPROD_BASIC_AUTH_USER:fretline} {$PREPROD_BASIC_AUTH_HASH:$2a$14$Bcoh63tinCQaAAH8qPR4teL49GuNTsmWW1dhmSueQ5xHWLqKMKI6e}
+	}
+
+	reverse_proxy preprod-app:3000
+
+	log {
+		output stdout
+		format console
+	}
+}

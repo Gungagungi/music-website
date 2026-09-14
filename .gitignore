@@ -44,6 +44,8 @@ perf/results/*
 # déjà un .env de développement. Les .example, eux, sont versionnés.
 .env.production
 .env.production.bak
+# Secrets de la pré-production (npm run preprod:env).
+.env.preprod
 
 # OS / editors
 .DS_Store

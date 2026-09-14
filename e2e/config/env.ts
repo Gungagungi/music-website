@@ -11,6 +11,15 @@ export const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 /** Shared secret expected by the app's `/api/test/*` endpoints. */
 export const TEST_API_TOKEN = process.env.TEST_API_TOKEN ?? 'fretline-e2e-token';
 
+/**
+ * Clé d'accès de la pré-production, envoyée dans `x-fretline-preprod`.
+ *
+ * Un en-tête dédié plutôt que les identifiants basic auth : ceux-ci occupent
+ * `Authorization`, où la suite API pose déjà son `Bearer`. Absente partout
+ * ailleurs — rien n'est envoyé contre un serveur local ou en CI.
+ */
+export const PREPROD_ACCESS_KEY = process.env.PREPROD_ACCESS_KEY;
+
 export const IS_CI = Boolean(process.env.CI);
 
 /** When set, the app serves its three deliberately seeded defects. */

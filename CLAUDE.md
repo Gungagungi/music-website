@@ -21,6 +21,13 @@ Les scripts sont dans `package.json` (racine et workspaces). Ce que leurs noms n
 - `npm run test:visual` échoue hors container CI (voir plus bas).
 - `npm run db:reset` emprunte le même chemin que `POST /api/test/reset` ; `db:generate` après toute modification du schéma.
 - `npm run perf:*` exige k6 installé ; `npm run prod:*` exige un `.env` de développement présent.
+- `npm run preprod:deploy -- <branche>` déploie `origin/<branche>` sur la pré-prod du VPS (un
+  seul slot, base remise à zéro, `E2E_TEST_MODE=1`) — voir ADR-007 et `docs/deployment.md`.
+  Deux pièges : l'image est `fretline-app:preprod`, **jamais** `:latest` (le prochain `up` de
+  la production reprendrait la branche) ; et les défauts `PREPROD_*` vivent dans
+  `docker-compose.yml` en `${VAR:-…}`, pas seulement dans le Caddyfile — Caddy n'applique son
+  défaut qu'à une variable absente, Compose transmet une variable vide, et un domaine ou un hash
+  vide fait tomber tout le proxy, boutique comprise.
 - Les seuils k6 sont dérivés de `perf/baseline.json`, mesuré sur le runner CI par le workflow
   dédié — ne jamais éditer ce fichier à la main, et ne jamais relever un seuil pour faire passer
   un run : c'est la mesure qu'on refait, pas la borne qu'on déplace.
