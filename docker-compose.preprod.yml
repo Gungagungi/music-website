@@ -42,6 +42,10 @@ x-app: &app
 services:
   db:
     image: postgres:17-alpine
+    # Même politique que `app`. Au redémarrage du serveur, c'est le démon Docker
+    # qui relance les conteneurs, pas Compose : `depends_on` n'y est pas relu, et
+    # une base en `restart: no` laissait l'application repartir seule, sans base.
+    restart: unless-stopped
     environment:
       POSTGRES_USER: fretline
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire — npm run preprod:env}
