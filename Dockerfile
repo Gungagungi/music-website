@@ -88,6 +88,14 @@ RUN rm -rf /usr/local/lib/node_modules/npm \
            /usr/local/bin/npm /usr/local/bin/npx \
            /opt/yarn-v* /usr/local/bin/yarn /usr/local/bin/yarnpkg
 
+# Les paquets Alpine de l'image de base ne sont rafraîchis qu'à sa republication,
+# qui suit les correctifs de sécurité avec des jours, parfois des semaines de
+# retard. Le scan Trivy a ainsi signalé OpenSSL 3.5.7 (CVE-2026-14456, élevée)
+# alors que la 3.5.8 était déjà publiée dans les dépôts Alpine. Mettre à jour à
+# chaque build ferme cette fenêtre sans attendre l'amont ; seul l'étage final
+# est concerné, les deux autres ne sont pas livrés.
+RUN apk upgrade --no-cache
+
 USER node
 EXPOSE 3000
 
