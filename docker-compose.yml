@@ -82,6 +82,18 @@ services:
         condition: service_completed_successfully
     expose:
       - '3000'
+    networks:
+      # L'alias que vise le Caddyfile, et non le nom de service `app`. Docker
+      # ajoute toujours le nom de service comme alias, en plus de ceux qui sont
+      # déclarés : le conteneur de pré-production, dont le service s'appelle
+      # aussi `app`, répondait donc à ce nom sur `fretline-edge`, où Caddy est
+      # branché. Caddy y résolvait `app` avant le réseau de cette pile, et la
+      # boutique publique a servi la pré-production — en mode test, sur une base
+      # remise à zéro à chaque déploiement de branche. `prod-app` n'existe que
+      # sur ce réseau, où la pré-prod n'entre pas.
+      default:
+        aliases:
+          - prod-app
 
   # Applique la politique de rétention des paniers (app/src/lib/retention.ts).
   #
