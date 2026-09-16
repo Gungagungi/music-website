@@ -29,7 +29,10 @@
 		-Server
 	}
 
-	reverse_proxy app:3000 {
+	# `prod-app`, et non `app` : voir l'alias dans docker-compose.yml. Ce Caddy
+	# est aussi branché sur `fretline-edge`, où le conteneur de pré-production
+	# répond au nom `app`.
+	reverse_proxy prod-app:3000 {
 		health_uri /api/health
 		health_interval 15s
 	}

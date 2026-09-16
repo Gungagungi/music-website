@@ -87,8 +87,10 @@ services:
     mem_limit: 512m
     networks:
       default:
-      # L'alias est ce que le Caddyfile vise. Le nom de service `app` ne peut
-      # pas servir : le conteneur de production porte le même sur ce réseau.
+      # L'alias est ce que le Caddyfile vise. Il ne suffit pas à lui seul :
+      # Docker ajoute toujours le nom de service, donc ce conteneur répond aussi
+      # à `app` sur ce réseau. C'est pourquoi la production s'y annonce sous
+      # `prod-app` — sans quoi Caddy sert l'une pour l'autre.
       edge:
         aliases:
           - preprod-app
