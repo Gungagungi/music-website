@@ -32,17 +32,17 @@ export const options = {
   thresholds: CALIBRATION
     ? { http_req_failed: ['rate<0.02'], journey_failed: ['rate<0.02'] }
     : {
-        // Dérivés de `perf/baseline.json`, mesuré sur le runner CI. Les valeurs
-        // `defaut` viennent du run de référence du 2026-08-18 sur un VPS, à
-        // 50 VU : médiane 5 ms, p(95) 17 ms, p(99) 28 ms, ajout au panier à
-        // p(95) 26 ms.
+        // Derived from `perf/baseline.json`, measured on the CI runner. The
+        // `defaut` values come from the reference run of 2026-08-18 on a VPS, at
+        // 50 VUs: median 5 ms, p(95) 17 ms, p(99) 28 ms, add to cart at p(95)
+        // 26 ms.
         //
-        // Ce palier est plus rapide que le smoke, ce qui n'est pas un paradoxe :
-        // à cinquante utilisateurs le pool est chaud et les plans sont en cache,
-        // là où le smoke paie les deux dans ses premières secondes. C'est aussi
-        // pourquoi les seuils d'ici ne sont pas ceux du smoke mis à l'échelle —
-        // la machine n'est pas le goulet à ce niveau de charge, et ce qu'ils
-        // surveillent reste la même classe de régression, pas la saturation.
+        // This stage is faster than the smoke test, which is no paradox: at
+        // fifty users the pool is warm and the plans are cached, whereas the
+        // smoke test pays for both in its first seconds. It is also why the
+        // thresholds here are not the smoke test's scaled up — the machine is
+        // not the bottleneck at this level of load, and what they watch is
+        // still the same class of regression, not saturation.
         http_req_duration: [
           expression('load', 'http_req_duration', 'p(95)', {
             facteur: 5,
@@ -79,7 +79,7 @@ export default function run() {
     const response = http.get(
       `${BASE_URL}/api/products?category=${category}&inStock=true&sort=note&limit=12`,
     );
-    failed = failed || !check(response, { 'rayon répond 200': (r) => r.status === 200 });
+    failed = failed || !check(response, { 'category answers 200': (r) => r.status === 200 });
   });
 
   sleep(Math.random() * 2);
@@ -89,7 +89,7 @@ export default function run() {
     const response = http.get(
       `${BASE_URL}/api/products?category=${category}&minPrice=5000&maxPrice=200000&sort=prix-asc&limit=12`,
     );
-    failed = failed || !check(response, { 'filtre répond 200': (r) => r.status === 200 });
+    failed = failed || !check(response, { 'filter answers 200': (r) => r.status === 200 });
 
     const items = response.json('items') || [];
     if (items.length > 0) slug = items[Math.floor(Math.random() * items.length)].slug;
@@ -101,7 +101,7 @@ export default function run() {
   if (slug) {
     group('Consulter une fiche', () => {
       const response = http.get(`${BASE_URL}/api/products/${slug}`);
-      failed = failed || !check(response, { 'fiche répond 200': (r) => r.status === 200 });
+      failed = failed || !check(response, { 'product page answers 200': (r) => r.status === 200 });
       if (response.status === 200) sku = response.json('sku');
     });
   }
@@ -126,12 +126,12 @@ export default function run() {
       // 409 is a legitimate outcome under load — the shelf can genuinely empty.
       failed =
         failed ||
-        !check(response, { 'ajout panier accepté ou stock épuisé': (r) => [201, 409].includes(r.status) });
+        !check(response, { 'add to cart accepted or out of stock': (r) => [201, 409].includes(r.status) });
 
       if (response.status === 201) {
         const cartId = response.json('id');
         const cart = http.get(`${BASE_URL}/api/cart`, { headers: { 'x-cart-id': cartId } });
-        failed = failed || !check(cart, { 'panier relu 200': (r) => r.status === 200 });
+        failed = failed || !check(cart, { 'cart read back 200': (r) => r.status === 200 });
       }
     });
   }
@@ -140,4 +140,4 @@ export default function run() {
   sleep(1);
 }
 
-export const handleSummary = summaryHandler(`Test de charge — montée à 50 VU — ${provenance('load')}`, 'load');
+export const handleSummary = summaryHandler(`Load test — ramp-up to 50 VUs — ${provenance('load')}`, 'load');

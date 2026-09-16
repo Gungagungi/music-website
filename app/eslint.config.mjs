@@ -9,8 +9,8 @@ const eslintConfig = [
   ...coreWebVitals,
   ...nextTypescript,
   {
-    // `dist/**` contient les commandes de base compilées par `npm run db:build` :
-    // du code généré, bundlé avec ses dépendances, qu'il n'y a rien à relire.
+    // `dist/**` holds the database commands compiled by `npm run db:build`:
+    // generated code, bundled with its dependencies, with nothing to review.
     ignores: ['.next/**', 'dist/**', 'node_modules/**', 'next-env.d.ts', 'scripts/**', '.stryker-tmp/**', 'reports/**'],
   },
 ];

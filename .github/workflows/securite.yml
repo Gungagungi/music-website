@@ -1,22 +1,22 @@
-# Versant dépôt de l'audit de sécurité.
+# Repository side of the security audit.
 #
-# Le versant machine — sshd, nftables, permissions des secrets, ports en écoute
-# — ne peut pas vivre ici : un runner GitHub n'a aucun accès au VPS. Il est tenu
-# par un timer systemd sur le serveur (scripts/systemd/audit-securite.timer).
-# Ce workflow couvre ce qu'un runner peut réellement voir : les dépendances, les
-# secrets committés, les images de la pile, et les en-têtes de la cible publique.
+# The machine side — sshd, nftables, secret permissions, listening ports — cannot
+# live here: a GitHub runner has no access to the VPS. It is handled by a systemd
+# timer on the server (scripts/systemd/audit-securite.timer). This workflow
+# covers what a runner can actually see: dependencies, committed secrets, the
+# stack's images, and the public target's headers.
 #
-# Cadence hebdomadaire plutôt que sur chaque PR, et c'est délibéré : les bases
-# de CVE bougent sans que le dépôt bouge, donc l'échéance utile est le calendrier
-# et non le commit. Le contrôle des dépendances, lui, tourne aussi sur les PR qui
-# touchent au verrou npm, parce que là c'est bien le diff qui change le risque.
+# Weekly cadence rather than on every PR, and that is deliberate: CVE databases
+# move without the repository moving, so the relevant deadline is the calendar,
+# not the commit. The dependency check, however, also runs on PRs that touch the
+# npm lockfile, because there it really is the diff that changes the risk.
 
 name: Sécurité
 
 on:
   schedule:
-    # Lundi 05:00 UTC — après le timer quotidien du VPS, dont le rapport de la
-    # nuit est alors déjà disponible pour comparaison.
+    # Monday 05:00 UTC — after the VPS daily timer, whose overnight report is
+    # then already available for comparison.
     - cron: '0 5 * * 1'
   workflow_dispatch:
   pull_request:
@@ -38,9 +38,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # L'historique complet : le contrôle de secrets committés ne juge que
-          # le contenu de HEAD, mais un diagnostic utile demande de pouvoir
-          # remonter au commit fautif sans re-cloner.
+          # Full history: the committed-secrets check only judges HEAD's
+          # content, but a useful diagnosis needs to be able to trace back to
+          # the offending commit without re-cloning.
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
@@ -50,13 +50,13 @@ jobs:
 
       - run: npm ci
 
-      # `--omit=dev` : les dépendances de développement ne sont jamais déployées.
-      # Les mélanger noierait le signal sous l'outillage de test, et un rapport
-      # qu'on prend l'habitude de survoler ne protège plus de rien.
-      - name: CVE des dépendances de production
+      # `--omit=dev`: development dependencies are never deployed. Mixing them
+      # in would bury the signal under test tooling, and a report people get
+      # used to skimming no longer protects anything.
+      - name: Production dependency CVEs
         run: npm audit --omit=dev --audit-level=high
 
-      - name: Contrôles dépôt de l'audit
+      - name: Audit repository checks
         run: python3 scripts/audit-securite.py --familles depot --seuil eleve
 
   images:
@@ -65,32 +65,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # L'image applicative est construite ici plutôt que tirée d'un registre :
-      # le dépôt n'en publie aucun, et scanner l'image que produit le Dockerfile
-      # courant est de toute façon la question qui nous intéresse.
-      - name: Construire l'image applicative
+      # The application image is built here rather than pulled from a registry:
+      # the repository publishes none, and scanning the image the current
+      # Dockerfile produces is the question we care about anyway.
+      - name: Build the application image
         run: docker build -t fretline-app:audit .
 
-      - name: Scanner l'image applicative
-        # Pas seulement « une version plus récente » : jusqu'à la v0.28.0 l'action
-        # appelait `setup-trivy` par un tag (`v0.2.1`) depuis supprimé en amont,
-        # ce qui la casse rétroactivement sans qu'aucun commit d'ici ne bouge.
-        # Les versions récentes épinglent cette dépendance par hash de commit.
+      - name: Scan the application image
+        # Not just "a newer version": up to v0.28.0 the action called
+        # `setup-trivy` by a tag (`v0.2.1`) since deleted upstream, which breaks
+        # it retroactively without any commit here changing. Recent versions
+        # pin that dependency by commit hash.
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: fretline-app:audit
           severity: 'HIGH,CRITICAL'
-          # Une CVE sans correctif publié n'appelle aucune action : la signaler
-          # à chaque exécution entraîne à ignorer le rapport entier.
+          # A CVE with no published fix calls for no action: reporting it on
+          # every run trains people to ignore the whole report.
           ignore-unfixed: true
           exit-code: '1'
           scanners: vuln
 
-      # Les images tierces se mettent à jour en repoussant leur tag, et rien
-      # dans ce dépôt ne dit quand c'est devenu nécessaire. Elles ne bloquent
-      # pas le job : leur correctif est un redéploiement, pas un changement de
-      # code, donc rougir ici ne ferait qu'entraîner à ignorer un check.
-      - name: Scanner les images tierces
+      # Third-party images are updated by bumping their tag, and nothing in this
+      # repository says when that became necessary. They do not block the job:
+      # their fix is a redeployment, not a code change, so turning red here
+      # would only train people to ignore a check.
+      - name: Scan third-party images
         continue-on-error: true
         run: |
           set -u
@@ -110,15 +110,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Aucune dépendance : le contrôle lit le compose, le Dockerfile et
-      # app/package.json, puis interroge endoflife.date. C'est le seul job de ce
-      # workflow qui n'a besoin ni de npm ni de Docker, et c'est aussi celui qui
-      # justifie le mieux la cadence hebdomadaire — une fin de support arrive à
-      # une date, pas à un commit.
+      # No dependency: the check reads the compose file, the Dockerfile and
+      # app/package.json, then queries endoflife.date. It is the only job in
+      # this workflow that needs neither npm nor Docker, and also the one that
+      # best justifies the weekly cadence — end of support arrives on a date,
+      # not with a commit.
       #
-      # `--seuil eleve` : le job rougit sur un cycle déjà mort, pas sur une
-      # échéance à 90 jours, qui se planifie sans arrêter la chaîne.
-      - name: Cycles de support des briques déployées
+      # `--seuil eleve`: the job turns red on an already dead cycle, not on a
+      # deadline 90 days away, which can be planned without stopping the line.
+      - name: Support cycles of deployed components
         run: |
           python3 scripts/audit-securite.py \
             --familles eol \
@@ -128,13 +128,13 @@ jobs:
   cible:
     name: Cible publique
     runs-on: ubuntu-latest
-    # Sans l'adresse du déploiement, il n'y a rien à sonder — et un job qui
-    # réussit faute d'avoir rien fait est pire qu'un job absent.
+    # Without the deployment's address, there is nothing to probe — and a job
+    # that succeeds for lack of doing anything is worse than no job at all.
     if: vars.FRETLINE_URL != ''
     steps:
       - uses: actions/checkout@v4
 
-      - name: En-têtes, TLS, endpoints de test
+      - name: Headers, TLS, test endpoints
         run: |
           python3 scripts/audit-securite.py \
             --familles web \

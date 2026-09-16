@@ -18,28 +18,28 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
 export const options = {
   vus: 10,
   duration: '30s',
-  // En calibration, on mesure : garder les seuils ferait échouer le run qui sert
-  // précisément à les produire. Seul le taux d'échec reste tenu, sinon on
-  // calibrerait sur une application qui répond des erreurs très vite.
+  // In calibration, we measure: keeping the thresholds would fail the very run
+  // meant to produce them. Only the failure rate is still enforced, otherwise we
+  // would calibrate on an application that answers errors very quickly.
   thresholds: CALIBRATION
     ? {
         http_req_failed: ['rate<0.01'],
-        // Une borne absurde, mais nécessaire : k6 ne matérialise une
-        // sous-métrique taguée que si un seuil la nomme. Sans cette ligne, le
-        // résumé de calibration ne contient pas `group_duration{Catalogue}` et
-        // il n'y a rien à enregistrer.
+        // An absurd bound, but a necessary one: k6 only materialises a tagged
+        // sub-metric if a threshold names it. Without this line, the
+        // calibration summary contains no `group_duration{Catalogue}` and there
+        // is nothing to record.
         'group_duration{group:::Catalogue}': ['p(95)<600000'],
       }
     : {
-        // Dérivés de `perf/baseline.json`, mesuré sur le runner CI — voir
-        // `lib/seuils.js`. Les valeurs `defaut` sont celles qui s'appliquaient
-        // avant la calibration, mesurées le 2026-08-18 sur un VPS : médiane
-        // 5–7 ms, p(95) 13–36 ms, p(99) 36–113 ms.
+        // Derived from `perf/baseline.json`, measured on the CI runner — see
+        // `lib/seuils.js`. The `defaut` values are those that applied before
+        // calibration, measured on 2026-08-18 on a VPS: median 5–7 ms, p(95)
+        // 13–36 ms, p(99) 36–113 ms.
         //
-        // Le facteur 5 est conservé — assez large pour qu'un runner partagé ne
-        // rougisse pas sur sa propre variance, assez serré pour qu'un N+1 ou un
-        // index perdu tombe du mauvais côté d'un ordre de grandeur, pas d'un
-        // cheveu.
+        // The factor of 5 is kept — loose enough that a shared runner does not
+        // turn red on its own variance, tight enough that an N+1 or a lost
+        // index lands on the wrong side of an order of magnitude, not of a
+        // hair.
         http_req_duration: [
           expression('smoke', 'http_req_duration', 'p(95)', {
             facteur: 5,
@@ -76,8 +76,8 @@ export default function run() {
   group('Supervision', () => {
     const response = http.get(`${BASE_URL}/api/health`);
     check(response, {
-      'health répond 200': (r) => r.status === 200,
-      'health signale ok': (r) => r.json('status') === 'ok',
+      'health answers 200': (r) => r.status === 200,
+      'health reports ok': (r) => r.json('status') === 'ok',
     });
   });
 
@@ -86,27 +86,27 @@ export default function run() {
 
     const list = http.get(`${BASE_URL}/api/products?category=${category}&sort=prix-asc&limit=12`);
     check(list, {
-      'liste répond 200': (r) => r.status === 200,
-      'liste non vide': (r) => (r.json('items') || []).length > 0,
+      'list answers 200': (r) => r.status === 200,
+      'list not empty': (r) => (r.json('items') || []).length > 0,
     });
 
     const items = list.json('items') || [];
     if (items.length > 0) {
       const slug = items[Math.floor(Math.random() * items.length)].slug;
       const detail = http.get(`${BASE_URL}/api/products/${slug}`);
-      check(detail, { 'fiche produit répond 200': (r) => r.status === 200 });
+      check(detail, { 'product page answers 200': (r) => r.status === 200 });
     }
   });
 
   group('Recherche', () => {
     const response = http.get(`${BASE_URL}/api/products?q=stratocaster`);
-    check(response, { 'recherche répond 200': (r) => r.status === 200 });
+    check(response, { 'search answers 200': (r) => r.status === 200 });
   });
 
   sleep(1);
 }
 
 export const handleSummary = summaryHandler(
-  `Test de charge — smoke (10 VU / 30 s) — ${provenance('smoke')}`,
+  `Load test — smoke (10 VUs / 30 s) — ${provenance('smoke')}`,
   'smoke',
 );

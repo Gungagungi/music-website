@@ -14,10 +14,10 @@ export const SHIPPING_FLAT_RATE = 990; // 9,90 €
 
 /** Rounds half away from zero, the convention French invoices use. */
 export function roundCents(value: number): number {
-  // Stryker disable next-line EqualityOperator: mutant équivalent. `<` et `<=`
-  // ne diffèrent qu'en zéro, où les deux branches rendent le même résultat :
-  // `-Math.round(-0)` vaut `+0`, la double négation annulant le zéro négatif.
-  // Aucun test ne peut le tuer, et le seuil reste donc à 100 %.
+  // Stryker disable next-line EqualityOperator: equivalent mutant. `<` and `<=`
+  // only differ at zero, where both branches return the same result:
+  // `-Math.round(-0)` is `+0`, the double negation cancelling the negative zero.
+  // No test can kill it, so the threshold stays at 100 %.
   return value < 0 ? -Math.round(-value) : Math.round(value);
 }
 

@@ -1,29 +1,29 @@
 /**
- * Corps Node.js du hook de démarrage, isolé dans son propre module.
+ * Node.js body of the startup hook, isolated in its own module.
  *
- * La séparation n'est pas cosmétique. Next compile `instrumentation.ts` pour
- * les deux runtimes, et son analyse est **statique** : elle voit `process.exit`
- * dans le texte du module et avertit qu'il n'existe pas sur le runtime edge,
- * quand bien même le garde `NEXT_RUNTIME !== 'nodejs'` en interdit l'exécution.
- * Un contrôle statique ne peut pas lire un test d'exécution. Déplacer l'appel
- * derrière un `import()` dynamique conditionnel est ce qui le sort réellement du
- * graphe edge — c'est la forme recommandée par Next, et la seule qui fasse
- * disparaître l'avertissement sans le masquer.
+ * The split is not cosmetic. Next compiles `instrumentation.ts` for both
+ * runtimes, and its analysis is **static**: it sees `process.exit` in the
+ * module's text and warns that it does not exist on the edge runtime, even
+ * though the `NEXT_RUNTIME !== 'nodejs'` guard prevents it from running. A
+ * static check cannot read a run-time test. Moving the call behind a
+ * conditional dynamic `import()` is what actually takes it out of the edge
+ * graph — it is the form Next recommends, and the only one that makes the
+ * warning go away without masking it.
  *
- * Concrètement : ne pas réintroduire d'API Node.js dans `instrumentation.ts`.
- * Elles vivent ici.
+ * In practice: do not reintroduce Node.js APIs into `instrumentation.ts`. They
+ * live here.
  */
 export async function verifierConfiguration(): Promise<void> {
   const { assertDeploymentConfig, deploymentWarnings } = await import('@/lib/deployment');
 
   for (const warning of deploymentWarnings()) {
-    console.warn(`[fretline] ATTENTION — ${warning}`);
+    console.warn(`[fretline] WARNING — ${warning}`);
   }
 
   try {
     assertDeploymentConfig();
   } catch (error) {
-    console.error(`[fretline] configuration refusée : ${(error as Error).message}`);
+    console.error(`[fretline] configuration rejected: ${(error as Error).message}`);
     // An explicit exit rather than a rethrow: a thrown error here is reported
     // but leaves the server listening, which is exactly the outcome this guard
     // exists to prevent.

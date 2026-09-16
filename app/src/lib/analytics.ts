@@ -1,16 +1,16 @@
 /**
- * Frontière unique entre l'application et le tracker Matomo.
+ * Single boundary between the application and the Matomo tracker.
  *
- * Tout passe par `push()`, y compris les appels e-commerce, et `push()` ne fait
- * rien quand `window._paq` est absent. Le tracker n'est chargé ni dans la suite
- * de tests ni quand les variables d'environnement ne sont pas renseignées : sans
- * ce point de passage, chaque appelant devrait refaire la même garde, et le jour
- * où l'un l'oublierait, la page casserait exactement là où le tracker n'a
- * aucune raison d'exister.
+ * Everything goes through `push()`, e-commerce calls included, and `push()` does
+ * nothing when `window._paq` is absent. The tracker is loaded neither in the
+ * test suite nor when the environment variables are not set: without this
+ * choke point, every caller would have to repeat the same guard, and the day one
+ * of them forgot, the page would break exactly where the tracker has no reason
+ * to exist.
  *
- * `_paq` est une file : Matomo la vide au chargement de matomo.js et remplace le
- * tableau par un objet qui exécute immédiatement. Empiler avant le chargement du
- * script est donc non seulement permis, c'est le mode d'emploi.
+ * `_paq` is a queue: Matomo drains it when matomo.js loads and replaces the
+ * array with an object that executes immediately. Pushing before the script
+ * loads is therefore not merely allowed, it is the intended usage.
  */
 
 declare global {
@@ -20,31 +20,29 @@ declare global {
 }
 
 /**
- * Empile une commande Matomo.
+ * Pushes a Matomo command.
  *
- * La file est créée si elle n'existe pas encore, et c'est le point délicat : les
- * effets des composants s'exécutent à l'hydratation, l'amorçage du tracker juste
- * après. Une version antérieure écartait les commandes tant que `window._paq`
- * était absent, et le `setEcommerceView` des fiches produit n'atteignait donc
- * jamais Matomo — silencieusement, puisque c'est exactement ce que la garde
- * était censée faire.
+ * The queue is created if it does not exist yet, and that is the tricky part:
+ * component effects run at hydration, the tracker bootstrap just after. An
+ * earlier version dropped commands while `window._paq` was absent, so the
+ * product pages' `setEcommerceView` never reached Matomo — silently, since that
+ * is exactly what the guard was meant to do.
  *
- * Empiler avant le chargement de matomo.js n'a rien d'un contournement : `_paq`
- * est une file que le tracker vide à son arrivée, et c'est le mode d'emploi
- * officiel. L'amorçage, lui, se préfixe à ce qui l'attend (voir Matomo.tsx),
- * de sorte que ses réglages précèdent toujours la première vue.
+ * Pushing before matomo.js loads is no workaround: `_paq` is a queue the tracker
+ * drains on arrival, and that is the official usage. The bootstrap, for its
+ * part, prepends itself to whatever is waiting (see Matomo.tsx), so its settings
+ * always come before the first page view.
  *
- * Sur le serveur, ou si le tracker n'est jamais chargé, la file grossit de
- * quelques entrées puis disparaît avec la page.
+ * On the server, or if the tracker is never loaded, the queue grows by a few
+ * entries and then disappears with the page.
  *
- * La commande est prise telle quelle, et surtout pas en paramètres du reste :
- * `push(...commande)` empilait `[['trackPageView']]` au lieu de
- * `['trackPageView']`, et matomo.js appelait `apply` sur un tableau plutôt que
- * sur une méthode. Le tracker mourait, et avec lui l'hydratation de la page —
- * `aB.apply is not a function`, dans du code minifié, sans rien qui désigne
- * l'appelant. La faute est restée invisible tant que la garde ci-dessus
- * écartait toutes les commandes : elle ne s'est déclarée qu'en réparant la
- * garde.
+ * The command is taken as-is, and above all not spread as parameters:
+ * `push(...commande)` pushed `[['trackPageView']]` instead of
+ * `['trackPageView']`, and matomo.js called `apply` on an array rather than on
+ * a method. The tracker died, and page hydration with it —
+ * `aB.apply is not a function`, in minified code, with nothing pointing at the
+ * caller. The fault stayed invisible as long as the guard above dropped every
+ * command: it only surfaced once the guard was fixed.
  */
 export function push(commande: unknown[]): void {
   if (typeof window === 'undefined') return;
@@ -52,13 +50,13 @@ export function push(commande: unknown[]): void {
 }
 
 /**
- * Convertit un montant du domaine vers l'unité que Matomo attend.
+ * Converts a domain amount into the unit Matomo expects.
  *
- * Tout le dépôt compte en centimes entiers (lib/money.ts) et Matomo raisonne en
- * unités monétaires décimales. La division vit ici, et nulle part ailleurs :
- * c'est la seule frontière où un flottant est légitime, et une commande à
- * 1 299,00 € enregistrée à 129 900 € est le genre d'erreur qu'on ne remarque
- * qu'au moment de lire les rapports, des semaines plus tard.
+ * The whole repository counts in integer cents (lib/money.ts) and Matomo reasons
+ * in decimal currency units. The division lives here, and nowhere else: it is
+ * the only boundary where a float is legitimate, and an order of €1,299.00
+ * recorded as €129,900 is the kind of mistake nobody notices until reading the
+ * reports, weeks later.
  */
 export function enUnitesMonetaires(centimes: number): number {
   return centimes / 100;

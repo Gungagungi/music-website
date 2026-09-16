@@ -18,13 +18,13 @@ import { isDatabaseEmpty, seedDatabase } from '@/db/seed';
  */
 export async function bootstrap(): Promise<void> {
   await runMigrations();
-  console.log('[db] migrations appliquées');
+  console.log('[db] migrations applied');
 
   if (await isDatabaseEmpty()) {
     await seedDatabase();
-    console.log('[db] base vide : graines insérées');
+    console.log('[db] empty database: seed data inserted');
     return;
   }
 
-  console.log('[db] base déjà peuplée : seed ignoré');
+  console.log('[db] database already populated: seed skipped');
 }

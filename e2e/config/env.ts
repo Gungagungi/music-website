@@ -12,11 +12,11 @@ export const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 export const TEST_API_TOKEN = process.env.TEST_API_TOKEN ?? 'fretline-e2e-token';
 
 /**
- * Clé d'accès de la pré-production, envoyée dans `x-fretline-preprod`.
+ * Pre-production access key, sent in `x-fretline-preprod`.
  *
- * Un en-tête dédié plutôt que les identifiants basic auth : ceux-ci occupent
- * `Authorization`, où la suite API pose déjà son `Bearer`. Absente partout
- * ailleurs — rien n'est envoyé contre un serveur local ou en CI.
+ * A dedicated header rather than basic auth credentials: those occupy
+ * `Authorization`, where the API suite already sets its `Bearer`. Absent
+ * everywhere else — nothing is sent against a local server or in CI.
  */
 export const PREPROD_ACCESS_KEY = process.env.PREPROD_ACCESS_KEY;
 

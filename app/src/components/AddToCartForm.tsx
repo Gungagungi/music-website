@@ -42,10 +42,10 @@ export function AddToCartForm({ product }: { product: Product }) {
         message: `« ${product.name} » a été ajouté à votre panier.`,
       });
 
-      // Matomo veut l'état du panier après l'ajout, pas le delta : la réponse
-      // porte le panier complet, donc on rejoue ses lignes plutôt que de tenir
-      // un compte parallèle qui divergerait au premier ajout depuis un autre
-      // onglet. Inerte sans tracker (lib/analytics.ts).
+      // Matomo wants the cart's state after the add, not the delta: the response
+      // carries the full cart, so its lines are replayed rather than keeping a
+      // parallel count that would diverge at the first add from another tab.
+      // Inert without a tracker (lib/analytics.ts).
       for (const item of payload.items ?? []) {
         push([
           'addEcommerceItem',

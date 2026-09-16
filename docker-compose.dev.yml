@@ -1,14 +1,14 @@
-# PostgreSQL seul, pour le développement et la suite de tests en local.
+# PostgreSQL only, for development and running the test suite locally.
 #
-# L'application tourne nativement (`npm run dev` ou `npm run start -w app`) : la
-# reconstruire dans un conteneur à chaque modification coûterait bien plus que ce
-# que l'isolation apporte ici. Le déploiement complet est dans docker-compose.yml.
+# The application runs natively (`npm run dev` or `npm run start -w app`):
+# rebuilding it in a container on every change would cost far more than the
+# isolation brings here. The full deployment is in docker-compose.yml.
 #
 #   docker compose -f docker-compose.dev.yml up -d --wait
 #   npm run db:migrate && npm run db:seed
 
-# Voir docker-compose.yml : les deux fichiers doivent porter des noms de projet
-# distincts, sans quoi Compose confond leurs services `db`.
+# See docker-compose.yml: both files must carry distinct project names,
+# otherwise Compose mixes up their `db` services.
 name: fretline-dev
 
 services:
@@ -19,19 +19,19 @@ services:
       POSTGRES_USER: fretline
       POSTGRES_PASSWORD: fretline
       POSTGRES_DB: fretline
-      # Les données sont jetables et rechargées par les graines : on échange la
-      # durabilité contre la vitesse, ce qui rend `db:reset` sensiblement plus
-      # rapide. À ne jamais reprendre en production.
+      # The data is disposable and reloaded from the seed data: durability is
+      # traded for speed, which makes `db:reset` noticeably faster. Never carry
+      # this over to production.
       POSTGRES_INITDB_ARGS: '--data-checksums'
     command: >
       postgres
       -c fsync=off
       -c synchronous_commit=off
       -c full_page_writes=off
-    # Lié à la boucle locale : le port par défaut publiait la base sur l'IP
-    # publique de la machine, mot de passe `fretline` compris. Rien hors de
-    # l'hôte n'a besoin de cette base — l'application de développement tourne
-    # nativement à côté.
+    # Bound to loopback: the default port published the database on the
+    # machine's public IP, `fretline` password included. Nothing outside the
+    # host needs this database — the development application runs natively
+    # alongside it.
     ports:
       - '127.0.0.1:5432:5432'
     volumes:

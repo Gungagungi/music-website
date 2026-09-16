@@ -5,5 +5,5 @@ import { seedDatabase } from '@/db/seed';
 // it only seeds a database that has never been loaded.
 runCommand('seed', async () => {
   await seedDatabase();
-  console.log('[db] graines insérées');
+  console.log('[db] seed data inserted');
 });

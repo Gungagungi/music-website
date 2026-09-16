@@ -36,7 +36,7 @@ test.describe('Accessibilité — pages publiques', () => {
         const violations = await scanForViolations(page);
         const blocking = atLeast(violations, 'serious');
 
-        expect(blocking, `Violations WCAG 2.1 AA :\n${formatViolations(blocking)}`).toEqual([]);
+        expect(blocking, `WCAG 2.1 AA violations:\n${formatViolations(blocking)}`).toEqual([]);
       },
     );
   }
@@ -69,20 +69,20 @@ test.describe('Accessibilité — parcours transactionnel', () => {
       await checkoutPage.open();
 
       let blocking = atLeast(await scanForViolations(page), 'serious');
-      expect(blocking, `Étape livraison :\n${formatViolations(blocking)}`).toEqual([]);
+      expect(blocking, `Shipping step:\n${formatViolations(blocking)}`).toEqual([]);
 
       await checkoutPage.fillShipping(new AddressBuilder().build(), 'a11y@fretline.test');
       await checkoutPage.shippingContinue.click();
       await expect(checkoutPage.paymentForm).toBeVisible();
 
       blocking = atLeast(await scanForViolations(page), 'serious');
-      expect(blocking, `Étape paiement :\n${formatViolations(blocking)}`).toEqual([]);
+      expect(blocking, `Payment step:\n${formatViolations(blocking)}`).toEqual([]);
 
       await checkoutPage.paymentContinue.click();
       await expect(checkoutPage.reviewStep).toBeVisible();
 
       blocking = atLeast(await scanForViolations(page), 'serious');
-      expect(blocking, `Étape récapitulatif :\n${formatViolations(blocking)}`).toEqual([]);
+      expect(blocking, `Review step:\n${formatViolations(blocking)}`).toEqual([]);
     },
   );
 
@@ -149,7 +149,7 @@ test.describe('Accessibilité — navigation au clavier', () => {
         address.firstName,
         address.lastName,
         address.line1,
-        '', // complément d'adresse, facultatif
+        '', // address line 2, optional
         address.postalCode,
         address.city,
       ]) {
@@ -182,15 +182,15 @@ test.describe('Accessibilité — navigation au clavier', () => {
 });
 
 /**
- * Le thème sombre repasse le scan de contraste, pas seulement le scan de
- * structure.
+ * The dark theme goes through the contrast scan again, not just the structure
+ * scan.
  *
- * C'est la seule partie de la fonctionnalité qu'une relecture ne suffit pas à
- * garder : un texte gris sur fond blanc lisible devient illisible sur fond
- * sombre sans que rien ne le signale, et le rapport de contraste est
- * exactement ce qu'axe sait calculer. Le scan tourne avec l'appareil réglé en
- * sombre plutôt qu'en cliquant le bouton, parce que c'est ainsi que la plupart
- * des visiteurs concernés arriveront sur le site.
+ * It is the only part of the feature a review is not enough to guard: grey text
+ * that is readable on a white background becomes unreadable on a dark one with
+ * nothing to flag it, and the contrast ratio is exactly what axe knows how to
+ * compute. The scan runs with the device set to dark rather than by clicking
+ * the button, because that is how most of the visitors concerned will arrive on
+ * the site.
  */
 test.describe('Accessibilité — thème sombre', () => {
   test.use({ colorScheme: 'dark' });
@@ -211,7 +211,7 @@ test.describe('Accessibilité — thème sombre', () => {
 
         const blocking = atLeast(await scanForViolations(page), 'serious');
 
-        expect(blocking, `Violations WCAG 2.1 AA (thème sombre) :\n${formatViolations(blocking)}`).toEqual([]);
+        expect(blocking, `WCAG 2.1 AA violations (dark theme):\n${formatViolations(blocking)}`).toEqual([]);
       },
     );
   }

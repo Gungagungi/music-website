@@ -3,29 +3,29 @@
   "info": {
     "title": "Fretline — API",
     "version": "1.0.0",
-    "description": "Généré depuis les schémas de contrat que la suite d’API valide à chaque run (`e2e/api/schemas.ts`). Ne pas éditer à la main : `npm run openapi:check -w e2e` échoue si le fichier committé diverge du code."
+    "description": "Generated from the contract schemas the API suite validates on every run (`e2e/api/schemas.ts`). Do not edit by hand: `npm run openapi:check -w e2e` fails if the committed file diverges from the code."
   },
   "servers": [
     {
       "url": "http://localhost:3000",
-      "description": "Développement et suite de tests"
+      "description": "Development and test suite"
     }
   ],
   "tags": [
     {
-      "name": "Supervision"
+      "name": "Monitoring"
     },
     {
       "name": "Catalogue"
     },
     {
-      "name": "Authentification"
+      "name": "Authentication"
     },
     {
-      "name": "Panier"
+      "name": "Cart"
     },
     {
-      "name": "Commandes"
+      "name": "Orders"
     }
   ],
   "components": {
@@ -54,13 +54,13 @@
   "paths": {
     "/api/health": {
       "get": {
-        "summary": "État du service",
+        "summary": "Service status",
         "tags": [
-          "Supervision"
+          "Monitoring"
         ],
         "responses": {
           "200": {
-            "description": "Le service répond.",
+            "description": "The service is responding.",
             "content": {
               "application/json": {
                 "schema": {
@@ -109,7 +109,7 @@
     },
     "/api/products": {
       "get": {
-        "summary": "Lister le catalogue",
+        "summary": "List the catalogue",
         "tags": [
           "Catalogue"
         ],
@@ -118,7 +118,7 @@
             "name": "category",
             "in": "query",
             "required": false,
-            "description": "Slug de catégorie.",
+            "description": "Category slug.",
             "schema": {
               "type": "string"
             }
@@ -127,7 +127,7 @@
             "name": "brand",
             "in": "query",
             "required": false,
-            "description": "Marque, répétable.",
+            "description": "Brand, repeatable.",
             "schema": {
               "type": "string"
             }
@@ -136,7 +136,7 @@
             "name": "q",
             "in": "query",
             "required": false,
-            "description": "Recherche plein texte, sur sous-chaîne.",
+            "description": "Full-text search, by substring.",
             "schema": {
               "type": "string"
             }
@@ -145,7 +145,7 @@
             "name": "minPrice",
             "in": "query",
             "required": false,
-            "description": "Prix minimum, en centimes.",
+            "description": "Minimum price, in cents.",
             "schema": {
               "type": "integer",
               "minimum": -9007199254740991,
@@ -156,7 +156,7 @@
             "name": "maxPrice",
             "in": "query",
             "required": false,
-            "description": "Prix maximum, en centimes.",
+            "description": "Maximum price, in cents.",
             "schema": {
               "type": "integer",
               "minimum": -9007199254740991,
@@ -167,7 +167,7 @@
             "name": "inStock",
             "in": "query",
             "required": false,
-            "description": "Ne garder que les produits disponibles.",
+            "description": "Keep only products in stock.",
             "schema": {
               "type": "boolean"
             }
@@ -176,7 +176,7 @@
             "name": "leftHanded",
             "in": "query",
             "required": false,
-            "description": "Ne garder que les modèles gauchers.",
+            "description": "Keep only left-handed models.",
             "schema": {
               "type": "boolean"
             }
@@ -185,7 +185,7 @@
             "name": "onSale",
             "in": "query",
             "required": false,
-            "description": "Ne garder que les produits remisés.",
+            "description": "Keep only discounted products.",
             "schema": {
               "type": "boolean"
             }
@@ -194,7 +194,7 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "description": "Tri appliqué avant pagination.",
+            "description": "Sort applied before pagination.",
             "schema": {
               "type": "string"
             }
@@ -203,7 +203,7 @@
             "name": "page",
             "in": "query",
             "required": false,
-            "description": "Page demandée, à partir de 1.",
+            "description": "Requested page, starting at 1.",
             "schema": {
               "type": "integer",
               "exclusiveMinimum": 0,
@@ -214,7 +214,7 @@
             "name": "perPage",
             "in": "query",
             "required": false,
-            "description": "Taille de page.",
+            "description": "Page size.",
             "schema": {
               "type": "integer",
               "exclusiveMinimum": 0,
@@ -224,7 +224,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Page de résultats.",
+            "description": "Page of results.",
             "content": {
               "application/json": {
                 "schema": {
@@ -403,7 +403,7 @@
             }
           },
           "422": {
-            "description": "Paramètre hors du schéma attendu.",
+            "description": "Parameter outside the expected schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -460,7 +460,7 @@
     },
     "/api/products/{slug}": {
       "get": {
-        "summary": "Détail d’un produit",
+        "summary": "Product details",
         "tags": [
           "Catalogue"
         ],
@@ -469,7 +469,7 @@
             "name": "slug",
             "in": "path",
             "required": true,
-            "description": "Identifiant lisible du produit.",
+            "description": "Human-readable product identifier.",
             "schema": {
               "type": "string"
             }
@@ -477,7 +477,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Le produit et ses avis.",
+            "description": "The product and its reviews.",
             "content": {
               "application/json": {
                 "schema": {
@@ -684,7 +684,7 @@
             }
           },
           "404": {
-            "description": "Aucun produit pour ce slug.",
+            "description": "No product for this slug.",
             "content": {
               "application/json": {
                 "schema": {
@@ -741,7 +741,7 @@
     },
     "/api/products/{slug}/reviews": {
       "get": {
-        "summary": "Lister les avis d’un produit",
+        "summary": "List a product’s reviews",
         "tags": [
           "Catalogue"
         ],
@@ -750,7 +750,7 @@
             "name": "slug",
             "in": "path",
             "required": true,
-            "description": "Identifiant lisible du produit.",
+            "description": "Human-readable product identifier.",
             "schema": {
               "type": "string"
             }
@@ -768,7 +768,7 @@
             "name": "note",
             "in": "query",
             "required": false,
-            "description": "Ne garder que les avis à ce nombre d’étoiles.",
+            "description": "Keep only reviews with this number of stars.",
             "schema": {
               "type": "integer",
               "minimum": -9007199254740991,
@@ -779,7 +779,7 @@
             "name": "page",
             "in": "query",
             "required": false,
-            "description": "Page demandée, à partir de 1.",
+            "description": "Requested page, starting at 1.",
             "schema": {
               "type": "integer",
               "exclusiveMinimum": 0,
@@ -790,7 +790,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Taille de page, 50 au maximum.",
+            "description": "Page size, 50 at most.",
             "schema": {
               "type": "integer",
               "exclusiveMinimum": 0,
@@ -800,7 +800,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Page d’avis et répartition des notes.",
+            "description": "Page of reviews and rating distribution.",
             "content": {
               "application/json": {
                 "schema": {
@@ -948,7 +948,7 @@
             }
           },
           "404": {
-            "description": "Aucun produit pour ce slug.",
+            "description": "No product for this slug.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1001,7 +1001,7 @@
             }
           },
           "422": {
-            "description": "Paramètre hors du schéma attendu.",
+            "description": "Parameter outside the expected schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1056,7 +1056,7 @@
         }
       },
       "post": {
-        "summary": "Déposer un avis",
+        "summary": "Post a review",
         "tags": [
           "Catalogue"
         ],
@@ -1073,7 +1073,7 @@
             "name": "slug",
             "in": "path",
             "required": true,
-            "description": "Identifiant lisible du produit.",
+            "description": "Human-readable product identifier.",
             "schema": {
               "type": "string"
             }
@@ -1112,7 +1112,7 @@
         },
         "responses": {
           "201": {
-            "description": "Avis enregistré.",
+            "description": "Review saved.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1179,7 +1179,7 @@
             }
           },
           "401": {
-            "description": "Porteur absent ou invalide.",
+            "description": "Missing or invalid bearer.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1232,7 +1232,7 @@
             }
           },
           "404": {
-            "description": "Aucun produit pour ce slug.",
+            "description": "No product for this slug.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1285,7 +1285,7 @@
             }
           },
           "409": {
-            "description": "Ce client a déjà publié un avis sur ce produit.",
+            "description": "This customer has already posted a review for this product.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1338,7 +1338,7 @@
             }
           },
           "422": {
-            "description": "Corps hors du schéma attendu.",
+            "description": "Body outside the expected schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1395,13 +1395,13 @@
     },
     "/api/categories": {
       "get": {
-        "summary": "Lister les catégories",
+        "summary": "List categories",
         "tags": [
           "Catalogue"
         ],
         "responses": {
           "200": {
-            "description": "Catégories et effectifs.",
+            "description": "Categories and counts.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1473,13 +1473,13 @@
     },
     "/api/brands": {
       "get": {
-        "summary": "Lister les marques",
+        "summary": "List brands",
         "tags": [
           "Catalogue"
         ],
         "responses": {
           "200": {
-            "description": "Marques et effectifs.",
+            "description": "Brands and counts.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1521,9 +1521,9 @@
     },
     "/api/auth/register": {
       "post": {
-        "summary": "Créer un compte",
+        "summary": "Create an account",
         "tags": [
-          "Authentification"
+          "Authentication"
         ],
         "requestBody": {
           "required": true,
@@ -1563,7 +1563,7 @@
         },
         "responses": {
           "201": {
-            "description": "Compte créé, porteur émis.",
+            "description": "Account created, bearer issued.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1619,7 +1619,7 @@
             }
           },
           "409": {
-            "description": "Adresse déjà enregistrée.",
+            "description": "Email address already registered.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1672,7 +1672,7 @@
             }
           },
           "422": {
-            "description": "Corps hors du schéma attendu.",
+            "description": "Body outside the expected schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1729,9 +1729,9 @@
     },
     "/api/auth/login": {
       "post": {
-        "summary": "Ouvrir une session",
+        "summary": "Log in",
         "tags": [
-          "Authentification"
+          "Authentication"
         ],
         "requestBody": {
           "required": true,
@@ -1761,7 +1761,7 @@
         },
         "responses": {
           "200": {
-            "description": "Porteur émis.",
+            "description": "Bearer issued.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1817,7 +1817,7 @@
             }
           },
           "401": {
-            "description": "Identifiants refusés.",
+            "description": "Credentials rejected.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1870,7 +1870,7 @@
             }
           },
           "422": {
-            "description": "Corps hors du schéma attendu.",
+            "description": "Body outside the expected schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1927,22 +1927,22 @@
     },
     "/api/auth/logout": {
       "post": {
-        "summary": "Fermer la session",
+        "summary": "Log out",
         "tags": [
-          "Authentification"
+          "Authentication"
         ],
         "responses": {
           "204": {
-            "description": "Cookie de session effacé."
+            "description": "Session cookie cleared."
           }
         }
       }
     },
     "/api/auth/me": {
       "get": {
-        "summary": "Profil du porteur",
+        "summary": "Bearer’s profile",
         "tags": [
-          "Authentification"
+          "Authentication"
         ],
         "security": [
           {
@@ -1954,7 +1954,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Le compte authentifié.",
+            "description": "The authenticated account.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1996,7 +1996,7 @@
             }
           },
           "401": {
-            "description": "Porteur absent ou invalide.",
+            "description": "Missing or invalid bearer.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2053,9 +2053,9 @@
     },
     "/api/cart": {
       "get": {
-        "summary": "Lire le panier",
+        "summary": "Read the cart",
         "tags": [
-          "Panier"
+          "Cart"
         ],
         "security": [
           {
@@ -2067,7 +2067,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Le panier et ses totaux.",
+            "description": "The cart and its totals.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2236,9 +2236,9 @@
     },
     "/api/cart/items": {
       "post": {
-        "summary": "Ajouter une ligne",
+        "summary": "Add a line",
         "tags": [
-          "Panier"
+          "Cart"
         ],
         "security": [
           {
@@ -2276,7 +2276,7 @@
         },
         "responses": {
           "201": {
-            "description": "Panier après ajout.",
+            "description": "Cart after adding.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2441,7 +2441,7 @@
             }
           },
           "404": {
-            "description": "Produit inconnu.",
+            "description": "Unknown product.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2494,7 +2494,7 @@
             }
           },
           "409": {
-            "description": "Stock insuffisant.",
+            "description": "Insufficient stock.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2547,7 +2547,7 @@
             }
           },
           "422": {
-            "description": "Corps hors du schéma attendu.",
+            "description": "Body outside the expected schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2604,9 +2604,9 @@
     },
     "/api/cart/items/{itemId}": {
       "patch": {
-        "summary": "Modifier une quantité",
+        "summary": "Change a quantity",
         "tags": [
-          "Panier"
+          "Cart"
         ],
         "security": [
           {
@@ -2621,7 +2621,7 @@
             "name": "itemId",
             "in": "path",
             "required": true,
-            "description": "Identifiant de la ligne.",
+            "description": "Line identifier.",
             "schema": {
               "type": "string"
             }
@@ -2650,7 +2650,7 @@
         },
         "responses": {
           "200": {
-            "description": "Panier après modification.",
+            "description": "Cart after the change.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2815,7 +2815,7 @@
             }
           },
           "404": {
-            "description": "Ligne absente du panier.",
+            "description": "Line not in the cart.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2868,7 +2868,7 @@
             }
           },
           "409": {
-            "description": "Stock insuffisant.",
+            "description": "Insufficient stock.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2921,7 +2921,7 @@
             }
           },
           "422": {
-            "description": "Corps hors du schéma attendu.",
+            "description": "Body outside the expected schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2976,9 +2976,9 @@
         }
       },
       "delete": {
-        "summary": "Retirer une ligne",
+        "summary": "Remove a line",
         "tags": [
-          "Panier"
+          "Cart"
         ],
         "security": [
           {
@@ -2993,7 +2993,7 @@
             "name": "itemId",
             "in": "path",
             "required": true,
-            "description": "Identifiant de la ligne.",
+            "description": "Line identifier.",
             "schema": {
               "type": "string"
             }
@@ -3001,7 +3001,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Panier après retrait.",
+            "description": "Cart after removal.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3166,7 +3166,7 @@
             }
           },
           "404": {
-            "description": "Ligne absente du panier.",
+            "description": "Line not in the cart.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3223,9 +3223,9 @@
     },
     "/api/cart/coupon": {
       "post": {
-        "summary": "Appliquer un coupon",
+        "summary": "Apply a coupon",
         "tags": [
-          "Panier"
+          "Cart"
         ],
         "security": [
           {
@@ -3257,7 +3257,7 @@
         },
         "responses": {
           "200": {
-            "description": "Panier avec la remise appliquée.",
+            "description": "Cart with the discount applied.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3422,7 +3422,7 @@
             }
           },
           "404": {
-            "description": "Coupon inconnu.",
+            "description": "Unknown coupon.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3475,7 +3475,7 @@
             }
           },
           "409": {
-            "description": "Coupon inapplicable — expiré, minimum non atteint, catégorie absente.",
+            "description": "Coupon not applicable — expired, minimum not reached, category missing.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3530,9 +3530,9 @@
         }
       },
       "delete": {
-        "summary": "Retirer le coupon",
+        "summary": "Remove the coupon",
         "tags": [
-          "Panier"
+          "Cart"
         ],
         "security": [
           {
@@ -3544,7 +3544,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Panier sans remise.",
+            "description": "Cart without a discount.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3713,9 +3713,9 @@
     },
     "/api/coupons/validate": {
       "post": {
-        "summary": "Éprouver un coupon sans l’appliquer",
+        "summary": "Try a coupon without applying it",
         "tags": [
-          "Panier"
+          "Cart"
         ],
         "requestBody": {
           "required": true,
@@ -3739,7 +3739,7 @@
         },
         "responses": {
           "200": {
-            "description": "Verdict et remise simulée.",
+            "description": "Verdict and simulated discount.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3770,7 +3770,7 @@
             }
           },
           "422": {
-            "description": "Corps hors du schéma attendu.",
+            "description": "Body outside the expected schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3827,9 +3827,9 @@
     },
     "/api/orders": {
       "post": {
-        "summary": "Passer commande",
+        "summary": "Place an order",
         "tags": [
-          "Commandes"
+          "Orders"
         ],
         "security": [
           {
@@ -3982,7 +3982,7 @@
         },
         "responses": {
           "201": {
-            "description": "Commande créée, jeton d’accès émis.",
+            "description": "Order created, access token issued.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4304,7 +4304,7 @@
             }
           },
           "409": {
-            "description": "Panier vide ou stock insuffisant.",
+            "description": "Empty cart or insufficient stock.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4357,7 +4357,7 @@
             }
           },
           "422": {
-            "description": "Corps hors du schéma attendu.",
+            "description": "Body outside the expected schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4412,9 +4412,9 @@
         }
       },
       "get": {
-        "summary": "Lister ses commandes",
+        "summary": "List one’s orders",
         "tags": [
-          "Commandes"
+          "Orders"
         ],
         "security": [
           {
@@ -4426,7 +4426,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Commandes du compte.",
+            "description": "The account’s orders.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4760,7 +4760,7 @@
             }
           },
           "401": {
-            "description": "Porteur absent ou invalide.",
+            "description": "Missing or invalid bearer.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4817,16 +4817,16 @@
     },
     "/api/orders/{id}": {
       "get": {
-        "summary": "Détail d’une commande",
+        "summary": "Order details",
         "tags": [
-          "Commandes"
+          "Orders"
         ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "Référence de la commande.",
+            "description": "Order reference.",
             "schema": {
               "type": "string"
             }
@@ -4834,7 +4834,7 @@
         ],
         "responses": {
           "200": {
-            "description": "La commande.",
+            "description": "The order.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5150,7 +5150,7 @@
             }
           },
           "403": {
-            "description": "Jeton d’accès absent ou étranger à la commande.",
+            "description": "Access token missing or not for this order.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5203,7 +5203,7 @@
             }
           },
           "404": {
-            "description": "Référence inconnue.",
+            "description": "Unknown reference.",
             "content": {
               "application/json": {
                 "schema": {

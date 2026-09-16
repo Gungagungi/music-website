@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# Vérifie REQ-DATA-05 : les données survivent à un arrêt complet.
+# Checks REQ-DATA-05: data survives a full shutdown.
 #
 #   CI=true ./scripts/verifier-persistance.sh http://localhost
 #   ./scripts/verifier-persistance.sh http://localhost --jaccepte
 #
-# Passe une commande, arrête toute la pile, la relance, et relit la commande.
-# C'est la seule vérification du dépôt que la suite Playwright ne peut pas
-# porter : elle ne peut pas redémarrer le serveur auquel elle parle. Elle
-# s'exécute donc contre les artefacts réels, ce qui la rend au passage plus
-# probante qu'un test qui aurait tourné en mémoire.
+# Places an order, stops the whole stack, starts it again, and reads the order
+# back. It is the only check in the repository the Playwright suite cannot
+# carry: it cannot restart the server it is talking to. It therefore runs
+# against the real artefacts, which incidentally makes it more convincing than a
+# test that would have run in memory.
 #
-# ATTENTION — ce script écrit une commande, consomme du stock et interrompt le
-# service. Sa place est en CI ou sur un déploiement fraîchement monté, jamais sur
-# une boutique qui tourne. D'où le garde-fou ci-dessous.
+# WARNING — this script writes an order, consumes stock and interrupts the
+# service. It belongs in CI or on a freshly set-up deployment, never on a shop
+# that is running. Hence the safeguard below.
 set -euo pipefail
 
 BASE_URL="${1:-}"
@@ -20,22 +20,22 @@ CONSENTEMENT="${2:-}"
 COMPOSE="${COMPOSE:-docker compose}"
 
 if [[ -z "$BASE_URL" ]]; then
-  echo "usage : [CI=true] $0 <url-de-base> [--jaccepte]" >&2
+  echo "usage: [CI=true] $0 <base-url> [--jaccepte]" >&2
   exit 64
 fi
 BASE_URL="${BASE_URL%/}"
 
 if [[ "${CI:-}" != "true" && "$CONSENTEMENT" != "--jaccepte" ]]; then
   cat >&2 <<'FIN'
-Ce script arrête la pile et écrit une commande de test.
-Sur un déploiement en service, ce n'est pas ce que vous voulez.
+This script stops the stack and writes a test order.
+On a live deployment, that is not what you want.
 
   ./scripts/verifier-persistance.sh <url> --jaccepte
 FIN
   exit 65
 fi
 
-# Node plutôt que jq : c'est un projet Node, jq ne l'est pas.
+# Node rather than jq: this is a Node project, jq is not.
 extraire() { node -pe "const d=JSON.parse(require('fs').readFileSync(0));$1"; }
 
 attendre() {
@@ -43,19 +43,19 @@ attendre() {
     curl -sf --max-time 5 "${BASE_URL}/api/health" >/dev/null 2>&1 && return 0
     sleep 2
   done
-  echo "  La pile n'a pas répondu." >&2
+  echo "  The stack did not respond." >&2
   return 1
 }
 
-echo "Persistance — ${BASE_URL}"
+echo "Persistence — ${BASE_URL}"
 attendre
 
-# ---------------------------------------------------------------- avant l'arrêt
+# -------------------------------------------------------------- before shutdown
 
 lecture=$(curl -sS "${BASE_URL}/api/products?limit=100")
 produit=$(printf '%s' "$lecture" | extraire "
   const p=d.items.find(i=>i.stock>=4);
-  if(!p) throw new Error('aucun produit avec assez de stock');
+  if(!p) throw new Error('no product with enough stock');
   [p.id,p.slug,p.stock].join(' ')")
 read -r PID SLUG STOCK_AVANT <<< "$produit"
 
@@ -78,28 +78,29 @@ LIGNES=$(printf '%s' "$commande" | extraire 'd.items.length')
 
 STOCK_APRES=$(curl -sS "${BASE_URL}/api/products/${SLUG}" | extraire 'd.stock')
 
-printf '  commande %s — %s ligne(s), total %s c, TVA %s c\n' "$REF" "$LIGNES" "$TOTAL" "$TVA"
-printf '  stock %s : %s → %s\n' "$SLUG" "$STOCK_AVANT" "$STOCK_APRES"
+printf '  order %s — %s line(s), total %s c, VAT %s c\n' "$REF" "$LIGNES" "$TOTAL" "$TVA"
+printf '  stock %s: %s → %s\n' "$SLUG" "$STOCK_AVANT" "$STOCK_APRES"
 
 if [[ "$STOCK_APRES" != "$((STOCK_AVANT - 2))" ]]; then
-  echo "  ÉCHEC le stock n'a pas été décrémenté avant même l'arrêt." >&2
+  echo "  FAIL  stock was not decremented even before the shutdown." >&2
   exit 1
 fi
 
-# ------------------------------------------------------------------- redémarrage
+# ---------------------------------------------------------------------- restart
 
 echo
-echo "  arrêt de la pile…"
-# Sans `--volumes` : c'est tout l'objet de la vérification. Un `down -v` ici
-# rendrait le test vert sur une base recréée de zéro, ce qui ne prouve rien.
+echo "  stopping the stack…"
+# Without `--volumes`: that is the whole point of the check. A `down -v` here
+# would turn the test green on a database recreated from scratch, which proves
+# nothing.
 $COMPOSE down >/dev/null 2>&1
-echo "  relance…"
+echo "  starting again…"
 $COMPOSE up -d >/dev/null 2>&1
 attendre
-echo "  la pile répond à nouveau."
+echo "  the stack responds again."
 echo
 
-# ---------------------------------------------------------------- après l'arrêt
+# --------------------------------------------------------------- after shutdown
 
 relue=$(curl -sS "${BASE_URL}/api/orders/${REF}" -H "x-order-token: ${JETON}")
 echecs=0
@@ -109,21 +110,21 @@ comparer() {
   if [[ "$attendu" == "$obtenu" ]]; then
     printf '  ok    %-34s %s\n' "$libelle" "$obtenu"
   else
-    printf '  ÉCHEC %-34s %s (attendu %s)\n' "$libelle" "$obtenu" "$attendu"
+    printf '  FAIL  %-34s %s (expected %s)\n' "$libelle" "$obtenu" "$attendu"
     echecs=$((echecs + 1))
   fi
 }
 
-comparer 'référence'      "$REF"          "$(printf '%s' "$relue" | extraire 'd.reference ?? "absente"')"
-comparer 'nombre de lignes' "$LIGNES"     "$(printf '%s' "$relue" | extraire 'd.items?.length ?? 0')"
-comparer 'total'          "$TOTAL"        "$(printf '%s' "$relue" | extraire 'd.totals?.total ?? 0')"
-comparer 'TVA'            "$TVA"          "$(printf '%s' "$relue" | extraire 'd.totals?.vat ?? 0')"
-comparer 'ville livrée'   'Paris'         "$(printf '%s' "$relue" | extraire 'd.shippingAddress?.city ?? "?"')"
-comparer 'stock conservé' "$STOCK_APRES"  "$(curl -sS "${BASE_URL}/api/products/${SLUG}" | extraire 'd.stock')"
+comparer 'reference'       "$REF"          "$(printf '%s' "$relue" | extraire 'd.reference ?? "absente"')"
+comparer 'number of lines' "$LIGNES"       "$(printf '%s' "$relue" | extraire 'd.items?.length ?? 0')"
+comparer 'total'           "$TOTAL"        "$(printf '%s' "$relue" | extraire 'd.totals?.total ?? 0')"
+comparer 'VAT'             "$TVA"          "$(printf '%s' "$relue" | extraire 'd.totals?.vat ?? 0')"
+comparer 'delivery city'   'Paris'         "$(printf '%s' "$relue" | extraire 'd.shippingAddress?.city ?? "?"')"
+comparer 'stock preserved' "$STOCK_APRES"  "$(curl -sS "${BASE_URL}/api/products/${SLUG}" | extraire 'd.stock')"
 
 echo
 if (( echecs > 0 )); then
-  echo "$echecs vérification(s) en échec — les données n'ont pas survécu." >&2
+  echo "$echecs check(s) failed — the data did not survive." >&2
   exit 1
 fi
-echo 'Les données ont survécu à un arrêt complet.'
+echo 'The data survived a full shutdown.'

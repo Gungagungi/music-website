@@ -6,23 +6,23 @@ import { useEffect, useRef } from 'react';
 import { push } from '@/lib/analytics';
 
 /**
- * Émet la vue de page, à l'entrée sur le site comme à chaque navigation.
+ * Emits the page view, on entering the site as on every navigation.
  *
- * Next ne recharge pas la page d'une route à l'autre : sans ce composant,
- * Matomo n'enregistrerait que la toute première vue de la session.
+ * Next does not reload the page from one route to the next: without this
+ * component, Matomo would only record the session's very first view.
  *
- * La première vue lui revient aussi, et pas à l'extrait d'amorçage, à cause de
- * l'e-commerce. `setEcommerceView` n'enregistre rien par lui-même : il arme la
- * *prochaine* vue de page. Il faut donc que la déclaration du produit précède
- * l'émission de la vue, sans quoi la fiche produit compte comme une page
- * ordinaire. React exécute les effets des enfants avant ceux des parents, et
- * `{children}` précède `<Matomo />` dans le layout : l'effet de
- * TrackProductView passe avant celui-ci, ce qui donne l'ordre voulu sans
- * coordination explicite. Si cet ordre venait à changer, la dégradation est
- * bénigne — une vue de page sans son volet e-commerce, jamais un doublon.
+ * The first view belongs to it too, and not to the bootstrap snippet, because
+ * of e-commerce. `setEcommerceView` records nothing by itself: it arms the
+ * *next* page view. The product declaration must therefore come before the view
+ * is emitted, otherwise the product page counts as an ordinary page. React runs
+ * children's effects before their parents', and `{children}` comes before
+ * `<Matomo />` in the layout: TrackProductView's effect runs before this one,
+ * which gives the intended order without explicit coordination. Should that
+ * order change, the degradation is benign — a page view without its e-commerce
+ * part, never a duplicate.
  *
- * `useSearchParams` est ce qui impose le `<Suspense>` du composant parent : sans
- * lui, toute page qui rend ce composant bascule en rendu dynamique.
+ * `useSearchParams` is what requires the parent component's `<Suspense>`:
+ * without it, any page rendering this component switches to dynamic rendering.
  */
 export function SuiviDeNavigation() {
   const pathname = usePathname();
@@ -33,9 +33,10 @@ export function SuiviDeNavigation() {
     const query = searchParams.toString();
     const url = query ? `${pathname}?${query}` : pathname;
 
-    // À l'entrée sur le site, le tracker lit lui-même l'URL et le référent du
-    // document. Les lui réécrire n'apporterait rien et remplacerait un référent
-    // externe — celui qui dit d'où vient le visiteur — par une page du site.
+    // On entering the site, the tracker reads the document's URL and referrer
+    // by itself. Rewriting them would add nothing and would replace an external
+    // referrer — the one that says where the visitor came from — with a page of
+    // the site.
     if (precedente.current !== null) {
       push(['setReferrerUrl', new URL(precedente.current, window.location.origin).href]);
       push(['setCustomUrl', window.location.href]);
@@ -43,8 +44,8 @@ export function SuiviDeNavigation() {
     }
 
     push(['trackPageView']);
-    // Les liens sortants et les téléchargements sont réattachés à chaque vue :
-    // le DOM a été remplacé, les écouteurs posés sur l'ancien ont disparu.
+    // Outbound links and downloads are re-attached on every view: the DOM has
+    // been replaced, and the listeners set on the old one are gone.
     push(['enableLinkTracking']);
 
     precedente.current = url;

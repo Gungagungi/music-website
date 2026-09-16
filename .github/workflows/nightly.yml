@@ -9,7 +9,7 @@ on:
     - cron: '0 2 * * *' # 02:00 UTC
   workflow_dispatch:
 
-# Le job `rapport` pousse une ligne sur la branche `historique-qa`.
+# The `rapport` job pushes a line to the `historique-qa` branch.
 permissions:
   contents: write
 
@@ -47,9 +47,9 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
-    # Job conteneurisé : il partage le réseau des services, donc il joint la base
-    # par le nom du service (`postgres`) et non par localhost, qui désignerait ici
-    # le conteneur du job lui-même.
+    # Containerised job: it shares the services' network, so it reaches the
+    # database by the service name (`postgres`) and not through localhost, which
+    # here would refer to the job's own container.
     services:
       postgres:
         image: postgres:17-alpine
@@ -86,7 +86,7 @@ jobs:
         with:
           database-url: ${{ env.DATABASE_URL }}
 
-      - name: Suite complète
+      - name: Full suite
         working-directory: e2e
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-${{ matrix.project }}-${{ matrix.shard }}.zip
@@ -102,9 +102,9 @@ jobs:
           path: e2e/blob-report
           retention-days: 14
 
-      # Échecs *et* instables : un test qui passe à la relance est celui qui ne
-      # se reproduira pas en local, donc celui dont la trace compte le plus.
-      - name: Publier les traces (échecs et instables)
+      # Failures *and* flaky tests: a test that passes on retry is the one that
+      # will not reproduce locally, hence the one whose trace matters most.
+      - name: Upload traces (failed and flaky)
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
@@ -146,29 +146,29 @@ jobs:
           name: app-build
           path: app/.next
 
-      # Ce job ne lance pas le projet `setup-db`, donc rien ne repassera derrière
-      # pour charger le catalogue : les graines posées ici sont celles que k6
-      # mesure.
+      # This job does not run the `setup-db` project, so nothing will come
+      # along afterwards to load the catalogue: the seed data laid down here is
+      # what k6 measures.
       - uses: ./.github/actions/preparer-base
         with:
           database-url: ${{ env.DATABASE_URL }}
 
       - uses: grafana/setup-k6-action@v1
 
-      - name: Démarrer l’application
+      - name: Start the application
         run: |
           E2E_TEST_MODE=1 npm run start -w app &
           for _ in $(seq 1 60); do
             curl -sf http://localhost:3000/api/health >/dev/null && exit 0
             sleep 1
           done
-          echo "L’application n’a pas répondu dans le délai imparti." >&2
+          echo "The application did not respond within the time limit." >&2
           exit 1
 
-      - name: Montée en charge
+      - name: Load ramp-up
         run: k6 run perf/load.js
 
-      - name: Ajouter le résumé au job
+      - name: Add the summary to the job
         if: ${{ !cancelled() }}
         run: cat perf/results/load.md >> "$GITHUB_STEP_SUMMARY"
 
@@ -198,7 +198,7 @@ jobs:
           path: e2e/all-blobs
           merge-multiple: true
 
-      - name: Fusionner en un rapport unique
+      - name: Merge into a single report
         working-directory: e2e
         run: npx playwright merge-reports -c merge.config.ts ./all-blobs
 
@@ -208,25 +208,25 @@ jobs:
           path: e2e/reports/html
           retention-days: 30
 
-      # L'historique vit sur une branche orpheline, pas sur `main` : une ligne
-      # ajoutée chaque nuit y noierait l'historique du code, et la donnée n'a
-      # aucun rapport avec un état du code à un instant donné. Les artifacts ne
-      # conviendraient pas non plus — ils expirent, et une tendance qui perd ses
-      # trois premiers mois ne dit plus rien de la dérive qu'elle sert à voir.
-      - name: Enregistrer le run dans l’historique
-        # `!cancelled()` et non `success()` : un run rouge est exactement celui
-        # que la tendance doit garder. Mais un run rouge produit un résumé, et
-        # un rapport non produit n'en produit aucun : sans le test sur le
-        # fichier, un échec de `download-artifact` faisait échouer cette étape
-        # sur « Résumé introuvable », et cette seconde erreur — la plus visible
-        # dans l'annotation du job — masquait la vraie panne.
+      # The history lives on an orphan branch, not on `main`: a line added every
+      # night would bury the code's history there, and the data has nothing to do
+      # with the state of the code at a given moment. Artifacts would not do
+      # either — they expire, and a trend that loses its first three months no
+      # longer says anything about the drift it is meant to show.
+      - name: Record the run in the history
+        # `!cancelled()` and not `success()`: a red run is exactly the one the
+        # trend must keep. But a red run produces a summary, and a report that
+        # was never produced produces none: without the test on the file, a
+        # `download-artifact` failure made this step fail with "Summary not
+        # found", and that second error — the most visible one in the job's
+        # annotation — hid the real outage.
         if: ${{ !cancelled() && hashFiles('e2e/reports/summary.json') != '' }}
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
-          # La branche peut ne pas exister au premier run : on la crée orpheline.
+          # The branch may not exist on the first run: it is created as an orphan.
           if git ls-remote --exit-code --heads origin historique-qa >/dev/null 2>&1; then
             git fetch --depth=1 origin historique-qa
             git worktree add ../historique historique-qa
@@ -239,5 +239,5 @@ jobs:
           node scripts/enregistrer-tendance.mjs e2e/reports/summary.json ../historique/runs.jsonl
 
           git -C ../historique add runs.jsonl
-          git -C ../historique commit -m "chore(tendance): run ${GITHUB_RUN_ID}"
+          git -C ../historique commit -m "chore(trend): run ${GITHUB_RUN_ID}"
           git -C ../historique push origin historique-qa

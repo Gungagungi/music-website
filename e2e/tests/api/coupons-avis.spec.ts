@@ -31,9 +31,9 @@ test.describe('API — codes promo', () => {
   );
 
   test.describe('refus', () => {
-    // Chaque scénario porte son propre identifiant : trois cas de test partageant
-    // un seul TC rendent la matrice de traçabilité fausse — une ligne y couvrirait
-    // trois vérifications, et en retirer une passerait inaperçu.
+    // Each scenario carries its own identifier: three test cases sharing a single
+    // TC make the traceability matrix wrong — one row would cover three checks,
+    // and removing one of them would go unnoticed.
     const cases = [
       {
         tc: 'TC-271',

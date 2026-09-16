@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
-"""Audit de sécurité récurrent : l'hôte, la pile de conteneurs, le dépôt, la cible publique.
+"""Recurring security audit: the host, the container stack, the repository, the public target.
 
-Un seul fichier, sans dépendance Python tierce : ce script tourne depuis un
-timer systemd sur le VPS de production, et une chaîne d'installation qui peut
-casser au renouvellement d'un paquet transforme une surveillance en angle mort
-silencieux. Les seuls binaires externes sont optionnels et détectés à l'exécution
-(`trivy`, `nuclei`) — leur absence dégrade le rapport, elle ne l'interrompt pas.
+A single file, with no third-party Python dependency: this script runs from a
+systemd timer on the production VPS, and an install chain that can break when a
+package is upgraded turns monitoring into a silent blind spot. The only external
+binaries are optional and detected at run time (`trivy`, `nuclei`) — their
+absence degrades the report, it does not interrupt it.
 
-Cinq familles de contrôles, activables séparément :
+Five families of checks, each can be enabled on its own:
 
-  hote        sshd, nftables, fail2ban, mises à jour, permissions des secrets
-  images      CVE des images de la pile (trivy)
-  eol         fin de support des briques déployées (endoflife.date)
-  depot       CVE des dépendances de production, secrets committés, .env
-  web         en-têtes, TLS, endpoints de test, cookies, signatures (nuclei)
+  hote        sshd, nftables, fail2ban, updates, secret file permissions
+  images      CVEs in the stack's images (trivy)
+  eol         end of support of deployed components (endoflife.date)
+  depot       CVEs in production dependencies, committed secrets, .env
+  web         headers, TLS, test endpoints, cookies, signatures (nuclei)
 
-Chaque contrôle produit zéro ou plusieurs constats. Le code de sortie vaut 0
-quand rien ne dépasse le seuil demandé, 1 sinon — c'est ce qui fait rougir
-l'unité systemd, et ce qui rend l'échec visible sans lire le rapport.
+Each check produces zero or more findings. The exit code is 0 when nothing
+exceeds the requested threshold, 1 otherwise — that is what turns the systemd
+unit red, and what makes the failure visible without reading the report.
 
-Usage :
-    scripts/audit-securite.py --cible https://exemple.fr
+Usage:
+    scripts/audit-securite.py --cible https://example.com
     scripts/audit-securite.py --familles hote,depot --format texte
     scripts/audit-securite.py --seuil eleve --sortie /var/lib/audit/rapport.json
 """
@@ -42,16 +42,16 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
-# --- Modèle ----------------------------------------------------------------
+# --- Model -----------------------------------------------------------------
 
-# Ordonnées de la plus grave à la moins grave : l'index sert de comparaison,
-# ce qui évite d'éparpiller des `if severite == ...` dans tout le fichier.
+# Ordered from most to least severe: the index is used for comparison, which
+# avoids scattering `if severite == ...` throughout the file.
 SEVERITES = ("critique", "eleve", "moyen", "faible", "info")
 
 
 @dataclass
 class Constat:
-    """Un problème observé, ou une observation neutre lorsqu'il n'y en a pas."""
+    """An observed problem, or a neutral observation when there is none."""
 
     severite: str
     famille: str
@@ -81,11 +81,10 @@ class Rapport:
 
 
 def executer(commande: list[str], *, delai: int = 60) -> tuple[int, str]:
-    """Lance une commande et rend (code, sortie). N'échoue jamais par exception.
+    """Runs a command and returns (code, output). Never fails with an exception.
 
-    Un audit qui s'interrompt parce qu'un binaire a changé d'avis sur son code
-    de retour ne rapporte rien du tout, ce qui est pire que de rapporter un
-    contrôle ignoré.
+    An audit that stops because a binary changed its mind about its exit code
+    reports nothing at all, which is worse than reporting a skipped check.
     """
     try:
         acheve = subprocess.run(
@@ -102,17 +101,17 @@ def executer(commande: list[str], *, delai: int = 60) -> tuple[int, str]:
         return 124, f"délai dépassé après {delai} s"
 
 
-# --- Famille « hote » -------------------------------------------------------
+# --- "hote" family ----------------------------------------------------------
 
 
 def controler_sshd() -> list[Constat]:
-    """Lit la configuration *effective* de sshd, pas le fichier principal.
+    """Reads sshd's *effective* configuration, not the main file.
 
-    La distinction n'est pas théorique : c'est précisément ce qui a été trouvé
-    sur ce serveur. `/etc/ssh/sshd_config` portait `PasswordAuthentication no`,
-    mais un `Include` placé plus haut tirait un fichier cloud-init qui disait
-    `yes` — et en sshd, la première valeur obtenue gagne. Relire le fichier
-    principal aurait conclu que tout allait bien.
+    The distinction is not theoretical: it is exactly what was found on this
+    server. `/etc/ssh/sshd_config` had `PasswordAuthentication no`, but an
+    `Include` placed higher up pulled in a cloud-init file that said `yes` — and
+    in sshd, the first value obtained wins. Re-reading the main file would have
+    concluded that all was well.
     """
     code, sortie = executer(["sshd", "-T"])
     if code != 0:
@@ -176,10 +175,9 @@ def controler_sshd() -> list[Constat]:
     return constats
 
 
-# Les ports que cette machine est censée exposer publiquement. Tout le reste
-# constitue un écart à signaler — c'est la liste qu'on met à jour quand on
-# ouvre délibérément un service, et l'oubli de le faire est exactement ce que
-# le contrôle doit attraper.
+# The ports this machine is expected to expose publicly. Anything else is a
+# deviation to report — this is the list to update when a service is opened on
+# purpose, and forgetting to do so is exactly what the check must catch.
 PORTS_PUBLICS_ATTENDUS = {80, 443, 54410}
 
 
@@ -198,8 +196,8 @@ def controler_pare_feu() -> list[Constat]:
             )
         )
     elif "hook input" in sortie:
-        # On ne cherche la politique que sur la chaîne d'entrée : `policy accept`
-        # en sortie est normal, en entrée il annule le pare-feu.
+        # The policy is only looked up on the input chain: `policy accept` on
+        # output is normal, on input it cancels the firewall.
         entree = sortie.split("hook input", 1)[1][:400]
         if "policy drop" not in entree and "policy reject" not in entree:
             constats.append(
@@ -226,20 +224,19 @@ def controler_pare_feu() -> list[Constat]:
             )
         )
 
-    # Écoutes sur une adresse non locale. Un processus qui écoute sur 0.0.0.0
-    # n'est pas joignable tant que le pare-feu tient — mais il le devient à la
-    # première règle assouplie, et personne ne relit la liste des écoutes à ce
-    # moment-là.
-    # TCP seulement. Les écoutes UDP de cette machine sont celles d'avahi (5353
-    # et ses ports éphémères) et du client DHCP (68) : elles réapparaissent à
-    # chaque démarrage sur un numéro différent, donc les signaler produit un
-    # constat neuf à chaque exécution, qui ne désigne jamais rien. Les services
-    # qu'on cherche — un serveur oublié, une base publiée par mégarde — écoutent
-    # en TCP.
-    # `-u` est conservé pour que `ss` émette la colonne Netid : sans elle, les
-    # champs se décalent d'un cran et l'adresse est lue au mauvais endroit — ce
-    # qui a fait disparaître un vrai constat du rapport en silence. Le filtrage
-    # TCP se fait donc sur la colonne, pas sur les options.
+    # Listeners on a non-local address. A process listening on 0.0.0.0 is not
+    # reachable as long as the firewall holds — but it becomes reachable at the
+    # first relaxed rule, and nobody re-reads the list of listeners at that
+    # moment.
+    # TCP only. This machine's UDP listeners are avahi's (5353 and its ephemeral
+    # ports) and the DHCP client's (68): they reappear on a different number at
+    # every boot, so reporting them produces a new finding on every run, which
+    # never points at anything. The services being looked for — a forgotten
+    # server, a database published by mistake — listen on TCP.
+    # `-u` is kept so that `ss` emits the Netid column: without it, the fields
+    # shift by one and the address is read from the wrong place — which
+    # silently made a real finding disappear from the report. TCP filtering is
+    # therefore done on the column, not through the options.
     code, sortie = executer(["ss", "-tulnpH"])
     if code == 0:
         for ligne in sortie.splitlines():
@@ -292,8 +289,8 @@ def controler_durcissement_hote() -> list[Constat]:
                 )
             )
 
-    # Mises à jour de sécurité en attente. `apt-get -s` simule : aucune écriture,
-    # et pas de dépendance à un binaire absent comme `jq`.
+    # Pending security updates. `apt-get -s` simulates: no writes, and no
+    # dependency on a missing binary such as `jq`.
     code, sortie = executer(["apt-get", "-s", "upgrade"], delai=120)
     if code == 0:
         paquets = [l for l in sortie.splitlines() if l.startswith("Inst ")]
@@ -336,11 +333,11 @@ def controler_durcissement_hote() -> list[Constat]:
 
 
 def controler_permissions_secrets(racine: Path) -> list[Constat]:
-    """Les fichiers d'environnement ne doivent être lisibles que par leur propriétaire.
+    """Environment files must be readable by their owner only.
 
-    Un `.env.production` en 0644 met AUTH_SECRET, le mot de passe PostgreSQL et
-    celui de Matomo à la portée de tout compte local — et de tout processus
-    compromis tournant sous un autre utilisateur.
+    A `.env.production` in 0644 puts AUTH_SECRET, the PostgreSQL password and
+    Matomo's within reach of every local account — and of any compromised
+    process running as another user.
     """
     constats: list[Constat] = []
     for chemin in sorted(racine.glob(".env*")):
@@ -361,15 +358,15 @@ def controler_permissions_secrets(racine: Path) -> list[Constat]:
     return constats
 
 
-# --- Famille « images » -----------------------------------------------------
+# --- "images" family --------------------------------------------------------
 
 
 def controler_images(seuil_trivy: str = "HIGH,CRITICAL") -> list[Constat]:
-    """CVE des images de la pile.
+    """CVEs in the stack's images.
 
-    Les images tierces (postgres, mariadb, matomo, caddy) ne sont couvertes par
-    aucun `npm audit` : elles se mettent à jour en repoussant le tag, et rien
-    dans ce dépôt ne dit quand c'est devenu nécessaire.
+    Third-party images (postgres, mariadb, matomo, caddy) are covered by no
+    `npm audit`: they are updated by bumping the tag, and nothing in this
+    repository says when that became necessary.
     """
     if not shutil.which("trivy"):
         return [
@@ -405,7 +402,7 @@ def controler_images(seuil_trivy: str = "HIGH,CRITICAL") -> list[Constat]:
                 "--quiet",
                 "--scanners", "vuln",
                 "--severity", seuil_trivy,
-                "--ignore-unfixed",  # une CVE sans correctif publié n'appelle aucune action
+                "--ignore-unfixed",  # a CVE with no published fix calls for no action
                 "--format", "json",
                 image,
             ],
@@ -450,21 +447,21 @@ def controler_images(seuil_trivy: str = "HIGH,CRITICAL") -> list[Constat]:
     return constats
 
 
-# --- Famille « eol » --------------------------------------------------------
+# --- "eol" family -----------------------------------------------------------
 #
-# Ce que la famille « images » ne peut pas voir. Trivy compare des paquets à une
-# base de CVE publiées : une version dont le support de sécurité est terminé n'y
-# apparaît pas plus vulnérable qu'une autre, parce que personne ne publie plus
-# d'avis pour elle. L'angle mort est exactement inverse du scan de CVE — plus la
-# version est morte, plus le rapport est silencieux.
+# What the "images" family cannot see. Trivy compares packages against a
+# database of published CVEs: a version whose security support has ended looks
+# no more vulnerable than any other there, because nobody publishes advisories
+# for it any more. The blind spot is the exact opposite of the CVE scan — the
+# deader the version, the quieter the report.
 #
-# Les cycles et leurs dates viennent d'endoflife.date. Une table figée ici
-# vieillirait sans bruit, et une table qui ment sur une date de fin de support
-# est pire que pas de contrôle du tout : elle rassure.
+# Cycles and their dates come from endoflife.date. A table frozen here would age
+# without a sound, and a table that lies about an end-of-support date is worse
+# than no check at all: it reassures.
 
-# Nom d'image Docker → produit endoflife.date. Les images tierces de la pile
-# sont lues dans le compose, pas listées ici : c'est le fichier qui déploie qui
-# fait foi, et une seconde liste finirait par diverger de la première.
+# Docker image name → endoflife.date product. The stack's third-party images
+# are read from the compose file, not listed here: the file that deploys is the
+# source of truth, and a second list would end up diverging from the first.
 PRODUITS_EOL = {
     "postgres": "postgresql",
     "mariadb": "mariadb",
@@ -473,18 +470,18 @@ PRODUITS_EOL = {
     "node": "nodejs",
 }
 
-# En deçà, la fin de support est assez proche pour qu'une montée de version
-# doive être planifiée plutôt que subie. Une majeure de PostgreSQL ou de MariaDB
-# se migre avec une fenêtre d'indisponibilité : 90 jours sont un délai court.
+# Below this, end of support is close enough that an upgrade should be planned
+# rather than endured. A PostgreSQL or MariaDB major version is migrated with a
+# downtime window: 90 days is a short lead time.
 JOURS_AVANT_EOL = 90
 
 
 def versions_de_la_pile(racine: Path) -> list[tuple[str, str, str]]:
-    """Rend (produit endoflife.date, cycle, origine) pour chaque brique déployée.
+    """Returns (endoflife.date product, cycle, source) for each deployed component.
 
-    Tout est lu dans les fichiers qui déploient — compose, Dockerfile,
-    package.json, /etc/os-release — et rien n'est écrit en dur : le jour où un
-    tag est repoussé, le contrôle suit sans qu'on y pense.
+    Everything is read from the files that deploy — compose, Dockerfile,
+    package.json, /etc/os-release — and nothing is hard-coded: the day a tag is
+    bumped, the check follows without anyone having to think about it.
     """
     releves: list[tuple[str, str, str]] = []
 
@@ -493,8 +490,8 @@ def versions_de_la_pile(racine: Path) -> list[tuple[str, str, str]]:
         produit = PRODUITS_EOL.get(nom.rsplit("/", 1)[-1])
         if not produit:
             return
-        # `17-alpine`, `5-apache`, `11` → `17`, `5`, `11`. Le suffixe de
-        # distribution ne dit rien du cycle de support.
+        # `17-alpine`, `5-apache`, `11` → `17`, `5`, `11`. The distribution
+        # suffix says nothing about the support cycle.
         cycle = re.match(r"(\d+(?:\.\d+)*)", tag or "")
         if cycle:
             releves.append((produit, cycle.group(1), origine))
@@ -521,8 +518,9 @@ def versions_de_la_pile(racine: Path) -> list[tuple[str, str, str]]:
         except (json.JSONDecodeError, OSError):
             pass
 
-    # Le système de l'hôte. Il porte le noyau, OpenSSL et le démon SSH : une
-    # Debian hors support ne reçoit plus de correctif pour aucun des trois.
+    # The host operating system. It carries the kernel, OpenSSL and the SSH
+    # daemon: an unsupported Debian no longer receives fixes for any of the
+    # three.
     osrelease = Path("/etc/os-release")
     if osrelease.is_file():
         texte = osrelease.read_text(encoding="utf-8")
@@ -535,12 +533,12 @@ def versions_de_la_pile(racine: Path) -> list[tuple[str, str, str]]:
 
 
 def cycle_correspondant(cycles: list[dict], cycle: str) -> dict | None:
-    """Retrouve l'entrée endoflife.date d'un cycle, tag Docker compris.
+    """Finds the endoflife.date entry for a cycle, Docker tags included.
 
-    Une correspondance exacte ne suffit pas : le tag `mariadb:11` suit la
-    dernière 11.x publiée, or endoflife.date ne connaît pas de cycle « 11 » —
-    seulement 11.0 à 11.8. Sans le repli par préfixe, la brique la plus exposée
-    de la pile serait silencieusement exclue du contrôle.
+    An exact match is not enough: the `mariadb:11` tag follows the latest 11.x
+    released, yet endoflife.date knows no "11" cycle — only 11.0 to 11.8.
+    Without the prefix fallback, the most exposed component of the stack would
+    be silently left out of the check.
     """
     for entree in cycles:
         if entree.get("cycle") == cycle:
@@ -559,10 +557,10 @@ def controler_eol(racine: Path) -> list[Constat]:
         return [Constat("info", "eol", "Aucune version relevée", "Ni compose, ni Dockerfile, ni os-release exploitables.", "")]
 
     aujourdhui = datetime.now(timezone.utc).date()
-    # Ce que le contrôle a effectivement couvert. Sans cette trace, une brique
-    # sortie du relevé — un service renommé, un tag qui perd son numéro — rend
-    # le rapport plus vert, pas plus rouge : le silence d'un contrôle et son
-    # succès s'écrivent de la même façon.
+    # What the check actually covered. Without this trace, a component that
+    # drops out of the scan — a renamed service, a tag that loses its number —
+    # makes the report greener, not redder: a check's silence and its success
+    # are written the same way.
     couvertes: list[str] = []
 
     for produit, cycle, origine in sorted(set(releves)):
@@ -597,8 +595,9 @@ def controler_eol(racine: Path) -> list[Constat]:
             )
             continue
 
-        # `eol` vaut `false` tant qu'aucune date n'est annoncée, et `true` quand
-        # le cycle est déjà mort sans date connue. Seule une chaîne se compare.
+        # `eol` is `false` as long as no date is announced, and `true` when the
+        # cycle is already dead with no known date. Only a string can be
+        # compared.
         echeance = entree.get("eol")
         connu = f"{produit} {entree.get('cycle')} (relevé {cycle} dans {origine})"
 
@@ -647,21 +646,21 @@ def controler_eol(racine: Path) -> list[Constat]:
     return constats
 
 
-# --- Famille « depot » ------------------------------------------------------
+# --- "depot" family ---------------------------------------------------------
 
-# Motifs de secrets committés. Volontairement peu nombreux et très spécifiques :
-# une expression large produit des faux positifs à chaque exécution, et un
-# rapport qu'on apprend à survoler ne protège plus de rien.
+# Patterns of committed secrets. Deliberately few and very specific: a broad
+# expression produces false positives on every run, and a report people learn
+# to skim no longer protects anything.
 MOTIFS_SECRETS = [
     (re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----"), "clé privée"),
     (re.compile(r"\bAKIA[0-9A-Z]{16}\b"), "clé d'accès AWS"),
     (re.compile(r"\bgh[pousr]_[A-Za-z0-9]{36,}"), "jeton GitHub"),
     (re.compile(r"\bsk-[A-Za-z0-9]{32,}"), "clé d'API"),
-    # L'hôte est exclu de la classe : une URL pointant vers `localhost`, `db`
-    # ou `postgres` désigne une base de développement ou le service d'un job CI,
-    # dont le mot de passe n'est un secret pour personne. Sans cette exclusion,
-    # le contrôle signalait trois fichiers à chaque exécution — et un rapport
-    # dont on apprend à ignorer les trois premières lignes ne protège plus.
+    # The host is excluded from the class: a URL pointing at `localhost`, `db`
+    # or `postgres` refers to a development database or a CI job's service,
+    # whose password is a secret to nobody. Without this exclusion, the check
+    # flagged three files on every run — and a report whose first three lines
+    # people learn to ignore no longer protects anything.
     (
         re.compile(
             r"postgres(?:ql)?://[^\s:@/]+:[^\s:@/]+@"
@@ -671,16 +670,16 @@ MOTIFS_SECRETS = [
     ),
 ]
 
-# Les fichiers dont le rôle est justement de porter des valeurs de démonstration.
+# Files whose very purpose is to carry demonstration values.
 CHEMINS_EXEMPTES = re.compile(r"(\.example$|^docs/|\.md$|package-lock\.json$)")
 
 
 def controler_depot(racine: Path) -> list[Constat]:
     constats: list[Constat] = []
 
-    # CVE des dépendances réellement déployées. `--omit=dev` est essentiel :
-    # sans lui le rapport est dominé par l'outillage de test, qui ne tourne
-    # jamais en production, et le signal se noie.
+    # CVEs in the dependencies actually deployed. `--omit=dev` is essential:
+    # without it the report is dominated by test tooling, which never runs in
+    # production, and the signal drowns.
     code, brut = executer(
         ["npm", "audit", "--omit=dev", "--json"],
         delai=180,
@@ -706,9 +705,9 @@ def controler_depot(racine: Path) -> list[Constat]:
             Constat("info", "depot", "npm audit illisible", brut[:200], "")
         )
 
-    # Secrets dans les fichiers suivis par git. On interroge git plutôt que le
-    # système de fichiers : ce qui n'est pas versionné ne fuit pas par le dépôt,
-    # et node_modules ferait exploser la durée du contrôle.
+    # Secrets in files tracked by git. Git is queried rather than the file
+    # system: what is not versioned does not leak through the repository, and
+    # node_modules would blow up the check's duration.
     code, sortie = executer(["git", "-C", str(racine), "ls-files"], delai=60)
     if code == 0:
         for relatif in sortie.splitlines():
@@ -734,8 +733,8 @@ def controler_depot(racine: Path) -> list[Constat]:
                         )
                     )
 
-    # AUTH_SECRET de démonstration en production. La valeur est publiée dans ce
-    # dépôt : quiconque la connaît forge une session pour n'importe quel compte.
+    # Demonstration AUTH_SECRET in production. The value is published in this
+    # repository: anyone who knows it can forge a session for any account.
     env_production = racine / ".env.production"
     if env_production.is_file():
         try:
@@ -757,15 +756,15 @@ def controler_depot(racine: Path) -> list[Constat]:
     return constats
 
 
-# --- Famille « web » --------------------------------------------------------
+# --- "web" family -----------------------------------------------------------
 
 
 def requete(url: str, *, methode: str = "GET", entetes: dict | None = None, delai: int = 20):
-    """Requête HTTP qui rend la réponse même sur code d'erreur.
+    """HTTP request that returns the response even on an error status.
 
-    urllib lève sur 4xx/5xx, or un 404 est ici le résultat *attendu* de
-    plusieurs contrôles : l'exception est donc rattrapée et son objet, qui est
-    une réponse complète, est rendu tel quel.
+    urllib raises on 4xx/5xx, yet a 404 is the *expected* result of several
+    checks here: the exception is therefore caught and its object, which is a
+    complete response, is returned as-is.
     """
     demande = urllib.request.Request(url, method=methode, headers=entetes or {})
     try:
@@ -776,7 +775,7 @@ def requete(url: str, *, methode: str = "GET", entetes: dict | None = None, dela
         return None
 
 
-# En-têtes attendus sur la cible, avec la sévérité de leur absence.
+# Headers expected on the target, with the severity of their absence.
 ENTETES_ATTENDUS = {
     "content-security-policy": ("eleve", "Aucune politique de sécurité du contenu : une injection de script s'exécute sans obstacle."),
     "strict-transport-security": ("eleve", "Sans HSTS, la première visite peut être dégradée en clair."),
@@ -807,9 +806,9 @@ def controler_entetes(cible: str) -> list[Constat]:
 
     csp = entetes.get("content-security-policy", "")
     if csp:
-        # Une CSP réduite au seul `frame-ancestors` interdit le cadrage et rien
-        # d'autre. C'est l'état exact dans lequel l'audit initial a trouvé ce
-        # déploiement, d'où un contrôle dédié plutôt qu'une simple présence.
+        # A CSP reduced to `frame-ancestors` alone forbids framing and nothing
+        # else. That is the exact state the initial audit found this deployment
+        # in, hence a dedicated check rather than a mere presence test.
         if "script-src" not in csp and "default-src" not in csp:
             constats.append(
                 Constat(
@@ -845,11 +844,11 @@ def controler_redirection(cible: str) -> list[Constat]:
         return []
     en_clair = "http://" + cible[len("https://") :]
 
-    # Ouvreur qui ne suit pas les redirections. `urllib.request.urlopen` les
-    # suit par défaut, donc ce contrôle observait le 200 servi en HTTPS à
-    # l'arrivée et concluait à l'absence de redirection — un faux constat, du
-    # type le plus coûteux : il désigne un problème inexistant sur le contrôle
-    # dont la réussite compte le plus.
+    # Opener that does not follow redirects. `urllib.request.urlopen` follows
+    # them by default, so this check used to observe the 200 served over HTTPS
+    # at the end and conclude there was no redirect — a false finding, of the
+    # most expensive kind: it points at a non-existent problem on the check
+    # whose success matters most.
     class SansRedirection(urllib.request.HTTPRedirectHandler):
         def redirect_request(self, *_args, **_kwargs):  # noqa: D102
             return None
@@ -875,15 +874,15 @@ def controler_redirection(cible: str) -> list[Constat]:
     return []
 
 
-# Ces routes effacent et réécrivent la base. Trois gardes les protègent, dont
-# `E2E_TEST_MODE` : un 404 est le seul résultat acceptable en production.
+# These routes wipe and rewrite the database. Three guards protect them,
+# including `E2E_TEST_MODE`: a 404 is the only acceptable result in production.
 #
-# Chaque route est sondée avec le verbe qu'elle expose réellement, et c'est
-# indispensable : Next rejette un verbe non exporté par un 405 émis *avant* le
-# corps du handler, donc avant la garde qui renvoie 404. Sonder GET sur une
-# route qui n'expose que POST rapportait quatre constats critiques sur un
-# déploiement parfaitement sain — le 405 y prouve seulement que le fichier de
-# route existe dans le build, ce qui est vrai de toute construction du dépôt.
+# Each route is probed with the verb it actually exposes, and that is essential:
+# Next rejects a non-exported verb with a 405 emitted *before* the handler body,
+# hence before the guard that returns 404. Probing GET on a route that only
+# exposes POST reported four critical findings on a perfectly healthy
+# deployment — the 405 only proves there that the route file exists in the
+# build, which is true of every build of the repository.
 ENDPOINTS_DE_TEST = (
     ("POST", "/api/test/reset"),
     ("POST", "/api/test/seed"),
@@ -943,10 +942,10 @@ def controler_sante(cible: str) -> list[Constat]:
 
 
 def controler_cookies(cible: str) -> list[Constat]:
-    """Vérifie les attributs du cookie de session sur une tentative de connexion.
+    """Checks the session cookie's attributes on a login attempt.
 
-    Les identifiants sont volontairement faux : un 401 pose le cookie de panier
-    et suffit à juger les attributs, sans créer ni compte ni commande sur la
+    The credentials are deliberately wrong: a 401 sets the cart cookie and is
+    enough to judge the attributes, without creating an account or an order on
     production.
     """
     corps = json.dumps({"email": "audit@exemple.invalid", "password": "x"}).encode()
@@ -1031,8 +1030,8 @@ def controler_tls(cible: str) -> list[Constat]:
                 Constat("critique", "web", "Certificat TLS expiré",
                         f"Expiré depuis {-jours} jour(s).", "Renouveler immédiatement."))
         elif jours < 15:
-            # Caddy renouvelle à 30 jours de l'échéance : sous 15, le
-            # renouvellement automatique a déjà échoué au moins une fois.
+            # Caddy renews 30 days before expiry: under 15, automatic renewal
+            # has already failed at least once.
             constats.append(
                 Constat("eleve", "web", f"Certificat TLS expirant dans {jours} jour(s)",
                         "Caddy renouvelle normalement à 30 jours : ce délai "
@@ -1043,12 +1042,12 @@ def controler_tls(cible: str) -> list[Constat]:
 
 
 def controler_nuclei(cible: str) -> list[Constat]:
-    """Scan par signatures.
+    """Signature-based scan.
 
-    Les modèles `dos`, `intrusive` et `fuzz` sont exclus : la cible est une
-    production, et un audit qui la met à genoux coûte plus qu'il ne rapporte.
-    Le débit est bridé pour la même raison — le test de rupture situe le mur de
-    cette machine autour de 80 requêtes par seconde.
+    The `dos`, `intrusive` and `fuzz` templates are excluded: the target is
+    production, and an audit that brings it to its knees costs more than it
+    yields. The rate is throttled for the same reason — the breaking-point test
+    puts this machine's wall at around 80 requests per second.
     """
     if not shutil.which("nuclei"):
         return [
@@ -1057,12 +1056,12 @@ def controler_nuclei(cible: str) -> list[Constat]:
                     "Installer nuclei (release GitHub projectdiscovery).")
         ]
 
-    # Sans modèles, nuclei sort en erreur *et n'écrit rien sur la sortie* : le
-    # scan produisait alors zéro constat, présenté comme un scan propre. C'est
-    # le pire mode de panne possible pour une surveillance, et il s'est
-    # effectivement produit — `nuclei -update-templates` échouait en silence sur
-    # cette machine. Le répertoire est donc vérifié avant, et son absence est
-    # rapportée comme un contrôle non effectué, jamais comme une réussite.
+    # Without templates, nuclei exits with an error *and writes nothing to
+    # stdout*: the scan then produced zero findings, presented as a clean scan.
+    # That is the worst possible failure mode for monitoring, and it actually
+    # happened — `nuclei -update-templates` was failing silently on this
+    # machine. The directory is therefore checked first, and its absence is
+    # reported as a check not performed, never as a success.
     modeles = next(
         (
             chemin
@@ -1132,7 +1131,7 @@ def controler_nuclei(cible: str) -> list[Constat]:
     return constats
 
 
-# --- Restitution ------------------------------------------------------------
+# --- Rendering --------------------------------------------------------------
 
 SYMBOLES = {
     "critique": "!!",
@@ -1184,40 +1183,40 @@ def rendre_texte(rapport: Rapport) -> str:
     return "\n".join(lignes)
 
 
-# --- Point d'entrée ---------------------------------------------------------
+# --- Entry point ------------------------------------------------------------
 
 
 def main() -> int:
     analyseur = argparse.ArgumentParser(
-        description="Audit de sécurité du VPS, de la pile et de la cible publique.",
+        description="Security audit of the VPS, the stack and the public target.",
     )
     analyseur.add_argument(
         "--cible",
         default=os.environ.get("AUDIT_CIBLE", ""),
-        help="URL du site à sonder (ex. https://exemple.fr). Sans elle, la famille « web » est ignorée.",
+        help="URL of the site to probe (e.g. https://example.com). Without it, the \"web\" family is skipped.",
     )
     analyseur.add_argument(
         "--familles",
         default="hote,images,eol,depot,web",
-        help="Familles à exécuter, séparées par des virgules.",
+        help="Comma-separated families to run.",
     )
     analyseur.add_argument(
         "--racine",
         type=Path,
         default=Path(__file__).resolve().parent.parent,
-        help="Racine du dépôt à inspecter.",
+        help="Root of the repository to inspect.",
     )
     analyseur.add_argument(
         "--seuil",
         choices=SEVERITES,
         default="eleve",
-        help="Sévérité à partir de laquelle le code de sortie vaut 1 (défaut : eleve).",
+        help="Severity from which the exit code is 1 (default: eleve).",
     )
     analyseur.add_argument("--format", choices=("texte", "json"), default="texte")
     analyseur.add_argument(
         "--sortie",
         type=Path,
-        help="Écrit aussi le rapport JSON complet à ce chemin, quel que soit --format.",
+        help="Also writes the full JSON report to this path, whatever --format is.",
     )
     arguments = analyseur.parse_args()
 

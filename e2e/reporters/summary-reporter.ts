@@ -46,9 +46,9 @@ export default class SummaryReporter implements Reporter {
     mkdirSync(dirname(localPath), { recursive: true });
     writeFileSync(localPath, markdown, 'utf8');
 
-    // Les mêmes chiffres, lisibles par une machine. Le Markdown répond à « qu'a
-    // cassé ce run » ; le JSON alimente `scripts/enregistrer-tendance.mjs`, qui
-    // répond à « depuis quand », et qu'aucun rapport par run ne peut dire.
+    // The same figures, machine-readable. The Markdown answers "what did this run
+    // break"; the JSON feeds `scripts/enregistrer-tendance.mjs`, which answers
+    // "since when" — something no per-run report can tell.
     writeFileSync('reports/summary.json', `${JSON.stringify(this.toJson(result), null, 2)}\n`, 'utf8');
 
     const githubSummary = process.env.GITHUB_STEP_SUMMARY;
@@ -92,7 +92,7 @@ export default class SummaryReporter implements Reporter {
    */
   private tally(): void {
     for (const test of this.rootSuite?.allTests() ?? []) {
-      const project = test.parent.project()?.name ?? 'inconnu';
+      const project = test.parent.project()?.name ?? 'unknown';
       const entry = this.stats.get(project) ?? {
         passed: 0,
         failed: 0,
@@ -124,7 +124,7 @@ export default class SummaryReporter implements Reporter {
       project,
       title: test.titlePath().slice(3).join(' › '),
       file: test.location.file.split('/').slice(-2).join('/'),
-      message: firstLine(attempt?.error?.message ?? 'Échec sans message.'),
+      message: firstLine(attempt?.error?.message ?? 'Failure without a message.'),
     };
   }
 
@@ -143,17 +143,17 @@ export default class SummaryReporter implements Reporter {
     const icon = result.status === 'passed' ? '✅' : result.status === 'failed' ? '❌' : '⚠️';
 
     const lines: string[] = [
-      `## ${icon} Fretline — résultats des tests`,
+      `## ${icon} Fretline — test results`,
       '',
       // Cumulated test time, not elapsed time: the same summary is rendered
       // after a live run and after `merge-reports`, where wall clock would be
       // the duration of the merge itself — a couple of seconds, reported for a
       // suite that took a quarter of an hour across six machines.
-      `**${totals.passed}/${this.totalTests}** réussis · **${totals.failed}** échecs · ` +
-        `**${totals.flaky}** instables · **${totals.skipped}** ignorés · ` +
-        `⏱️ ${formatDuration(totals.durationMs)} cumulés`,
+      `**${totals.passed}/${this.totalTests}** passed · **${totals.failed}** failed · ` +
+        `**${totals.flaky}** flaky · **${totals.skipped}** skipped · ` +
+        `⏱️ ${formatDuration(totals.durationMs)} cumulative`,
       '',
-      '| Projet | ✅ | ❌ | ⚠️ Instables | ⏭️ Ignorés | Durée |',
+      '| Project | ✅ | ❌ | ⚠️ Flaky | ⏭️ Skipped | Duration |',
       '| --- | ---: | ---: | ---: | ---: | ---: |',
     ];
 
@@ -163,14 +163,14 @@ export default class SummaryReporter implements Reporter {
       );
     }
 
-    appendSection(lines, '### Échecs', this.failures);
+    appendSection(lines, '### Failures', this.failures);
 
     // Flakes are surfaced separately rather than folded into the failure list.
     // A green pipeline that quietly retried its way past an unstable test is
     // how a suite stops being trusted; naming them keeps the debt visible.
-    appendSection(lines, '### Instables (réussis après relance)', this.flakes);
+    appendSection(lines, '### Flaky (passed on retry)', this.flakes);
 
-    lines.push('', '_Rapport HTML complet et traces disponibles dans les artifacts du job._');
+    lines.push('', '_Full HTML report and traces available in the job artifacts._');
     return lines.join('\n');
   }
 }
@@ -184,7 +184,7 @@ function appendSection(lines: string[], heading: string, records: FailureRecord[
     lines.push(`  > ${record.message}`);
   }
   if (records.length > 20) {
-    lines.push('', `_…et ${records.length - 20} autres (voir le rapport HTML)._`);
+    lines.push('', `_…and ${records.length - 20} more (see the HTML report)._`);
   }
 }
 

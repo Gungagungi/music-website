@@ -8,9 +8,9 @@ import { couponSchema } from '@/lib/schemas';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  // Un code promo se devine : sans limite, cette route est un oracle qui
-  // distingue COUPON_UNKNOWN d'un refus motivé, donc de quoi énumérer les
-  // codes valides à la vitesse du réseau.
+  // A promo code can be guessed: without a limit, this route is an oracle that
+  // distinguishes COUPON_UNKNOWN from a reasoned refusal, which is enough to
+  // enumerate valid codes at network speed.
   const limited = enforceRateLimit('coupon', request);
   if (limited) return limited;
 

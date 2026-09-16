@@ -1,25 +1,25 @@
 # syntax=docker/dockerfile:1
 
-# Image de production de l'application.
+# Production image of the application.
 #
-# Trois étages : installation des dépendances, build, puis une image d'exécution
-# qui ne contient ni source, ni chaîne d'outils, ni dépendance de développement.
+# Three stages: dependency installation, build, then a runtime image that
+# contains no source, no toolchain and no development dependency.
 #
-# Le point délicat vient des workspaces npm. Le `package-lock.json` est à la
-# racine, et la sortie `standalone` de Next reproduit l'arborescence du monorepo :
-# le point d'entrée est `app/server.js`, les dépendances sont un cran au-dessus.
-# D'où la mise en place à `/srv` plutôt qu'à `/srv/app`.
+# The tricky part comes from npm workspaces. `package-lock.json` sits at the
+# root, and Next's `standalone` output reproduces the monorepo tree: the entry
+# point is `app/server.js`, the dependencies are one level up. Hence the layout
+# at `/srv` rather than `/srv/app`.
 
 ARG NODE_VERSION=22-alpine
 
-# --- Dépendances ------------------------------------------------------------
+# --- Dependencies -----------------------------------------------------------
 FROM node:${NODE_VERSION} AS deps
 WORKDIR /build
 
-# Les manifestes des deux workspaces sont nécessaires : npm réconcilie le
-# lockfile avec l'ensemble des workspaces déclarés, même quand on n'en installe
-# qu'un. `--workspace app` évite en revanche de télécharger Playwright et ses
-# navigateurs, qui n'ont rien à faire ici.
+# Both workspaces' manifests are needed: npm reconciles the lockfile with every
+# declared workspace, even when only one is installed. `--workspace app`, on
+# the other hand, avoids downloading Playwright and its browsers, which have no
+# business here.
 COPY package.json package-lock.json ./
 COPY app/package.json app/package.json
 COPY e2e/package.json e2e/package.json
@@ -34,20 +34,19 @@ COPY package.json package-lock.json ./
 COPY e2e/package.json e2e/package.json
 COPY app ./app
 
-# `BUILD_STANDALONE=1` est ce qui déclenche la sortie autonome — voir
-# next.config.ts : elle n'a de sens que pour cette image, et un build qui la
-# porte ne peut plus être servi par `next start`, dont dépendent la suite et la
-# CI.
+# `BUILD_STANDALONE=1` is what triggers the standalone output — see
+# next.config.ts: it only makes sense for this image, and a build that carries
+# it can no longer be served by `next start`, which the suite and CI depend on.
 #
-# Aucune base n'est nécessaire : toutes les routes sont dynamiques (`ƒ` dans la
-# sortie de `next build`), et `db/client.ts` n'ouvre son pool qu'à la première
-# requête. Si une page devenait prérendue, le build échouerait ici — c'est voulu.
+# No database is needed: every route is dynamic (`ƒ` in the `next build`
+# output), and `db/client.ts` only opens its pool on the first request. If a
+# page became prerendered, the build would fail here — that is intended.
 ENV BUILD_STANDALONE=1
 
-# Adresse de l'instance Matomo et identifiant du site. `NEXT_PUBLIC_*` est
-# substitué à la compilation, pas lu à l'exécution : ces deux valeurs doivent
-# donc entrer ici, comme arguments de build, et changer l'une ou l'autre impose
-# de reconstruire l'image. Vides par défaut — le tracker ne rend alors rien.
+# Matomo instance address and site ID. `NEXT_PUBLIC_*` is substituted at
+# compile time, not read at run time: these two values must therefore come in
+# here, as build arguments, and changing either one requires rebuilding the
+# image. Empty by default — the tracker then renders nothing.
 ARG NEXT_PUBLIC_MATOMO_URL=""
 ARG NEXT_PUBLIC_MATOMO_SITE_ID=""
 ENV NEXT_PUBLIC_MATOMO_URL=$NEXT_PUBLIC_MATOMO_URL \
@@ -56,7 +55,7 @@ ENV NEXT_PUBLIC_MATOMO_URL=$NEXT_PUBLIC_MATOMO_URL \
 RUN npm run build -w app \
  && node app/scripts/build-db-cli.mjs
 
-# --- Exécution --------------------------------------------------------------
+# --- Runtime ----------------------------------------------------------------
 FROM node:${NODE_VERSION} AS runner
 WORKDIR /srv
 
@@ -65,25 +64,25 @@ ENV NODE_ENV=production \
     HOSTNAME=0.0.0.0 \
     NEXT_TELEMETRY_DISABLED=1
 
-# `standalone/` contient `app/server.js` et les modules réellement tracés ; le
-# reste de node_modules ne suit pas.
+# `standalone/` contains `app/server.js` and the modules actually traced; the
+# rest of node_modules does not come along.
 COPY --from=builder --chown=node:node /build/app/.next/standalone ./
 COPY --from=builder --chown=node:node /build/app/.next/static ./app/.next/static
 
-# Les commandes de base (bootstrap, migrate, seed, purge), compilées en ESM
-# autonome, et les migrations SQL qu'elles appliquent. `dist/db/migrate.mjs`
-# cherche ses migrations à `../../drizzle` : l'emplacement ci-dessous n'est pas
-# décoratif.
+# The database commands (bootstrap, migrate, seed, purge), compiled to
+# standalone ESM, and the SQL migrations they apply. `dist/db/migrate.mjs`
+# looks for its migrations at `../../drizzle`: the location below is not
+# decorative.
 COPY --from=builder --chown=node:node /build/app/dist ./app/dist
 COPY --from=builder --chown=node:node /build/app/drizzle ./app/drizzle
 
-# npm et yarn sont livrés par l'image de base, et aucun point d'entrée de la
-# pile ne les appelle : le serveur, le bootstrap et la purge sont tous lancés
-# par `node` sur du code déjà bundlé. Ils ne sont donc que de la surface
-# d'attaque, et pas en théorie — le scan Trivy de l'image remontait 9 CVE
-# (1 critique, 8 élevées) toutes situées dans les dépendances embarquées du
-# CLI npm, aucune dans les dépendances de l'application. Les supprimer traite
-# la cause ; les filtrer du rapport n'aurait traité que le symptôme.
+# npm and yarn ship with the base image, and no entry point of the stack calls
+# them: the server, the bootstrap and the purge are all started by `node` on
+# already bundled code. They are therefore nothing but attack surface, and not
+# in theory — the Trivy scan of the image reported 9 CVEs (1 critical, 8 high),
+# all located in the npm CLI's bundled dependencies, none in the application's
+# dependencies. Removing them treats the cause; filtering them out of the
+# report would only have treated the symptom.
 RUN rm -rf /usr/local/lib/node_modules/npm \
            /usr/local/bin/npm /usr/local/bin/npx \
            /opt/yarn-v* /usr/local/bin/yarn /usr/local/bin/yarnpkg

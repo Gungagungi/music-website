@@ -1,21 +1,22 @@
-name: Préparer la base
-description: Applique les migrations et charge les graines sur le service PostgreSQL du job.
+name: Prepare the database
+description: Applies the migrations and loads the seed data on the job's PostgreSQL service.
 
 inputs:
   database-url:
     description: >-
-      Chaîne de connexion. Elle diffère selon le job : un job conteneurisé rejoint
-      le service par son nom (`postgres`), un job sur le runner hôte passe par le
-      port publié (`localhost`).
+      Connection string. It differs from job to job: a containerised job reaches
+      the service by its name (`postgres`), a job on the host runner goes through
+      the published port (`localhost`).
     required: true
 
 runs:
   using: composite
   steps:
-    # Le service est déclaré `--health-cmd pg_isready`, donc GitHub attend déjà
-    # qu'il réponde avant de lancer la première étape. Cette attente couvre le cas
-    # restant : le serveur accepte les connexions mais termine encore son initdb.
-    - name: Attendre PostgreSQL
+    # The service is declared with `--health-cmd pg_isready`, so GitHub already
+    # waits for it to respond before running the first step. This wait covers the
+    # remaining case: the server accepts connections but is still finishing its
+    # initdb.
+    - name: Wait for PostgreSQL
       shell: bash
       env:
         DATABASE_URL: ${{ inputs.database-url }}
@@ -46,10 +47,10 @@ runs:
         DATABASE_URL: ${{ inputs.database-url }}
       run: npm run db:migrate
 
-    # Idempotent. La plupart des jobs repassent derrière via POST /api/test/reset,
-    # mais le job de performance ne lance pas le projet `setup-db` et a besoin
-    # d'un catalogue chargé.
-    - name: Graines
+    # Idempotent. Most jobs go over it again through POST /api/test/reset, but
+    # the performance job does not run the `setup-db` project and needs a loaded
+    # catalogue.
+    - name: Seed data
       shell: bash
       env:
         DATABASE_URL: ${{ inputs.database-url }}

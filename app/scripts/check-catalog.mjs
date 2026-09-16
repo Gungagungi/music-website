@@ -1,24 +1,24 @@
 /**
- * Contrôle de cohérence du catalogue généré.
+ * Consistency check of the generated catalogue.
  *
- * Vérifie les invariants que `generate-catalog.mjs` est censé garantir — unicité
- * des slugs et des SKU — puis, surtout, que chaque facette dont dépendent les
- * specs de filtrage reste **non vide et non totale**.
+ * Checks the invariants `generate-catalog.mjs` is supposed to guarantee —
+ * uniqueness of slugs and SKUs — then, above all, that every facet the filtering
+ * specs depend on stays **neither empty nor total**.
  *
- * Cette seconde garde est celle qui justifie le script. Une facette tombée à
- * zéro ne rend pas la suite rouge : elle la rend vide. `TC-215` affirme que les
- * filtres booléens se cumulent, en itérant sur les résultats —
+ * That second guard is what justifies the script. A facet that drops to zero
+ * does not turn the suite red: it turns it empty. `TC-215` asserts that boolean
+ * filters combine, by iterating over the results —
  *
  *     for (const product of body.items) { expect(product.stock).toBeGreaterThan(0) }
  *
- * — ce qui est vrai de toute liste vide. Le test passe, la couverture a disparu,
- * et rien ne le signale. La facette totale a le défaut symétrique : filtrer sur
- * une propriété que tous les produits portent ne distingue rien, et l'assertion
- * réussit sans que le filtre ait rien fait.
+ * — which holds true for any empty list. The test passes, the coverage is gone,
+ * and nothing flags it. A total facet has the symmetrical flaw: filtering on a
+ * property every product carries distinguishes nothing, and the assertion
+ * succeeds without the filter having done anything.
  *
- * Sort en code 1 si un invariant est violé.
+ * Exits with code 1 if an invariant is violated.
  *
- * Usage : node app/scripts/check-catalog.mjs
+ * Usage: node app/scripts/check-catalog.mjs
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -30,7 +30,7 @@ const CATALOG = join(__dirname, '..', 'src', 'data', 'products.json');
 const products = JSON.parse(readFileSync(CATALOG, 'utf8'));
 const total = products.length;
 
-/** Renvoie les valeurs apparaissant plus d'une fois pour la clé donnée. */
+/** Returns the values that appear more than once for the given key. */
 function duplicates(key) {
   const seen = new Map();
   for (const product of products) {
@@ -40,26 +40,26 @@ function duplicates(key) {
 }
 
 const facets = {
-  rupture: (p) => p.stock === 0,
-  promos: (p) => p.discountPct > 0,
-  gauchers: (p) => p.leftHanded,
-  nouveautes: (p) => p.isNew,
+  'out of stock': (p) => p.stock === 0,
+  'on sale': (p) => p.discountPct > 0,
+  'left-handed': (p) => p.leftHanded,
+  'new arrivals': (p) => p.isNew,
   bestsellers: (p) => p.bestSeller,
 };
 
 const problemes = [];
 
-console.log(`produits : ${total}`);
+console.log(`products: ${total}`);
 
 for (const [label, predicate] of Object.entries(facets)) {
   const dedans = products.filter(predicate).length;
-  console.log(`${label} : ${dedans}`);
+  console.log(`${label}: ${dedans}`);
 
   if (dedans === 0) {
-    problemes.push(`facette « ${label} » vide : les specs qui la filtrent passeront à vide`);
+    problemes.push(`facet "${label}" is empty: the specs that filter on it will pass on nothing`);
   } else if (dedans === total) {
     problemes.push(
-      `facette « ${label} » universelle (${dedans}/${total}) : la filtrer ne distingue plus rien`,
+      `facet "${label}" is universal (${dedans}/${total}): filtering on it no longer distinguishes anything`,
     );
   }
 }
@@ -67,7 +67,7 @@ for (const [label, predicate] of Object.entries(facets)) {
 for (const key of ['slug', 'sku']) {
   const dupes = duplicates(key);
   if (dupes.length > 0) {
-    problemes.push(`${key} dupliqués : ${dupes.join(', ')}`);
+    problemes.push(`duplicate ${key} values: ${dupes.join(', ')}`);
   }
 }
 
@@ -77,4 +77,4 @@ if (problemes.length > 0) {
   process.exit(1);
 }
 
-console.log('\nslugs et SKU uniques, toutes les facettes discriminent');
+console.log('\nslugs and SKUs are unique, every facet discriminates');

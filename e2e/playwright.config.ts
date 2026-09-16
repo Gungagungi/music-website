@@ -58,8 +58,8 @@ export default defineConfig({
     locale: 'fr-FR',
     timezoneId: 'Europe/Paris',
     testIdAttribute: 'data-testid',
-    // Suite lancée contre la pré-production : cet en-tête exempte du basic auth
-    // posé par Caddy — voir docs/deployment.md. Rien n'est ajouté sans la clé.
+    // Suite run against pre-production: this header exempts it from the basic
+    // auth set by Caddy — see docs/deployment.md. Nothing is added without the key.
     ...(PREPROD_ACCESS_KEY ? { extraHTTPHeaders: { 'x-fretline-preprod': PREPROD_ACCESS_KEY } } : {}),
   },
 

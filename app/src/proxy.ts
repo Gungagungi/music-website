@@ -1,38 +1,37 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
- * Politique de sécurité du contenu (CSP), à nonce par requête.
+ * Content Security Policy (CSP), with a per-request nonce.
  *
- * Jusqu'ici la seule directive servie était `frame-ancestors 'none'`, posée par
- * Caddy. Elle interdit le cadrage, et rien d'autre : sans `default-src` ni
- * `script-src`, une injection de balise `<script>` s'exécutait sans obstacle.
- * Un audit l'a relevé.
+ * Until now the only directive served was `frame-ancestors 'none'`, set by
+ * Caddy. It forbids framing, and nothing else: with neither `default-src` nor
+ * `script-src`, an injected `<script>` tag ran unhindered. An audit flagged it.
  *
- * Le nonce est indispensable plutôt que confortable : l'en-tête ne peut pas
- * être statique parce que ce document contient un script inline — l'amorçage du
- * thème, qui doit s'exécuter dans `<head>` avant la première peinture pour
- * éviter le sursaut de thème (voir lib/theme.ts). Le figer par un `sha256-`
- * conviendrait à celui-là seul, mais pas aux scripts que Next injecte pour
- * l'hydratation, dont le contenu change à chaque build.
+ * The nonce is a necessity, not a convenience: the header cannot be static
+ * because this document contains an inline script — the theme bootstrap, which
+ * must run in `<head>` before first paint to avoid the theme flash (see
+ * lib/theme.ts). Pinning it with a `sha256-` would suit that one script, but
+ * not the scripts Next injects for hydration, whose content changes with every
+ * build.
  *
- * `strict-dynamic` fait le reste : un script porteur du nonce transmet sa
- * confiance à ceux qu'il crée. C'est ce qui laisse matomo.js s'installer — il
- * est inséré par `document.createElement('script')` depuis l'amorçage Matomo
- * (components/analytics/Matomo.tsx) — sans avoir à autoriser son hôte, et sans
- * qu'une liste d'hôtes autorisés ne devienne le contournement habituel.
+ * `strict-dynamic` does the rest: a script carrying the nonce passes its trust
+ * on to the scripts it creates. That is what lets matomo.js install itself — it
+ * is inserted through `document.createElement('script')` by the Matomo
+ * bootstrap (components/analytics/Matomo.tsx) — without allow-listing its host,
+ * and without a host allow-list becoming the usual bypass.
  *
- * Ce fichier s'appelle `proxy.ts` et non `middleware.ts` : la convention a été
- * renommée dans Next 16, l'ancien nom est déprécié.
+ * This file is named `proxy.ts`, not `middleware.ts`: the convention was
+ * renamed in Next 16, and the old name is deprecated.
  */
 
 /**
- * Figée au build comme partout ailleurs dans ce dépôt — `NEXT_PUBLIC_*` est
- * substitué par `next build`, y compris ici. L'expression est écrite en toutes
- * lettres pour cette raison : un accès indirect ne serait pas remplacé.
+ * Frozen at build time like everywhere else in this repository — `NEXT_PUBLIC_*`
+ * is substituted by `next build`, here included. The expression is spelled out
+ * in full for that reason: an indirect access would not be replaced.
  */
 const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL;
 
-/** L'origine de Matomo, ou rien si la mesure d'audience n'est pas configurée. */
+/** Matomo's origin, or nothing when analytics is not configured. */
 function matomoOrigin(): string {
   if (!MATOMO_URL) return '';
   try {
@@ -48,39 +47,39 @@ function policy(nonce: string, chiffre: boolean): string {
 
   return [
     "default-src 'self'",
-    // `unsafe-eval` uniquement en développement : React s'en sert pour
-    // reconstruire les piles d'erreur serveur dans le navigateur. Ni React ni
-    // Next n'en ont besoin en production.
+    // `unsafe-eval` in development only: React uses it to rebuild server error
+    // stacks in the browser. Neither React nor Next needs it in production.
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${developpement ? " 'unsafe-eval'" : ''}`,
-    // `unsafe-inline` assumé pour les styles, et pas par facilité : React pose
-    // des attributs `style=` sur les éléments, que `style-src-attr` ne sait
-    // autoriser qu'ainsi — un nonce ne couvre que les balises `<style>`. La
-    // directive qui compte contre l'injection de code est `script-src`, et
-    // elle, elle est stricte.
+    // `unsafe-inline` is deliberate for styles, and not out of convenience:
+    // React sets `style=` attributes on elements, which `style-src-attr` can
+    // only allow this way — a nonce only covers `<style>` tags. The directive
+    // that matters against code injection is `script-src`, and that one is
+    // strict.
     "style-src 'self' 'unsafe-inline'",
-    // `data:` couvre les SVG produits à la volée par images/product/[slug].
+    // `data:` covers the SVGs generated on the fly by images/product/[slug].
     `img-src 'self' data: blob:${matomo ? ` ${matomo}` : ''}`,
     "font-src 'self'",
     `connect-src 'self'${matomo ? ` ${matomo}` : ''}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    // Remplace X-Frame-Options, qui ne sait pas exprimer autre chose que
-    // « jamais » ou « même origine ».
+    // Replaces X-Frame-Options, which cannot express anything other than
+    // "never" or "same origin".
     "frame-ancestors 'none'",
-    // Seulement sur un document déjà servi en TLS. Sur une origine en clair la
-    // directive n'a rien à durcir, mais WebKit l'applique quand même à
-    // `http://localhost` là où Chromium et Firefox exemptent les origines
-    // locales : les chunks de `_next/static` partaient en `https://` vers un
-    // port sans TLS, l'hydratation n'arrivait jamais, et toute la suite WebKit
-    // échouait sur `waitForHydration()` sans qu'aucune assertion ne soit fausse.
+    // Only on a document already served over TLS. On a plain-text origin the
+    // directive has nothing to harden, but WebKit applies it to
+    // `http://localhost` anyway where Chromium and Firefox exempt local
+    // origins: `_next/static` chunks went out as `https://` to a port without
+    // TLS, hydration never arrived, and the whole WebKit suite failed on
+    // `waitForHydration()` without a single wrong assertion.
     ...(chiffre ? ['upgrade-insecure-requests'] : []),
   ].join('; ');
 }
 
 /**
- * Le protocole vu par le navigateur, et non celui du saut jusqu'à l'application :
- * en production Caddy termine le TLS et parle en clair au container.
+ * The protocol as seen by the browser, not the one of the hop to the
+ * application: in production Caddy terminates TLS and talks plain HTTP to the
+ * container.
  */
 function requeteChiffree(request: NextRequest): boolean {
   const transmis = request.headers.get('x-forwarded-proto');
@@ -92,9 +91,9 @@ export function proxy(request: NextRequest) {
   const nonce = crypto.randomUUID().replace(/-/g, '');
   const csp = policy(nonce, requeteChiffree(request));
 
-  // Le nonce voyage par un en-tête de requête : c'est ainsi que le layout le
-  // récupère (`headers().get('x-nonce')`) pour le poser sur le script de thème
-  // et sur l'amorçage Matomo.
+  // The nonce travels in a request header: that is how the layout retrieves it
+  // (`headers().get('x-nonce')`) to set it on the theme script and on the
+  // Matomo bootstrap.
   const enTetes = new Headers(request.headers);
   enTetes.set('x-nonce', nonce);
   enTetes.set('Content-Security-Policy', csp);
@@ -102,9 +101,9 @@ export function proxy(request: NextRequest) {
   const response = NextResponse.next({ request: { headers: enTetes } });
   response.headers.set('Content-Security-Policy', csp);
 
-  // Aucune de ces fonctionnalités n'est utilisée par la boutique. Les refuser
-  // explicitement évite qu'un script tiers introduit plus tard puisse les
-  // demander sans que personne ne s'en aperçoive.
+  // The shop uses none of these features. Denying them explicitly prevents a
+  // third-party script added later from requesting them without anyone
+  // noticing.
   response.headers.set(
     'Permissions-Policy',
     'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()',
@@ -117,12 +116,12 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   /**
-   * Tout, sauf les fichiers servis tels quels.
+   * Everything, except files served as-is.
    *
-   * Les ressources de `_next/static` sont immuables et mises en cache par le
-   * navigateur comme par le proxy : leur faire traverser ce module coûterait un
-   * nonce recalculé pour un en-tête que personne ne lit sur une réponse de
-   * fichier. `_next/image` est exclu pour la même raison.
+   * `_next/static` assets are immutable and cached by the browser as well as by
+   * the proxy: routing them through this module would cost a recomputed nonce
+   * for a header nobody reads on a file response. `_next/image` is excluded for
+   * the same reason.
    */
   matcher: [
     {

@@ -1,26 +1,25 @@
 #!/usr/bin/env node
 /**
- * Ajoute un run à l'historique de tendance.
+ * Appends a run to the trend history.
  *
- * Chaque run produit son instantané : combien de tests, combien d'échecs,
- * combien d'instables, combien de temps. Aucun ne dit si la suite ralentit
- * depuis trois semaines, ni si un test devient instable une fois sur dix — ce
- * qui est pourtant la seule façon de voir venir la dérive plutôt que de la
- * subir. Il y faut une mémoire, et un rapport par run n'en a pas.
+ * Each run produces its own snapshot: how many tests, how many failures, how
+ * many flaky ones, how long. None of them says whether the suite has been
+ * slowing down for three weeks, or whether a test is becoming flaky one time in
+ * ten — which is nevertheless the only way to see drift coming rather than
+ * suffering it. That takes a memory, and a per-run report has none.
  *
- * Le format est du JSON Lines : une ligne par run, ajoutée à la fin. Deux runs
- * qui écrivent en même temps produisent au pire deux lignes dans le désordre,
- * jamais un fichier illisible — ce qu'un JSON réécrit à chaque fois ne garantit
- * pas.
+ * The format is JSON Lines: one line per run, appended at the end. Two runs
+ * writing at the same time produce at worst two lines out of order, never an
+ * unreadable file — which a JSON file rewritten every time does not guarantee.
  *
- *   node scripts/enregistrer-tendance.mjs <resume.json> <historique.jsonl>
+ *   node scripts/enregistrer-tendance.mjs <summary.json> <history.jsonl>
  */
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 const [resumeArg, historiqueArg] = process.argv.slice(2);
 if (!resumeArg || !historiqueArg) {
-  console.error('Usage : node scripts/enregistrer-tendance.mjs <resume.json> <historique.jsonl>');
+  console.error('Usage: node scripts/enregistrer-tendance.mjs <summary.json> <history.jsonl>');
   process.exit(1);
 }
 
@@ -28,14 +27,14 @@ const resume = resolve(resumeArg);
 const historique = resolve(historiqueArg);
 
 if (!existsSync(resume)) {
-  console.error(`Résumé introuvable : ${resume}. Le run n'a rien produit à enregistrer.`);
+  console.error(`Summary not found: ${resume}. The run produced nothing to record.`);
   process.exit(1);
 }
 
 const { statut, total, totaux, projets, instables } = JSON.parse(readFileSync(resume, 'utf8'));
 
-// Le taux d'instabilité se rapporte aux tests exécutés, pas au total : compter
-// les ignorés au dénominateur ferait baisser le taux en désactivant des tests.
+// The flaky rate is relative to the tests executed, not to the total: counting
+// skipped tests in the denominator would lower the rate by disabling tests.
 const executes = totaux.passed + totaux.failed + totaux.flaky;
 const tauxInstables = executes === 0 ? 0 : Number((totaux.flaky / executes).toFixed(4));
 
@@ -62,6 +61,6 @@ mkdirSync(dirname(historique), { recursive: true });
 appendFileSync(historique, `${JSON.stringify(ligne)}\n`, 'utf8');
 
 console.log(
-  `Run enregistré : ${ligne.reussis}/${ligne.total} réussis · ${ligne.instables} instables ` +
-    `(${(tauxInstables * 100).toFixed(2)} %) · ${Math.round(ligne.dureeMs / 1000)} s cumulés`,
+  `Run recorded: ${ligne.reussis}/${ligne.total} passed · ${ligne.instables} flaky ` +
+    `(${(tauxInstables * 100).toFixed(2)} %) · ${Math.round(ligne.dureeMs / 1000)} s cumulative`,
 );

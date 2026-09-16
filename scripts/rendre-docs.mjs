@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 /**
- * Rend `docs/` en HTML pour la publication sur GitHub Pages.
+ * Renders `docs/` as HTML for publication on GitHub Pages.
  *
- * Le workflow copiait jusqu'ici les `.md` bruts à côté du rapport Playwright.
- * Un navigateur les télécharge ou les affiche en texte brut selon le type MIME
- * deviné : un tableau de traçabilité de 139 lignes y devient illisible, et c'est
- * précisément le document qu'un lecteur extérieur vient voir. Sur GitHub ils se
- * lisent bien — mais alors la publication n'apporte rien qu'un lien vers le
- * dépôt ne donnerait mieux.
+ * The workflow used to copy the raw `.md` files next to the Playwright report.
+ * A browser downloads them or shows them as plain text depending on the guessed
+ * MIME type: a 139-row traceability table becomes unreadable there, and it is
+ * precisely the document an outside reader comes to see. On GitHub they read
+ * fine — but then publishing adds nothing a link to the repository would not
+ * give better.
  *
- * Le rendu est délibérément sans dépendance de mise en page : `marked` pour le
- * Markdown, une feuille de style inline, aucun JavaScript. Une page de
- * documentation qui exige un runtime pour s'afficher est une page qui cessera
- * de s'afficher.
+ * Rendering deliberately has no layout dependency: `marked` for the Markdown,
+ * an inline stylesheet, no JavaScript. A documentation page that needs a
+ * runtime to display is a page that will stop displaying.
  *
  *   node scripts/rendre-docs.mjs <destination>
  */
@@ -25,7 +24,7 @@ const RACINE = resolve(import.meta.dirname, '..');
 const SOURCE = resolve(RACINE, 'docs');
 const DESTINATION = resolve(process.argv[2] ?? 'site/docs');
 
-/** Toutes les feuilles de `docs/`, chemins relatifs à `docs/`. */
+/** Every leaf under `docs/`, as paths relative to `docs/`. */
 function fichiers(racine = SOURCE, repertoire = racine) {
   return readdirSync(repertoire, { withFileTypes: true }).flatMap((entree) => {
     const chemin = join(repertoire, entree.name);
@@ -34,12 +33,12 @@ function fichiers(racine = SOURCE, repertoire = racine) {
 }
 
 /**
- * Réécrit les liens internes vers leur équivalent rendu.
+ * Rewrites internal links to their rendered equivalent.
  *
- * `test-strategy.md` → `test-strategy.html`, et `adr/` → `adr/index.html` : un
- * lien vers un répertoire s'appuie sur la résolution de GitHub, que Pages ne
- * reproduit pas. Les liens externes, les ancres et les fichiers non rendus
- * (le CSV) passent inchangés.
+ * `test-strategy.md` → `test-strategy.html`, and `adr/` → `adr/index.html`: a
+ * link to a directory relies on GitHub's resolution, which Pages does not
+ * reproduce. External links, anchors and non-rendered files (the CSV) pass
+ * through unchanged.
  */
 function reecrireLien(href) {
   if (/^([a-z]+:|#|\/\/)/i.test(href)) return href;
@@ -81,8 +80,8 @@ blockquote {
   margin: 1.25rem 0; padding: .35rem 0 .35rem 1rem;
   border-left: 3px solid var(--trait); color: var(--attenue);
 }
-/* Les tableaux de traçabilité sont larges : ils défilent dans leur cadre plutôt
-   que d'imposer un défilement horizontal à la page entière. */
+/* Traceability tables are wide: they scroll inside their frame rather than
+   forcing horizontal scrolling on the whole page. */
 .tableau { overflow-x: auto; margin: 1.25rem 0; }
 table { border-collapse: collapse; width: 100%; font-size: .9rem; }
 th, td { border: 1px solid var(--trait); padding: .45rem .7rem; text-align: left; vertical-align: top; }
@@ -108,13 +107,13 @@ function page(titre, corps, profondeur) {
 <main>
 ${corps}
 </main>
-<footer>Fretline — documentation générée depuis <code>docs/</code>. Le dépôt fait foi.</footer>
+<footer>Fretline — documentation generated from <code>docs/</code>. The repository is the source of truth.</footer>
 </body>
 </html>
 `;
 }
 
-/** Le titre est le premier `# ` du document ; à défaut, son nom de fichier. */
+/** The title is the document's first `# `; failing that, its file name. */
 function titreDe(markdown, secours) {
   const ligne = markdown.split('\n').find((l) => l.startsWith('# '));
   return ligne ? ligne.slice(2).trim() : secours;
@@ -145,8 +144,8 @@ for (const relatif of fichiers()) {
   moteur.table = (jeton) => `<div class="tableau">${tableOrigine(jeton)}</div>`;
 
   const corps = marked.parse(markdown, { renderer: moteur, async: false });
-  // `README.md` devient `index.html` : c'est ce qu'un lien vers un répertoire
-  // sert, et ce que Pages ouvre par défaut.
+  // `README.md` becomes `index.html`: that is what a link to a directory serves,
+  // and what Pages opens by default.
   const nom = relatif.replace(/README\.md$/, 'index.md').replace(/\.md$/, '.html');
   const cible = join(DESTINATION, nom);
   mkdirSync(dirname(cible), { recursive: true });
@@ -155,14 +154,14 @@ for (const relatif of fichiers()) {
 }
 
 /**
- * Un lien mort dans une documentation publiée est pire qu'un lien absent : il
- * promet une page. La réécriture `.md` → `.html` en fabrique facilement — un
- * document renommé, un répertoire déplacé — et rien ne le dirait avant qu'un
- * lecteur ne tombe dessus. La vérification tourne donc à chaque rendu, et
- * échoue le build plutôt que de publier.
+ * A dead link in published documentation is worse than a missing one: it
+ * promises a page. The `.md` → `.html` rewrite easily produces them — a renamed
+ * document, a moved directory — and nothing would say so before a reader
+ * stumbled on one. The check therefore runs on every render, and fails the
+ * build rather than publishing.
  *
- * Les liens qui sortent de `docs/` sont hors périmètre : `../index.html` désigne
- * le rapport Playwright, assemblé par le workflow après cette étape.
+ * Links that leave `docs/` are out of scope: `../index.html` refers to the
+ * Playwright report, assembled by the workflow after this step.
  */
 const morts = [];
 for (const produit of fichiers(DESTINATION)) {
@@ -179,9 +178,9 @@ for (const produit of fichiers(DESTINATION)) {
 }
 
 if (morts.length > 0) {
-  console.error(`${morts.length} lien(s) interne(s) mort(s) :`);
+  console.error(`${morts.length} dead internal link(s):`);
   for (const mort of morts) console.error(`  ${mort}`);
   process.exit(1);
 }
 
-console.log(`${rendus} documents rendus, ${copies} fichiers copiés tels quels → ${DESTINATION}`);
+console.log(`${rendus} documents rendered, ${copies} files copied as-is → ${DESTINATION}`);

@@ -31,8 +31,8 @@ test.describe('Défauts connus — preuve de détection', () => {
       ],
     },
     async ({ cartWith, cartPage }) => {
-      // 2 × 41,30 € = 82,60 €, dont 10 % font 8,26 € — un sous-total qui n'est
-      // pas un compte rond est précisément le cas que l'arrondi fautif casse.
+      // 2 × €41.30 = €82.60, 10 % of which is €8.26 — a subtotal that is not a
+      // round amount is precisely the case the faulty rounding breaks.
       await cartWith([{ sku: PRODUCTS.cheap.sku, quantity: 2 }]);
       await cartPage.open();
 

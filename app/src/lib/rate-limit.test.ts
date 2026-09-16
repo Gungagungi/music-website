@@ -3,14 +3,14 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { RATE_LIMITS, callerKey, consume, resetRateLimits } from './rate-limit';
 
 /**
- * L'algorithme du limiteur est éprouvé ici plutôt que par la suite d'API, et
- * c'est délibéré : `consume()` reçoit son horloge en paramètre, donc la fenêtre
- * qui se rouvre se vérifie en avançant un entier au lieu d'attendre soixante
- * secondes. Voir le commentaire de FACTEUR_MODE_TEST — la suite d'API, qui
- * tourne sous E2E_TEST_MODE, ne verrait de toute façon jamais le refus.
+ * The limiter's algorithm is exercised here rather than by the API suite, and
+ * that is deliberate: `consume()` takes its clock as a parameter, so a window
+ * reopening is checked by advancing an integer instead of waiting sixty
+ * seconds. See the comment on FACTEUR_MODE_TEST — the API suite, which runs
+ * under E2E_TEST_MODE, would never see the refusal anyway.
  */
 
-/** Une requête nue, éventuellement porteuse d'un `x-forwarded-for`. */
+/** A bare request, optionally carrying an `x-forwarded-for`. */
 function requete(ip?: string): Request {
   return new Request('https://exemple.fr/api/auth/login', {
     headers: ip ? { 'x-forwarded-for': ip } : {},
@@ -19,7 +19,7 @@ function requete(ip?: string): Request {
 
 describe('callerKey', () => {
   it('retient la première adresse de x-forwarded-for', () => {
-    // La première est le client ; les suivantes sont les proxys traversés.
+    // The first one is the client; the following ones are the proxies traversed.
     expect(callerKey(requete('203.0.113.7, 172.25.0.5'))).toBe('203.0.113.7');
   });
 
@@ -31,8 +31,8 @@ describe('callerKey', () => {
 describe('consume', () => {
   beforeEach(() => {
     resetRateLimits();
-    // Le facteur du mode test multiplierait chaque plafond par 250 et rendrait
-    // ces assertions muettes.
+    // The test-mode multiplier would multiply every ceiling by 250 and silence
+    // these assertions.
     delete process.env.E2E_TEST_MODE;
   });
 
@@ -57,8 +57,8 @@ describe('consume', () => {
       consume('login', requete('198.51.100.1'), 1_000);
     }
 
-    // Saturer un appelant ne doit pas fermer la porte aux autres, sinon la
-    // limite devient elle-même l'outil de déni de service.
+    // Saturating one caller must not shut the door on the others, otherwise the
+    // limit itself becomes the denial-of-service tool.
     expect(consume('login', requete('198.51.100.2'), 1_000).allowed).toBe(true);
   });
 
@@ -83,9 +83,9 @@ describe('consume', () => {
     const { limit, windowSeconds } = RATE_LIMITS.login;
     for (let i = 0; i < limit + 3; i += 1) consume('login', requete('198.51.100.5'), 1_000);
 
-    // Un client qui ignore les 429 ne doit pas pouvoir tenir un débit constant
-    // juste sous le plafond : la fenêtre ne se rouvre qu'à l'heure dite, pas
-    // après un nombre d'acceptations.
+    // A client that ignores 429s must not be able to hold a steady rate just
+    // under the ceiling: the window only reopens at the set time, not after a
+    // number of acceptances.
     const justeAvant = 1_000 + windowSeconds * 1_000 - 1;
     expect(consume('login', requete('198.51.100.5'), justeAvant).allowed).toBe(false);
   });
@@ -99,7 +99,7 @@ describe('consume', () => {
 
     expect(immediat.retryAfterSeconds).toBe(windowSeconds);
     expect(plusTard.retryAfterSeconds).toBeLessThan(immediat.retryAfterSeconds);
-    // Jamais zéro : un `Retry-After: 0` invite à réessayer sur-le-champ.
+    // Never zero: a `Retry-After: 0` invites an immediate retry.
     expect(plusTard.retryAfterSeconds).toBeGreaterThan(0);
   });
 

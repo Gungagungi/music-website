@@ -106,7 +106,7 @@ docker compose up -d --build
 ./scripts/verifier-deploiement.sh https://your-domain
 ```
 
-`migrate` runs again and reports `base déjà peuplée : seed ignoré`. New migrations apply;
+`migrate` runs again and reports `database already populated: seed skipped`. New migrations apply;
 the catalogue is left alone.
 
 ## The post-deployment check

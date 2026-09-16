@@ -37,18 +37,18 @@ export class HeaderComponent {
   }
 
   /**
-   * Mode affiché par le bouton — « Système », « Clair » ou « Sombre ».
+   * Mode shown by the button — "Système", "Clair" or "Sombre".
    *
-   * Les trois libellés sont dans le DOM, la cascade n'en montre qu'un : lire le
-   * seul visible revient à lire l'état réellement appliqué, sans passer par une
-   * valeur de couleur ni par l'attribut que le test cherche justement à vérifier
-   * ailleurs.
+   * All three labels are in the DOM, the cascade only shows one: reading the
+   * only visible one amounts to reading the state actually applied, without
+   * going through a colour value or through the attribute the test is precisely
+   * trying to check elsewhere.
    */
   async themeMode(): Promise<string> {
     return (await this.themeToggle.locator('[data-mode]:visible').innerText()).trim();
   }
 
-  /** Avance d'un cran dans le cycle Système → Clair → Sombre. */
+  /** Moves one step forward in the Système → Clair → Sombre cycle. */
   async cycleTheme(): Promise<void> {
     await this.themeToggle.click();
   }

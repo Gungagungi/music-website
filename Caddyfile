@@ -1,31 +1,31 @@
-# Reverse proxy et terminaison TLS.
+# Reverse proxy and TLS termination.
 #
-# Caddy obtient et renouvelle le certificat tout seul dès que FRETLINE_DOMAIN est
-# un nom de domaine public pointant vers ce serveur. Pour un essai local, mettre
-# FRETLINE_DOMAIN=:80 dans .env : Caddy sert alors en clair sans rien demander à
-# Let's Encrypt.
+# Caddy obtains and renews the certificate on its own as soon as FRETLINE_DOMAIN
+# is a public domain name pointing at this server. For a local trial, set
+# FRETLINE_DOMAIN=:80 in .env: Caddy then serves plain HTTP without asking
+# Let's Encrypt for anything.
 #
-# Traefik ferait la même chose, mais en exposant le socket Docker au proxy ; ça ne
-# se rentabilise qu'à partir d'une dizaine de services à découvrir dynamiquement.
+# Traefik would do the same, but by exposing the Docker socket to the proxy;
+# that only pays off from a dozen or so services to discover dynamically.
 
 {$FRETLINE_DOMAIN} {
 	encode zstd gzip
 
 	header {
-		# HSTS : Caddy sert déjà en HTTPS, autant interdire la version en clair
-		# pour les visites suivantes.
+		# HSTS: Caddy already serves HTTPS, so the plain-text version might as
+		# well be forbidden for subsequent visits.
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
-		# Pas de X-Frame-Options : `frame-ancestors` le remplace et couvre plus
-		# de cas.
+		# No X-Frame-Options: `frame-ancestors` replaces it and covers more
+		# cases.
 		#
-		# Pas de Content-Security-Policy non plus, et c'est délibéré : la
-		# politique complète est posée par l'application (app/src/proxy.ts),
-		# parce qu'elle porte un nonce recalculé à chaque requête. Deux en-têtes
-		# du même nom ne se remplacent pas — le navigateur applique
-		# l'intersection des deux — et un `frame-ancestors 'none'` figé ici
-		# passerait inaperçu jusqu'au jour où il contredirait l'autre.
+		# No Content-Security-Policy either, and that is deliberate: the full
+		# policy is set by the application (app/src/proxy.ts), because it
+		# carries a nonce recomputed on every request. Two headers with the
+		# same name do not replace each other — the browser enforces the
+		# intersection of both — and a `frame-ancestors 'none'` frozen here
+		# would go unnoticed until the day it contradicted the other one.
 		-Server
 	}
 
@@ -43,17 +43,17 @@
 	}
 }
 
-# Interface Matomo, sur son propre nom de domaine.
+# Matomo interface, on its own domain name.
 #
-# Un sous-domaine dédié plutôt qu'un chemin sous le site : Matomo est une
-# application PHP complète, qui réécrit ses propres URL et pose ses cookies de
-# session sur la racine. La monter sous /analytics obligerait à réécrire ses
-# liens un par un, et le premier oubli se solderait par une page blanche.
+# A dedicated subdomain rather than a path under the site: Matomo is a full PHP
+# application that rewrites its own URLs and sets its session cookies on the
+# root. Mounting it under /analytics would mean rewriting its links one by one,
+# and the first one missed would end in a blank page.
 #
-# Variable distincte de FRETLINE_DOMAIN, et non `analytics.{$FRETLINE_DOMAIN}` :
-# un essai local met FRETLINE_DOMAIN=:80, et `analytics.:80` n'est pas une
-# adresse. Le défaut ci-dessous sert exactement ce cas — Caddy écoute alors en
-# clair sur 8081, sans rien demander à Let's Encrypt.
+# A variable separate from FRETLINE_DOMAIN, not `analytics.{$FRETLINE_DOMAIN}`:
+# a local trial sets FRETLINE_DOMAIN=:80, and `analytics.:80` is not an
+# address. The default below serves exactly that case — Caddy then listens in
+# plain HTTP on 8081, without asking Let's Encrypt for anything.
 {$FRETLINE_ANALYTICS_DOMAIN::8081} {
 	encode zstd gzip
 
@@ -73,10 +73,10 @@
 	}
 }
 
-# Serveur de notifications ntfy, destinataire des alertes de l'audit de sécurité.
+# ntfy notification server, recipient of the security audit alerts.
 #
-# Même motif que le bloc Matomo : sous-domaine dédié, et défaut en clair sur
-# 8082 pour l'essai local, où le port reste sur la boucle locale.
+# Same pattern as the Matomo block: dedicated subdomain, and a plain-HTTP
+# default on 8082 for local trials, where the port stays on loopback.
 {$FRETLINE_NTFY_DOMAIN::8082} {
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -86,10 +86,10 @@
 		-Server
 	}
 
-	# Pas de `encode` ici, contrairement aux deux autres blocs : la souscription
-	# ntfy est un flux d'événements qui reste ouvert, et une couche de
-	# compression tamponne — le message n'arrive alors qu'une fois le tampon
-	# plein, c'est-à-dire à la prochaine alerte.
+	# No `encode` here, unlike the other two blocks: an ntfy subscription is an
+	# event stream that stays open, and a compression layer buffers — the
+	# message then only arrives once the buffer is full, that is, with the next
+	# alert.
 	reverse_proxy ntfy:80 {
 		flush_interval -1
 	}
@@ -100,15 +100,16 @@
 	}
 }
 
-# Pré-production : la branche déployée par scripts/deployer-preprod.sh.
+# Pre-production: the branch deployed by scripts/deployer-preprod.sh.
 #
-# Servie par ce Caddy plutôt que par un second : 80 et 443 sont déjà pris, et
-# les certificats sont ici. L'application vit dans une autre pile Compose
-# (docker-compose.preprod.yml), jointe par le réseau `fretline-edge` sous l'alias
-# `preprod-app`. Pré-prod éteinte, ce bloc répond 502 et rien d'autre ne bouge.
+# Served by this Caddy rather than a second one: 80 and 443 are already taken,
+# and the certificates live here. The application lives in another Compose
+# stack (docker-compose.preprod.yml), reached through the `fretline-edge`
+# network under the `preprod-app` alias. With pre-production down, this block
+# answers 502 and nothing else moves.
 #
-# Même motif que Matomo et ntfy pour le défaut : en clair sur 8083, sur la boucle
-# locale, sans rien demander à Let's Encrypt.
+# Same default pattern as Matomo and ntfy: plain HTTP on 8083, on loopback,
+# without asking Let's Encrypt for anything.
 {$FRETLINE_PREPROD_DOMAIN::8083} {
 	encode zstd gzip
 
@@ -116,25 +117,25 @@
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
-		# Une pré-prod indexée finit en résultat de recherche à côté de la
-		# boutique, avec ses paniers de test et ses comptes semés.
+		# An indexed pre-production ends up as a search result next to the
+		# shop, with its test carts and seeded accounts.
 		X-Robots-Tag "noindex, nofollow"
 		-Server
 	}
 
-	# Exemption par clé, pour la suite Playwright lancée contre la pré-prod. Le
-	# basic auth occupe l'en-tête `Authorization`, que la suite API remplit déjà
-	# avec son `Bearer` : les deux ne peuvent pas cohabiter sur une même requête.
+	# Key-based exemption, for the Playwright suite run against pre-production.
+	# Basic auth occupies the `Authorization` header, which the API suite
+	# already fills with its `Bearer`: the two cannot coexist on one request.
 	#
-	# Une expression plutôt qu'un matcher `header` : sans PREPROD_ACCESS_KEY, la
-	# substitution donne une chaîne vide, et un en-tête vide ou absent ne doit
-	# jamais passer pour la bonne clé. Le `!= ""` est ce qui ferme cette porte.
+	# An expression rather than a `header` matcher: without PREPROD_ACCESS_KEY,
+	# the substitution yields an empty string, and an empty or missing header
+	# must never pass for the right key. The `!= ""` is what closes that door.
 	@verrouille not expression `{header.X-Fretline-Preprod} != "" && {header.X-Fretline-Preprod} == "{$PREPROD_ACCESS_KEY}"`
 
-	# Défauts verrouillés, et non vides : un hash vide ferait refuser toute la
-	# configuration — et tomber avec elle la boutique, servie par ce même Caddy.
-	# Le défaut est le hash d'une chaîne tirée au hasard puis jetée : Caddy
-	# démarre (CI, essai local) et personne n'entre.
+	# Locked-down defaults, not empty ones: an empty hash would make the whole
+	# configuration fail — and take down with it the shop, served by this same
+	# Caddy. The default is the hash of a randomly drawn, then discarded string:
+	# Caddy starts (CI, local trial) and nobody gets in.
 	basic_auth @verrouille {
 		{$PREPROD_BASIC_AUTH_USER:fretline} {$PREPROD_BASIC_AUTH_HASH:$2a$14$Bcoh63tinCQaAAH8qPR4teL49GuNTsmWW1dhmSueQ5xHWLqKMKI6e}
 	}
