@@ -16,16 +16,16 @@ export function verifyPassword(password: string, stored: string): boolean {
   if (!salt || !expected) return false;
   const derived = scryptSync(password, salt, 64);
 
-  // Comparaison à temps constant. La version précédente utilisait `===` en
-  // assumant qu'une démo n'en avait pas besoin ; un audit l'a relevé, et
-  // l'argument ne tient pas : `timingSafeEqual` coûte trois lignes, tandis que
-  // `===` sort au premier octet différent et rend la durée de la comparaison
-  // fonction du préfixe deviné.
+  // Constant-time comparison. The previous version used `===`, assuming a demo
+  // did not need it; an audit flagged it, and the argument does not hold:
+  // `timingSafeEqual` costs three lines, whereas `===` exits at the first
+  // differing byte and makes the comparison's duration a function of the
+  // guessed prefix.
   //
-  // `timingSafeEqual` exige deux tampons de même longueur — il lève sinon, au
-  // lieu de renvoyer false. La longueur est donc vérifiée d'abord, et elle ne
-  // révèle rien : elle est constante pour tout hash que cette fonction a
-  // produit, et n'est différente que pour une valeur stockée corrompue.
+  // `timingSafeEqual` requires two buffers of the same length — it throws
+  // otherwise, instead of returning false. The length is therefore checked
+  // first, and it reveals nothing: it is constant for every hash this function
+  // has produced, and only differs for a corrupted stored value.
   let expectedBytes: Buffer;
   try {
     expectedBytes = Buffer.from(expected, 'hex');

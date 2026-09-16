@@ -3,19 +3,19 @@
 import { THEME_STORAGE_KEY, nextTheme, type ThemeChoice } from '@/lib/theme';
 
 /**
- * Bouton de thème : cycle Système → Clair → Sombre → Système.
+ * Theme button: cycles System → Light → Dark → System.
  *
- * Le composant est volontairement **sans état React**. Le thème effectif au
- * chargement dépend de `localStorage` et de la préférence système, deux choses
- * que le serveur ne peut pas connaître : en faire un état rendu produirait soit
- * une divergence d'hydratation, soit un premier rendu au mauvais thème corrigé
- * après coup, c'est-à-dire le scintillement qu'on cherche à éviter.
+ * The component is deliberately **free of React state**. The effective theme on
+ * load depends on `localStorage` and on the system preference, two things the
+ * server cannot know: making it rendered state would produce either a hydration
+ * mismatch or a first render in the wrong theme corrected afterwards, that is,
+ * the very flash we are trying to avoid.
  *
- * Les trois libellés sont donc tous rendus, et la cascade n'en laisse voir
- * qu'un (`--affichage-theme-*`, voir globals.css). Le HTML servi est le même
- * dans les trois cas, l'affichage est correct dès la première peinture, et le
- * nom accessible du bouton suit — les libellés masqués le sont par
- * `display: none`, donc ils sortent aussi de l'arbre d'accessibilité.
+ * All three labels are therefore rendered, and the cascade lets only one of
+ * them show (`--affichage-theme-*`, see globals.css). The served HTML is the
+ * same in all three cases, the display is correct from first paint, and the
+ * button's accessible name follows — hidden labels are hidden with
+ * `display: none`, so they also leave the accessibility tree.
  */
 export function ThemeToggle() {
   function avancer() {
@@ -27,14 +27,14 @@ export function ThemeToggle() {
     if (suivant === 'system') delete racine.dataset.theme;
     else racine.dataset.theme = suivant;
 
-    // Le choix explicite survit à la navigation ; l'absence de clé signifie
-    // « suivre l'appareil ». Un navigateur qui refuse le stockage (mode privé
-    // strict) ne doit pas empêcher la bascule de la page en cours.
+    // The explicit choice survives navigation; a missing key means "follow the
+    // device". A browser that refuses storage (strict private mode) must not
+    // prevent the current page from switching.
     try {
       if (suivant === 'system') window.localStorage.removeItem(THEME_STORAGE_KEY);
       else window.localStorage.setItem(THEME_STORAGE_KEY, suivant);
     } catch {
-      /* thème appliqué quand même, simplement pas mémorisé */
+      /* theme applied anyway, just not remembered */
     }
   }
 
@@ -45,8 +45,8 @@ export function ThemeToggle() {
       className="flex items-center rounded-md border border-ink-700 px-3 py-2 text-sm hover:border-amber-brand hover:text-amber-brand"
       data-testid="theme-toggle"
     >
-      {/* Le nom accessible du bouton serait « Sombre » sans ce préfixe, ce qui
-          ne dit ni de quoi il s'agit ni qu'on peut en changer. */}
+      {/* Without this prefix the button's accessible name would be "Sombre",
+          which says neither what it is about nor that it can be changed. */}
       <span className="sr-only">Thème d’affichage : </span>
       <span className="theme-mode-systeme" data-mode="system">
         <IconeSysteme />
@@ -64,9 +64,9 @@ export function ThemeToggle() {
   );
 }
 
-/* Icônes tracées plutôt qu'emoji : un emoji est rendu par une police différente
-   selon la plateforme, ce qui décale la ligne de base et fait diverger les
-   captures de référence sans qu'aucune régression n'ait eu lieu. */
+/* Drawn icons rather than emoji: an emoji is rendered by a different font on
+   each platform, which shifts the baseline and makes reference screenshots
+   diverge without any regression having happened. */
 
 const COMMUN = {
   'aria-hidden': true,
@@ -83,8 +83,8 @@ function IconeSysteme() {
   return (
     <svg {...COMMUN}>
       <circle cx="12" cy="12" r="9" />
-      {/* Moitié pleine : le disque mi-clair mi-sombre est la convention pour
-          « ni l'un ni l'autre, c'est l'appareil qui décide ». */}
+      {/* Half filled: the half-light, half-dark disc is the convention for
+          "neither one nor the other, the device decides". */}
       <path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none" />
     </svg>
   );

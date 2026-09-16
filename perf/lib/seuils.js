@@ -1,22 +1,23 @@
 /**
- * Seuils dérivés d'une mesure prise sur le runner CI.
+ * Thresholds derived from a measurement taken on the CI runner.
  *
- * Les seuils de ce dépôt étaient calibrés sur un VPS — la machine de celui qui
- * les a écrits. Un runner GitHub partagé est plus lent et surtout plus variable,
- * si bien qu'un seuil calé sur une autre machine ne dit plus rien : trop large,
- * il ne détecte rien ; trop serré, il rougit sur le bruit du voisinage.
+ * This repository's thresholds used to be calibrated on a VPS — the machine of
+ * whoever wrote them. A shared GitHub runner is slower and above all more
+ * variable, so a threshold tuned on another machine no longer means anything:
+ * too loose, it detects nothing; too tight, it turns red on the neighbours'
+ * noise.
  *
- * `baseline.json` est donc produit par le workflow « Mesurer la baseline de
- * performance », qui exécute les mêmes scripts sur le runner et y écrit les
- * mesures. C'est le même principe que les baselines visuelles : la référence
- * appartient à l'environnement qui la compare.
+ * `baseline.json` is therefore produced by the "Mesurer la baseline de
+ * performance" workflow, which runs the same scripts on the runner and writes
+ * the measurements there. It is the same principle as the visual baselines: the
+ * reference belongs to the environment that compares against it.
  *
- * Tant qu'aucune mesure n'existe, `defaut` s'applique — les valeurs historiques,
- * pour que la suite reste utilisable sans avoir à lancer la calibration d'abord.
+ * As long as no measurement exists, `defaut` applies — the historical values, so
+ * the suite stays usable without having to run the calibration first.
  */
 const baseline = JSON.parse(open('../baseline.json'));
 
-/** Mode calibration : mesurer sans seuil, sinon le run à calibrer échoue sur les seuils qu'il sert à produire. */
+/** Calibration mode: measure without thresholds, otherwise the run being calibrated fails on the thresholds it is meant to produce. */
 export const CALIBRATION = __ENV.K6_CALIBRATION === '1';
 
 export function mesure(scenario, metrique, statistique) {
@@ -25,12 +26,12 @@ export function mesure(scenario, metrique, statistique) {
 }
 
 /**
- * Seuil = `facteur` × la mesure, jamais moins que `plancher`.
+ * Threshold = `facteur` × the measurement, never less than `plancher`.
  *
- * Le plancher n'est pas une précaution de style : les mesures se comptent en
- * dizaines de millisecondes, et cinq fois 12 ms font un seuil de 60 ms qu'une
- * pause du ramasse-miettes suffit à franchir. Il fixe le bruit qu'on accepte de
- * ne pas voir, en dessous duquel multiplier n'a plus de sens.
+ * The floor is not a stylistic precaution: measurements are counted in tens of
+ * milliseconds, and five times 12 ms makes a 60 ms threshold that a garbage
+ * collector pause is enough to cross. It sets the noise we accept not to see,
+ * below which multiplying no longer makes sense.
  */
 export function seuil(scenario, metrique, statistique, { facteur, plancher, defaut }) {
   const valeur = mesure(scenario, metrique, statistique);
@@ -38,14 +39,14 @@ export function seuil(scenario, metrique, statistique, { facteur, plancher, defa
   return Math.max(Math.round(facteur * valeur), plancher);
 }
 
-/** `p(95)<250` — l'expression que k6 attend, construite depuis la mesure. */
+/** `p(95)<250` — the expression k6 expects, built from the measurement. */
 export function expression(scenario, metrique, statistique, bornes) {
   return `${statistique}<${seuil(scenario, metrique, statistique, bornes)}`;
 }
 
-/** Ce que le résumé doit dire de la provenance des seuils, mesurés ou hérités. */
+/** What the summary must say about where the thresholds come from, measured or inherited. */
 export function provenance(scenario) {
   const mesures = baseline.scenarios?.[scenario];
-  if (!mesures) return 'seuils hérités — aucune mesure de référence sur le runner CI';
-  return `seuils dérivés de la mesure du ${baseline.mesureLe} sur ${baseline.runner}`;
+  if (!mesures) return 'inherited thresholds — no reference measurement on the CI runner';
+  return `thresholds derived from the measurement of ${baseline.mesureLe} on ${baseline.runner}`;
 }

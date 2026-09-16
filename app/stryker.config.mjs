@@ -1,16 +1,16 @@
 /**
- * Tests de mutation sur l'arithmétique monétaire.
+ * Mutation testing on the monetary arithmetic.
  *
- * Une suite verte dit qu'aucun test n'échoue ; elle ne dit pas qu'un test
- * échouerait si le code devenait faux. Stryker pose la question directement :
- * il remplace `>=` par `>`, `Math.round` par `Math.floor`, un `+` par un `-`,
- * et compte les mutants que la suite laisse passer. Sur les prix, un mutant
- * survivant est un centime que personne ne réclamera.
+ * A green suite says that no test fails; it does not say that a test would fail
+ * if the code went wrong. Stryker asks the question directly: it replaces `>=`
+ * with `>`, `Math.round` with `Math.floor`, a `+` with a `-`, and counts the
+ * mutants the suite lets through. On prices, a surviving mutant is a cent nobody
+ * will ever claim.
  *
- * Le périmètre est volontairement minuscule. Ce n'est pas une couverture du
- * dépôt : c'est `money.ts`, et les fonctions pures de `cart.ts` — celles qui
- * décident d'un montant. Le reste de `cart.ts` parle à la base, ne se prête pas
- * à une suite unitaire rapide, et reste couvert par la suite d'API.
+ * The scope is deliberately tiny. This is not coverage of the repository: it is
+ * `money.ts`, and the pure functions of `cart.ts` — the ones that decide an
+ * amount. The rest of `cart.ts` talks to the database, does not lend itself to
+ * a fast unit suite, and stays covered by the API suite.
  *
  * @type {import('@stryker-mutator/api/core').PartialStrykerOptions}
  */
@@ -21,14 +21,14 @@ const config = {
   reporters: ['html', 'clear-text', 'progress'],
   htmlReporter: { fileName: 'reports/mutation/index.html' },
 
-  // Les plages de lignes suivent la section « Pure pricing » de `cart.ts`. Si
-  // le code pur y est déplacé ou étendu sans mettre cette plage à jour, le
-  // score chute et la CI le dit — l'oubli se signale au lieu de s'installer.
+  // The line ranges follow the "Pure pricing" section of `cart.ts`. If pure
+  // code is moved or extended there without updating this range, the score
+  // drops and CI says so — the oversight reports itself instead of settling in.
   mutate: ['src/lib/money.ts', 'src/lib/cart.ts:44-48', 'src/lib/cart.ts:72-149'],
 
-  // 100 % ou rien : sur ce périmètre, un mutant survivant désigne une règle
-  // d'arrondi que rien ne tient. Le seuil est tenable parce que le périmètre
-  // est petit — c'est le prix à payer pour qu'il reste un signal.
+  // 100 % or nothing: on this scope, a surviving mutant points at a rounding
+  // rule nothing holds. The threshold is sustainable because the scope is
+  // small — that is the price of keeping it a signal.
   thresholds: { high: 100, low: 100, break: 100 },
   timeoutMS: 20000,
 };

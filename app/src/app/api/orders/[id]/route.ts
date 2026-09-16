@@ -31,12 +31,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 /**
- * Compare le jeton présenté à celui de la commande, à temps constant.
+ * Compares the presented token with the order's, in constant time.
  *
- * Le jeton est un UUID v4 : le deviner de bout en bout est hors de portée, mais
- * `===` sort au premier caractère différent, ce qui en fait un oracle qui se
- * remonte caractère par caractère. Le coût de la parade est nul, l'assumer ne
- * l'était pas.
+ * The token is a UUID v4: guessing it end to end is out of reach, but `===`
+ * exits at the first differing character, which turns it into an oracle that
+ * can be walked back character by character. The countermeasure costs nothing;
+ * accepting the risk did not.
  */
 function matchesAccessToken(provided: string, expected: string): boolean {
   const a = Buffer.from(provided);

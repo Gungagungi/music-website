@@ -1,39 +1,39 @@
 /**
- * Limitation de débit par fenêtre fixe.
+ * Fixed-window rate limiting.
  *
- * L'enveloppe d'erreur déclarait `RATE_LIMITED` et son 429 depuis le premier
- * jour, mais rien ne l'émettait : le code existait, le mécanisme non. Un audit
- * l'a relevé sur `POST /api/auth/login`, qui exécute un scrypt — délibérément
- * lent, 50 à 100 ms — avant de répondre. Sans limite, la même route sert donc
- * à la fois au bruteforce et au déni de service : le test de rupture situe le
- * mur de la production entre 80 et 90 parcours par seconde, CPU-lié, et
- * quelques dizaines de requêtes par seconde sur `login` suffisent à l'atteindre.
+ * The error envelope had declared `RATE_LIMITED` and its 429 since day one, but
+ * nothing ever emitted it: the code existed, the mechanism did not. An audit
+ * flagged it on `POST /api/auth/login`, which runs scrypt — deliberately slow,
+ * 50 to 100 ms — before answering. Without a limit, the same route serves both
+ * brute force and denial of service: the breaking-point test puts production's
+ * wall between 80 and 90 journeys per second, CPU-bound, and a few dozen
+ * requests per second on `login` are enough to reach it.
  *
- * Compteur en mémoire, et pas Redis. Le déploiement est un conteneur unique
- * (docker-compose.yml) : une dépendance de plus coûterait un service, un
- * volume et un mode de panne supplémentaires pour un état que ce processus
- * détient déjà. La limite est **par processus** — au jour où l'application
- * passe à deux répliques, le plafond effectif double, et c'est le moment de
- * déplacer ce compteur, pas avant.
+ * In-memory counter, not Redis. The deployment is a single container
+ * (docker-compose.yml): one more dependency would cost a service, a volume and
+ * an extra failure mode for state this process already holds. The limit is
+ * **per process** — the day the application moves to two replicas, the
+ * effective ceiling doubles, and that is the moment to move this counter, not
+ * before.
  *
- * Épinglé sur `globalThis` pour la même raison que le pool PostgreSQL
- * (db/client.ts) : Next recharge les modules en développement, et un compteur
- * neuf à chaque rechargement remettrait la limite à zéro à chaque sauvegarde.
+ * Pinned on `globalThis` for the same reason as the PostgreSQL pool
+ * (db/client.ts): Next reloads modules in development, and a fresh counter on
+ * every reload would reset the limit on every save.
  */
 
 import { isTestMode } from '@/lib/deployment';
 
 export interface RateLimitRule {
-  /** Nombre de requêtes autorisées par fenêtre. */
+  /** Number of requests allowed per window. */
   limit: number;
-  /** Durée de la fenêtre, en secondes. */
+  /** Window length, in seconds. */
   windowSeconds: number;
 }
 
 /**
- * Les règles sont serrées là où l'appel coûte cher au serveur ou ouvre sur un
- * secret, et larges ailleurs. Un visiteur légitime ne les atteint pas : six
- * tentatives de connexion par minute couvre largement la faute de frappe.
+ * Rules are tight where a call is expensive for the server or leads to a
+ * secret, and loose elsewhere. A legitimate visitor never reaches them: six
+ * login attempts per minute comfortably covers a typo.
  */
 export const RATE_LIMITS = {
   login: { limit: 6, windowSeconds: 60 },
@@ -46,22 +46,22 @@ export const RATE_LIMITS = {
 export type RateLimitName = keyof typeof RATE_LIMITS;
 
 /**
- * Facteur appliqué aux plafonds sous `E2E_TEST_MODE=1`.
+ * Multiplier applied to the ceilings under `E2E_TEST_MODE=1`.
  *
- * La suite s'exécute sans proxy devant elle, donc sans `x-forwarded-for` : tous
- * ses appels partagent un seul et même seau. Quatre inscriptions par dix
- * minutes, plafond juste en production, arrête la suite au quinzième test — ce
- * qui a effectivement eu lieu.
+ * The suite runs with no proxy in front of it, hence no `x-forwarded-for`: all
+ * of its calls share one and the same bucket. Four sign-ups per ten minutes, a
+ * sensible production ceiling, stops the suite at the fifteenth test — which
+ * actually happened.
  *
- * Un facteur plutôt qu'un court-circuit : le chemin de code reste emprunté à
- * chaque requête, en-têtes compris, donc une régression qui casserait le
- * limiteur se verrait toujours. Ce qui change est la borne, pas la mécanique.
- * L'algorithme lui-même est éprouvé par les tests unitaires — `consume()` prend
- * son horloge en paramètre exactement pour ça — plutôt que par la suite d'API,
- * où il faudrait fabriquer un millier de requêtes pour voir un 429.
+ * A multiplier rather than a bypass: the code path is still taken on every
+ * request, headers included, so a regression that broke the limiter would
+ * still show. What changes is the bound, not the mechanism. The algorithm
+ * itself is exercised by the unit tests — `consume()` takes its clock as a
+ * parameter precisely for that — rather than by the API suite, where it would
+ * take a thousand requests to see a 429.
  *
- * Ne jamais l'appliquer hors mode test : le discriminant est le même que
- * partout ailleurs dans ce dépôt (lib/deployment.ts), et il est fail-closed.
+ * Never apply it outside test mode: the discriminator is the same as
+ * everywhere else in this repository (lib/deployment.ts), and it fails closed.
  */
 const FACTEUR_MODE_TEST = 250;
 
@@ -71,7 +71,7 @@ function effectiveLimit(rule: RateLimitRule): number {
 
 interface Window {
   count: number;
-  /** Horodatage de fin de fenêtre, en millisecondes. */
+  /** Window end timestamp, in milliseconds. */
   resetAt: number;
 }
 
@@ -88,12 +88,12 @@ function store(): Map<string, Window> {
 }
 
 /**
- * Purge les fenêtres expirées.
+ * Evicts expired windows.
  *
- * Sans elle la Map croît d'une entrée par adresse IP vue et ne rend jamais
- * rien : un balayage suffisamment long finirait par la faire tenir toute la
- * mémoire du conteneur. Le balayage est amorti sur les écritures plutôt que
- * confié à un `setInterval`, qui tiendrait le processus éveillé pour rien.
+ * Without it the Map grows by one entry per IP address seen and never gives
+ * anything back: a long enough scan would end up holding the container's whole
+ * memory. Eviction is amortised over writes rather than handed to a
+ * `setInterval`, which would keep the process awake for nothing.
  */
 function purgeExpired(now: number): void {
   for (const [key, window] of store()) {
@@ -105,15 +105,15 @@ let writesSincePurge = 0;
 const PURGE_EVERY = 500;
 
 /**
- * Identifie l'appelant.
+ * Identifies the caller.
  *
- * `x-forwarded-for` n'est digne de confiance que parce que Caddy est le seul
- * point d'entrée (docker-compose.yml : l'application n'expose aucun port sur
- * l'hôte) et qu'il réécrit l'en-tête. Exposer `app` directement rendrait cette
- * valeur forgeable, et la limite contournable d'un en-tête.
+ * `x-forwarded-for` can only be trusted because Caddy is the sole entry point
+ * (docker-compose.yml: the application publishes no port on the host) and it
+ * rewrites the header. Exposing `app` directly would make this value forgeable,
+ * and the limit bypassable with a single header.
  *
- * La première adresse de la liste est le client ; les suivantes sont les
- * proxys traversés.
+ * The first address in the list is the client; the following ones are the
+ * proxies traversed.
  */
 export function callerKey(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -123,19 +123,19 @@ export function callerKey(request: Request): string {
 
 export interface RateLimitResult {
   allowed: boolean;
-  /** Requêtes encore autorisées dans la fenêtre courante. */
+  /** Requests still allowed in the current window. */
   remaining: number;
-  /** Secondes à attendre avant que la fenêtre ne se rouvre. */
+  /** Seconds to wait before the window reopens. */
   retryAfterSeconds: number;
   limit: number;
 }
 
 /**
- * Consomme une unité du quota et dit si l'appel peut passer.
+ * Consumes one unit of quota and says whether the call may go through.
  *
- * Le compteur est incrémenté même lorsque la réponse sera un refus : c'est ce
- * qui empêche de maintenir un débit constant juste sous le plafond en ignorant
- * les 429.
+ * The counter is incremented even when the answer will be a refusal: that is
+ * what prevents holding a steady rate just under the ceiling by ignoring the
+ * 429s.
  */
 export function consume(
   name: RateLimitName,
@@ -169,7 +169,7 @@ export function consume(
   };
 }
 
-/** Vide le compteur. Réservé aux tests unitaires. */
+/** Clears the counter. Reserved for unit tests. */
 export function resetRateLimits(): void {
   store().clear();
   writesSincePurge = 0;

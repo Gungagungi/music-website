@@ -4,24 +4,24 @@ import { CATEGORIES, PRODUCTS, RULES } from '@/data/seed';
 import { TAGS, covers, testCase } from '@/utils/tags';
 
 /**
- * Le parcours d'achat, d'un bout à l'autre, sans aucun arrangement par l'API.
+ * The purchase journey, end to end, with no arrangement through the API.
  *
- * Toutes les étapes sont déjà couvertes une à une — TC-010 pour l'accueil,
- * TC-060 et TC-067 pour la fiche produit, TC-100 pour le panier, TC-120 pour le
- * tunnel — et chacune de ces specs pose ses préconditions par l'API, à dessein :
- * un échec y désigne alors l'étape fautive et rien d'autre.
+ * Every step is already covered one by one — TC-010 for the home page, TC-060
+ * and TC-067 for the product page, TC-100 for the cart, TC-120 for checkout —
+ * and each of those specs sets up its preconditions through the API, on
+ * purpose: a failure there then points at the faulty step and nothing else.
  *
- * Ce découpage laisse pourtant un angle mort, et c'est le seul objet de cette
- * spec : rien ne garantissait que le panier rempli au clic depuis la fiche
- * produit soit celui que le tunnel encaisse. Le cookie `fretline_cart` posé à
- * l'ajout, sa reprise par la page panier, puis par la commande, sont trois
- * jointures qu'aucune spec ne traversait dans une même session.
+ * That split nevertheless leaves a blind spot, and it is this spec's sole
+ * purpose: nothing guaranteed that the cart filled by clicking on the product
+ * page is the one checkout charges. The `fretline_cart` cookie set on add, its
+ * pick-up by the cart page, then by the order, are three joints no spec went
+ * through within a single session.
  *
- * Donc : un seul test, une seule session, zéro fixture d'arrangement, et le
- * prix suivi de la vignette du catalogue jusqu'à la confirmation. Les
- * vérifications fines (facettes, coupons, validation de champs) restent chez
- * les specs dédiées — les ajouter ici rendrait l'échec ambigu sans rien couvrir
- * de plus.
+ * Hence: one test, one session, zero arrangement fixtures, and the price
+ * followed from the catalogue card all the way to the confirmation. Fine-grained
+ * checks (facets, coupons, field validation) stay with the dedicated specs —
+ * adding them here would make a failure ambiguous without covering anything
+ * more.
  */
 test.describe('Parcours d’achat complet', () => {
   test(
@@ -36,20 +36,20 @@ test.describe('Parcours d’achat complet', () => {
     async ({ page, homePage, catalogPage, productPage, cartPage, checkoutPage, confirmationPage }) => {
       const quantity = 2;
 
-      // 1. Arrivée sur le site.
+      // 1. Landing on the site.
       await homePage.open();
       await expect(homePage.hero).toBeVisible();
       await expect(homePage.header.cartCount).toHaveText('0');
 
-      // 2. Navigation vers un rayon, par la barre de catégories.
+      // 2. Navigating to a category, through the category bar.
       await homePage.header.openCategory(CATEGORIES.effectPedals.slug);
       await page.waitForURL(`**/c/${CATEGORIES.effectPedals.slug}`);
       await expect(catalogPage.heading).toHaveText(CATEGORIES.effectPedals.label);
 
-      // 3. Ouverture de la fiche depuis la vignette. Le prix est lu ici, sur la
-      // carte, et non pris dans les graines : c'est ce qui fait de la chaîne
-      // une vérification de continuité plutôt qu'une suite d'assertions
-      // indépendantes contre une même constante.
+      // 3. Opening the product page from its card. The price is read here, on
+      // the card, and not taken from the seed data: that is what turns the
+      // chain into a continuity check rather than a series of independent
+      // assertions against the same constant.
       const card = catalogPage.cardBySlug(PRODUCTS.cheap.slug);
       const unitPriceCents = await card.priceCents();
       await card.open();
@@ -58,12 +58,12 @@ test.describe('Parcours d’achat complet', () => {
       await expect(productPage.heading).toContainText(PRODUCTS.cheap.name);
       await expect(productPage.price).toShowPrice(unitPriceCents);
 
-      // 4. Ajout au panier, au clic, avec la quantité saisie dans le formulaire.
+      // 4. Adding to the cart, by clicking, with the quantity typed into the form.
       expect(await productPage.addToCart({ quantity })).toBe('success');
       await expect(productPage.header.cartCount).toHaveText(String(quantity));
 
-      // 5. Le panier repris depuis l'en-tête — c'est la jointure que le
-      // découpage précédent ne traversait pas.
+      // 5. The cart, reached from the header — the joint the previous split did
+      // not go through.
       await productPage.header.cartLink.click();
       await page.waitForURL('**/panier');
 
@@ -76,14 +76,14 @@ test.describe('Parcours d’achat complet', () => {
       await expect(cartPage.subtotal).toShowPrice(unitPriceCents * quantity);
       await expect(cartPage.total).toShowPrice(expectedTotal);
 
-      // 6. Tunnel de commande, atteint par le lien du panier.
+      // 6. Checkout, reached through the cart's link.
       await cartPage.proceedToCheckout();
       await expect(checkoutPage.summaryTotal).toShowPrice(expectedTotal);
 
       const address = new AddressBuilder().build();
       await checkoutPage.completeCheckout({ address, email: 'parcours@fretline.test' });
 
-      // 7. Confirmation : la commande porte bien le panier constitué au clic.
+      // 7. Confirmation: the order does carry the cart built by clicking.
       await expect(confirmationPage.root).toBeVisible();
       await expect(confirmationPage.reference).toHaveText(/^FRT-\d{6}$/);
       await expect(confirmationPage.email).toHaveText('parcours@fretline.test');

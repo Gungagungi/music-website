@@ -1,26 +1,26 @@
 #!/usr/bin/env node
 /**
- * Rend l'historique de tendance en une page HTML.
+ * Renders the trend history as an HTML page.
  *
- * Deux courbes et un tableau, en SVG inline : pas de bibliothèque de graphiques,
- * pas de JavaScript. La page doit s'ouvrir dans dix ans depuis un artifact
- * archivé, et une dépendance CDN morte n'affiche rien du tout.
+ * Two curves and a table, as inline SVG: no charting library, no JavaScript.
+ * The page must still open in ten years from an archived artifact, and a dead
+ * CDN dependency displays nothing at all.
  *
- *   node scripts/rendre-tendance.mjs <historique.jsonl> <sortie.html>
+ *   node scripts/rendre-tendance.mjs <history.jsonl> <output.html>
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 const [historiqueArg, sortieArg] = process.argv.slice(2);
 if (!historiqueArg || !sortieArg) {
-  console.error('Usage : node scripts/rendre-tendance.mjs <historique.jsonl> <sortie.html>');
+  console.error('Usage: node scripts/rendre-tendance.mjs <history.jsonl> <output.html>');
   process.exit(1);
 }
 
 const historique = resolve(historiqueArg);
 const sortie = resolve(sortieArg);
 
-/** Les runs les plus récents en dernier ; on n'en trace qu'une fenêtre. */
+/** Most recent runs last; only a window of them is plotted. */
 const FENETRE = 60;
 
 const runs = existsSync(historique)
@@ -37,14 +37,14 @@ function echapper(texte) {
 }
 
 /**
- * Une courbe, dessinée sur une grille fixe.
+ * A curve, drawn on a fixed grid.
  *
- * L'axe des ordonnées part de zéro et non du minimum observé : une échelle qui
- * s'ajuste aux données transforme une variation de 2 % en falaise, ce qui est
- * la façon la plus courante de mentir avec un graphique honnête.
+ * The y axis starts at zero, not at the observed minimum: a scale that fits
+ * itself to the data turns a 2 % variation into a cliff, which is the most
+ * common way of lying with an honest chart.
  */
 function courbe(valeurs, { hauteur = 140, largeur = 720, couleur, formater }) {
-  if (valeurs.length === 0) return '<p class="vide">Aucune mesure.</p>';
+  if (valeurs.length === 0) return '<p class="vide">No measurements.</p>';
 
   const max = Math.max(...valeurs, 0) || 1;
   const pas = valeurs.length > 1 ? largeur / (valeurs.length - 1) : 0;
@@ -121,51 +121,51 @@ footer { max-width:52rem; margin:3rem auto 0; padding-top:1.25rem; border-top:1p
 `;
 
 const html = `<!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tendance — Fretline QA</title>
+<title>Trend — Fretline QA</title>
 <style>${STYLE}</style>
 </head>
 <body>
-<nav><a href="index.html">Rapport de tests</a> · <a href="docs/index.html">Documentation QA</a></nav>
+<nav><a href="index.html">Test report</a> · <a href="docs/index.html">QA documentation</a></nav>
 <main>
-<h1>Tendance</h1>
-<p class="chapeau">${runs.length} run${runs.length > 1 ? 's' : ''} nocturne${runs.length > 1 ? 's' : ''} enregistré${runs.length > 1 ? 's' : ''}${dernier ? ` — dernier le ${echapper(dernier.date.slice(0, 10))}` : ''}. Un rapport par run dit ce qui a cassé ; celui-ci dit depuis quand.</p>
+<h1>Trend</h1>
+<p class="chapeau">${runs.length} nightly run${runs.length > 1 ? 's' : ''} recorded${dernier ? ` — latest on ${echapper(dernier.date.slice(0, 10))}` : ''}. A per-run report says what broke; this one says since when.</p>
 
 ${
   dernier
     ? `<div class="cartes">
-  <div class="carte"><div class="valeur">${dernier.reussis}/${dernier.total}</div><div class="libelle">réussis au dernier run</div></div>
-  <div class="carte"><div class="valeur">${secondes(dernier.dureeMs)} s</div><div class="libelle">durée cumulée</div></div>
-  <div class="carte"><div class="valeur">${(dernier.tauxInstables * 100).toFixed(2)} %</div><div class="libelle">taux d’instabilité</div></div>
-  <div class="carte"><div class="valeur">${dernier.instables}</div><div class="libelle">tests instables</div></div>
+  <div class="carte"><div class="valeur">${dernier.reussis}/${dernier.total}</div><div class="libelle">passed in the latest run</div></div>
+  <div class="carte"><div class="valeur">${secondes(dernier.dureeMs)} s</div><div class="libelle">cumulative duration</div></div>
+  <div class="carte"><div class="valeur">${(dernier.tauxInstables * 100).toFixed(2)} %</div><div class="libelle">flaky rate</div></div>
+  <div class="carte"><div class="valeur">${dernier.instables}</div><div class="libelle">flaky tests</div></div>
 </div>`
-    : '<p class="vide">Aucun run enregistré pour l’instant. Le premier nightly alimentera cette page.</p>'
+    : '<p class="vide">No run recorded yet. The first nightly will feed this page.</p>'
 }
 
-<h2>Durée cumulée de la suite</h2>
+<h2>Cumulative suite duration</h2>
 ${courbe(runs.map((r) => secondes(r.dureeMs)), { couleur: 'var(--accent)', formater: (v) => `${Math.round(v)} s` })}
 
-<h2>Taux d’instabilité</h2>
+<h2>Flaky rate</h2>
 ${courbe(runs.map((r) => r.tauxInstables * 100), { couleur: 'var(--alerte)', formater: (v) => `${v.toFixed(1)} %` })}
 
-<h2>Vingt derniers runs</h2>
+<h2>Last twenty runs</h2>
 <div class="tableau">
 <table>
-<thead><tr><th>Date</th><th>Commit</th><th></th><th>Réussis</th><th>Échecs</th><th>Instables</th><th>Taux</th><th>Durée</th></tr></thead>
+<thead><tr><th>Date</th><th>Commit</th><th></th><th>Passed</th><th>Failed</th><th>Flaky</th><th>Rate</th><th>Duration</th></tr></thead>
 <tbody>
-${lignesTableau || '<tr><td colspan="8" class="vide">Rien à afficher.</td></tr>'}
+${lignesTableau || '<tr><td colspan="8" class="vide">Nothing to show.</td></tr>'}
 </tbody>
 </table>
 </div>
 </main>
-<footer>Généré depuis l’historique de la branche <code>historique-qa</code>. Échelles à partir de zéro : une échelle ajustée aux données transforme 2 % de variation en falaise.</footer>
+<footer>Generated from the history on the <code>historique-qa</code> branch. Scales start at zero: a scale fitted to the data turns a 2 % variation into a cliff.</footer>
 </body>
 </html>
 `;
 
 mkdirSync(dirname(sortie), { recursive: true });
 writeFileSync(sortie, html);
-console.log(`Page de tendance écrite (${runs.length} run(s)) → ${sortie}`);
+console.log(`Trend page written (${runs.length} run(s)) → ${sortie}`);

@@ -11,9 +11,9 @@ import {
 } from '@/lib/money';
 
 /**
- * Ces tests visent les bornes, pas les cas nominaux : un total juste au centime
- * près sur un panier ordinaire ne dit rien de la règle d'arrondi, alors qu'un
- * demi-centime négatif la désigne entièrement.
+ * These tests target the boundaries, not the nominal cases: a total correct to
+ * the cent on an ordinary cart says nothing about the rounding rule, whereas a
+ * negative half-cent pins it down entirely.
  */
 
 describe('roundCents', () => {
@@ -22,17 +22,17 @@ describe('roundCents', () => {
     expect(roundCents(2.4)).toBe(2);
   });
 
-  // `Math.round(-2.5)` vaut -2 : JavaScript arrondit vers +∞, pas en valeur
-  // absolue. La convention des factures françaises veut -3, d'où la symétrie
-  // explicite de la fonction — c'est elle que ce test tient.
+  // `Math.round(-2.5)` is -2: JavaScript rounds towards +∞, not by absolute
+  // value. French invoicing convention wants -3, hence the function's explicit
+  // symmetry — which is what this test holds.
   it('arrondit le demi négatif à l’opposé du positif', () => {
     expect(roundCents(-2.5)).toBe(-3);
     expect(roundCents(-2.4)).toBe(-2);
   });
 
-  // Sans `Object.is`, `-0` passerait : `expect(-0).toBe(0)` est vrai en `toBe`
-  // strict mais faux ici, et un zéro négatif se propage jusqu'à l'affichage
-  // (`-0,00 €`).
+  // Without `Object.is`, `-0` would pass: `expect(-0).toBe(0)` is true with
+  // strict `toBe` but false here, and a negative zero propagates all the way to
+  // the display (`-0,00 €`).
   it('renvoie un zéro positif pour zéro', () => {
     expect(Object.is(roundCents(0), 0)).toBe(true);
   });
@@ -49,9 +49,9 @@ describe('applyPercent', () => {
     expect(applyPercent(84900, 15)).toBe(12735);
   });
 
-  // 12345 × 10 % = 1234,5 centimes. Le demi part au supérieur, et surtout le
-  // résultat ne doit pas rester fractionnaire : c'est le défaut que BUG-001
-  // caricature dans l'autre sens en tronquant à l'euro.
+  // 12345 × 10 % = 1234.5 cents. The half goes up, and above all the result
+  // must not stay fractional: that is the defect BUG-001 caricatures the other
+  // way round by truncating to the euro.
   it('arrondit le demi-centime au supérieur', () => {
     expect(applyPercent(12345, 10)).toBe(1235);
   });
@@ -67,9 +67,9 @@ describe('applyPercent', () => {
 });
 
 describe('vatIncludedIn', () => {
-  // Prix affichés TTC : la TVA est extraite du total, jamais ajoutée par-dessus.
-  // 120,00 € TTC contiennent 20,00 € de TVA — et non 24,00 €, ce que produirait
-  // une TVA ajoutée.
+  // Prices are displayed VAT-inclusive: VAT is extracted from the total, never
+  // added on top. €120.00 incl. VAT contains €20.00 of VAT — not €24.00, which
+  // added VAT would produce.
   it('extrait la TVA du total au lieu de l’ajouter', () => {
     expect(vatIncludedIn(12000)).toBe(2000);
     expect(vatIncludedIn(12000)).not.toBe(2400);
@@ -91,15 +91,15 @@ describe('shippingFor', () => {
     expect(shippingFor(1)).toBe(SHIPPING_FLAT_RATE);
   });
 
-  // Le seuil est atteint, pas dépassé : `>=` et non `>`. Un centime d'écart
-  // sépare les deux assertions, et c'est tout ce qui distingue les deux
-  // implémentations.
+  // The threshold is reached, not exceeded: `>=` and not `>`. One cent separates
+  // the two assertions, and that is all that distinguishes the two
+  // implementations.
   it('offre le port à partir du seuil exact', () => {
     expect(shippingFor(FREE_SHIPPING_THRESHOLD)).toBe(0);
     expect(shippingFor(FREE_SHIPPING_THRESHOLD + 1)).toBe(0);
   });
 
-  // Un panier vide ne doit pas se voir facturer 9,90 € de port.
+  // An empty cart must not be charged €9.90 for shipping.
   it('ne facture rien pour un sous-total nul ou négatif', () => {
     expect(shippingFor(0)).toBe(0);
     expect(shippingFor(-100)).toBe(0);
@@ -107,8 +107,8 @@ describe('shippingFor', () => {
 });
 
 describe('formatPrice', () => {
-  // L'espace avant le symbole est insécable (U+00A0) : c'est ce qu'`Intl`
-  // produit, et ce que les sélecteurs de la suite UI rencontrent.
+  // The space before the symbol is non-breaking (U+00A0): that is what `Intl`
+  // produces, and what the UI suite's selectors run into.
   it('formate en euros avec une espace insécable avant le symbole', () => {
     expect(formatPrice(84900)).toBe('849,00 €');
   });
@@ -122,9 +122,9 @@ describe('formatPrice', () => {
     expect(formatPrice(-1250)).toBe('-12,50 €');
   });
 
-  // Le séparateur de milliers dépend de la version d'ICU (U+202F ou U+00A0
-  // selon les runtimes) : le normaliser évite un test qui rougit au changement
-  // de Node sans qu'aucune règle métier ait bougé.
+  // The thousands separator depends on the ICU version (U+202F or U+00A0
+  // depending on the runtime): normalising it avoids a test that turns red when
+  // Node changes without any business rule having moved.
   it('sépare les milliers', () => {
     expect(formatPrice(123450).replace(/[\s  ]/g, ' ')).toBe('1 234,50 €');
   });

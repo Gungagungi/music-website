@@ -1,23 +1,23 @@
 /**
- * Thème d'affichage.
+ * Display theme.
  *
- * Trois états, dont un qui n'est pas une couleur : `system` signifie « suivre
- * l'appareil », et il se distingue des deux autres par l'**absence** de choix
- * stocké. C'est ce qui permet à toute la logique de tenir dans la cascade —
- * l'état par défaut est le sélecteur `:root` sans attribut, les deux autres
- * sont `:root[data-theme='light']` et `:root[data-theme='dark']`.
+ * Three states, one of which is not a colour: `system` means "follow the
+ * device", and it is distinguished from the other two by the **absence** of a
+ * stored choice. That is what lets all the logic fit in the cascade — the
+ * default state is the `:root` selector with no attribute, the other two are
+ * `:root[data-theme='light']` and `:root[data-theme='dark']`.
  *
- * Le cycle repasse par `system` plutôt que de faire l'aller-retour entre clair
- * et sombre : sans lui, un visiteur ayant touché le bouton une seule fois ne
- * pourrait plus jamais revenir au suivi de son appareil sans vider le stockage
- * de son navigateur, et rien dans l'interface ne le lui dirait.
+ * The cycle goes back through `system` rather than bouncing between light and
+ * dark: without it, a visitor who had touched the button just once could never
+ * return to following their device without clearing their browser storage, and
+ * nothing in the interface would tell them so.
  */
 export type Theme = 'light' | 'dark';
 export type ThemeChoice = Theme | 'system';
 
 export const THEME_STORAGE_KEY = 'fretline-theme';
 
-/** Ordre du cycle du bouton de bascule. */
+/** Order of the toggle button's cycle. */
 export const THEME_CYCLE: readonly ThemeChoice[] = ['system', 'light', 'dark'];
 
 export function nextTheme(current: ThemeChoice): ThemeChoice {
@@ -26,18 +26,17 @@ export function nextTheme(current: ThemeChoice): ThemeChoice {
 }
 
 /**
- * Script reposé sur `<html>` avant la première peinture.
+ * Script that re-applies the theme on `<html>` before first paint.
  *
- * Il n'existe que pour le choix explicite : la détection automatique, elle, ne
- * demande pas une ligne de JavaScript. Le rendre bloquant dans `<head>` est
- * précisément ce qui empêche le sursaut de thème — un `next/script` en
- * `afterInteractive` s'exécuterait après la peinture, donc trop tard, et
- * `beforeInteractive` n'est jamais exécuté dans l'App Router (voir le
- * commentaire de components/analytics/Matomo.tsx).
+ * It only exists for the explicit choice: automatic detection does not take a
+ * single line of JavaScript. Making it blocking in `<head>` is precisely what
+ * prevents the theme flash — a `next/script` with `afterInteractive` would run
+ * after paint, hence too late, and `beforeInteractive` is never executed in the
+ * App Router (see the comment in components/analytics/Matomo.tsx).
  *
- * Le `try` couvre les navigateurs qui lèvent à la simple lecture de
- * `localStorage` : une exception ici interromprait le script en tête de
- * document, avant tout le reste.
+ * The `try` covers browsers that throw on merely reading `localStorage`: an
+ * exception here would stop the script at the head of the document, before
+ * everything else.
  */
 export const THEME_BOOTSTRAP_SCRIPT = `try{var t=localStorage.getItem(${JSON.stringify(
   THEME_STORAGE_KEY,

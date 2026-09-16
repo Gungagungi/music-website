@@ -20,9 +20,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Nonce de la CSP, produit par requête dans proxy.ts. Il autorise les deux
-  // seuls scripts inline du document — l'amorçage du thème et celui de Matomo —
-  // sans ouvrir `script-src` à tout le reste.
+  // CSP nonce, produced per request in proxy.ts. It allows the document's only
+  // two inline scripts — the theme bootstrap and Matomo's — without opening
+  // `script-src` to everything else.
   const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (

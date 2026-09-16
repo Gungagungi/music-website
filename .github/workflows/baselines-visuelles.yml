@@ -1,22 +1,21 @@
 name: Régénérer les baselines visuelles
 
-# Les captures de référence appartiennent à l'environnement qui les compare.
+# Reference screenshots belong to the environment that compares against them.
 #
-# Une baseline produite sur un poste de développement et comparée dans le
-# container CI échoue systématiquement : les polices n'ont pas exactement les
-# mêmes métriques d'un système à l'autre, chaque mot se décale de quelques
-# pixels, et le diff atteint 6 % de l'image sans qu'aucune régression n'ait eu
-# lieu. Baisser le seuil de tolérance pour absorber l'écart reviendrait à rendre
-# la suite aveugle aux vraies régressions.
+# A baseline produced on a development machine and compared in the CI container
+# fails every time: fonts do not have exactly the same metrics from one system
+# to another, every word shifts by a few pixels, and the diff reaches 6 % of the
+# image without any regression having happened. Lowering the tolerance
+# threshold to absorb the gap would make the suite blind to real regressions.
 #
-# L'environnement de référence est donc le container CI — celui qui garde les
-# merges. Ce workflow y régénère les captures et les recommite sur la branche
-# choisie. À lancer après tout changement d'interface assumé.
+# The reference environment is therefore the CI container — the one that guards
+# merges. This workflow regenerates the screenshots there and commits them back
+# to the chosen branch. Run it after any intentional interface change.
 #
-#   Actions → Régénérer les baselines visuelles → Run workflow → choisir la branche
+#   Actions → Régénérer les baselines visuelles → Run workflow → pick the branch
 #
-# Puis relire le diff des PNG comme n'importe quel diff : une baseline acceptée
-# sans être regardée transforme la régression visuelle en formalité.
+# Then review the PNG diff like any other diff: a baseline accepted without
+# being looked at turns visual regression into a formality.
 on:
   workflow_dispatch:
 
@@ -38,8 +37,9 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
-    # Le projet `visual` dépend de `setup-db`, donc d'une base. Job conteneurisé :
-    # il la joint par le nom du service, pas par localhost.
+    # The `visual` project depends on `setup-db`, hence on a database.
+    # Containerised job: it reaches it by the service name, not through
+    # localhost.
     services:
       postgres:
         image: postgres:17-alpine
@@ -64,27 +64,27 @@ jobs:
 
       - run: npm ci
 
-      - name: Build de production
+      - name: Production build
         run: npm run build -w app
 
       - uses: ./.github/actions/preparer-base
         with:
           database-url: ${{ env.DATABASE_URL }}
 
-      - name: Régénérer les captures de référence
+      - name: Regenerate reference screenshots
         working-directory: e2e
         env:
           HOME: /root
         run: npx playwright test --project=visual --update-snapshots
 
-      - name: Publier les captures pour relecture
+      - name: Upload screenshots for review
         uses: actions/upload-artifact@v7
         with:
           name: baselines-visuelles
           path: e2e/tests/visual/__screenshots__
           retention-days: 14
 
-      - name: Commiter si les captures ont changé
+      - name: Commit if screenshots changed
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name  'github-actions[bot]'
@@ -92,15 +92,15 @@ jobs:
           git add e2e/tests/visual/__screenshots__
 
           if git diff --cached --quiet; then
-            echo "Aucune capture n'a changé : les baselines sont déjà à jour." >> "$GITHUB_STEP_SUMMARY"
+            echo "No screenshot changed: the baselines are already up to date." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
           {
-            echo "## 📸 Baselines mises à jour"
+            echo "## 📸 Baselines updated"
             echo ""
             git diff --cached --stat
           } >> "$GITHUB_STEP_SUMMARY"
 
-          git commit -m "test(visual): régénérer les baselines dans l'environnement CI"
+          git commit -m "test(visual): regenerate the baselines in the CI environment"
           git push origin "HEAD:${GITHUB_REF_NAME}"

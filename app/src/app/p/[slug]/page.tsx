@@ -51,8 +51,8 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8" data-testid="product-page" data-sku={product.sku}>
-      {/* Inerte sans tracker : les commandes empilées vers un `_paq` absent sont
-          ignorées (lib/analytics.ts). */}
+      {/* Inert without a tracker: commands pushed towards a missing `_paq` are
+          ignored (lib/analytics.ts). */}
       <TrackProductView
         sku={product.sku}
         name={`${product.brand} ${product.name}`}

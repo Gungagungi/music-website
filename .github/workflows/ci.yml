@@ -39,42 +39,42 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Vérification des types
+      - name: Type check
         run: npm run typecheck
 
-      # Deux secondes, aucune base : les seuls tests du dépôt qui parlent
-      # directement à une fonction. Ils tiennent l'arithmétique monétaire, que la
-      # suite Playwright ne peut éprouver qu'à travers un panier entier.
-      - name: Tests unitaires
+      # Two seconds, no database: the only tests in the repository that talk
+      # directly to a function. They hold the monetary arithmetic, which the
+      # Playwright suite can only exercise through a whole cart.
+      - name: Unit tests
         run: npm run test:unit
 
-      # La matrice et le CSV sont dérivés des annotations des specs. Sans cette
-      # garde, ils restent committés dans un état qui décrit une suite qui
-      # n'existe plus — pire qu'absents, puisqu'on continue de s'y fier.
-      - name: Vérifier la traçabilité générée
+      # The matrix and the CSV are derived from the specs' annotations. Without
+      # this guard, they stay committed in a state describing a suite that no
+      # longer exists — worse than missing, since people keep relying on them.
+      - name: Check generated traceability
         working-directory: e2e
         run: npm run trace:check
 
-      # Même règle que la matrice : la spécification est dérivée des schémas que
-      # la suite d'API valide, jamais rédigée à côté. Une spec qu'aucun test ne
-      # traverse décrit une intention, pas une API.
-      - name: Vérifier la spécification OpenAPI
+      # Same rule as the matrix: the specification is derived from the schemas
+      # the API suite validates, never written alongside. A spec no test goes
+      # through describes an intention, not an API.
+      - name: Check OpenAPI specification
         working-directory: e2e
         run: npm run openapi:check
 
-      # Une facette vide ne rend pas la suite rouge, elle la rend vide : TC-215
-      # itère sur les résultats du filtre, ce qui est vrai de toute liste vide.
-      # Le test resterait vert avec zéro couverture.
-      - name: Vérifier les invariants du catalogue
+      # An empty facet does not turn the suite red, it turns it empty: TC-215
+      # iterates over the filter's results, which holds true for any empty list.
+      # The test would stay green with zero coverage.
+      - name: Check catalogue invariants
         run: npm run check:catalog
 
-      - name: Build de production
+      - name: Production build
         run: npm run build
 
       # The application is built once and shared with every test job. Rebuilding
       # it six times would add minutes to the pipeline and, worse, let the jobs
       # disagree about what they are testing.
-      - name: Publier le build
+      - name: Upload the build
         uses: actions/upload-artifact@v7
         with:
           name: app-build
@@ -86,9 +86,9 @@ jobs:
     name: Tests API
     needs: qualite
     runs-on: ubuntu-latest
-    # Job sur le runner hôte : le service publie son port, on l'atteint par
-    # localhost. Les jobs conteneurisés plus bas passent au contraire par le nom
-    # du service — c'est la différence à ne pas confondre.
+    # Job on the host runner: the service publishes its port and is reached
+    # through localhost. The containerised jobs below go through the service
+    # name instead — that is the difference not to mix up.
     services:
       postgres:
         image: postgres:17-alpine
@@ -129,7 +129,7 @@ jobs:
       # `report.zip` for an unsharded run, so several jobs merging into one
       # directory would silently overwrite each other and the consolidated
       # report would be missing whole suites.
-      - name: Suite API
+      - name: API suite
         working-directory: e2e
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-api.zip
@@ -156,9 +156,9 @@ jobs:
 
       - run: npm ci
 
-      # Le seuil est à 100 % sur ce périmètre : le job échoue dès qu'un mutant
-      # survit. C'est ce qui distingue une mesure d'une garde — un score qu'on
-      # se contente de publier redescend sans que personne ne l'apprenne.
+      # The threshold is 100 % on this scope: the job fails as soon as a mutant
+      # survives. That is what separates a measurement from a gate — a score
+      # that is merely published drifts down without anyone finding out.
       - name: Mutants
         run: npm run test:mutation
 
@@ -176,9 +176,9 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
-    # Job conteneurisé : il partage le réseau des services, donc il joint la base
-    # par le nom du service (`postgres`) et non par localhost, qui désignerait ici
-    # le conteneur du job lui-même.
+    # Containerised job: it shares the services' network, so it reaches the
+    # database by the service name (`postgres`) and not through localhost, which
+    # here would refer to the job's own container.
     services:
       postgres:
         image: postgres:17-alpine
@@ -236,7 +236,7 @@ jobs:
         with:
           database-url: ${{ env.DATABASE_URL }}
 
-      - name: Suite UI
+      - name: UI suite
         working-directory: e2e
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-${{ matrix.project }}-${{ matrix.shard || 'all' }}.zip
@@ -262,7 +262,7 @@ jobs:
       # passed on retry, which is how a race survives three pipelines in a row.
       # `test-results` only holds artifacts for runs that failed at least once,
       # so a fully green job uploads nothing.
-      - name: Publier les traces (échecs et instables)
+      - name: Upload traces (failed and flaky)
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
@@ -309,7 +309,7 @@ jobs:
         with:
           database-url: ${{ env.DATABASE_URL }}
 
-      - name: Scans axe-core (WCAG 2.1 AA)
+      - name: axe-core scans (WCAG 2.1 AA)
         working-directory: e2e
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-a11y.zip
@@ -361,7 +361,7 @@ jobs:
         with:
           database-url: ${{ env.DATABASE_URL }}
 
-      - name: Comparaison aux baselines
+      - name: Compare against baselines
         working-directory: e2e
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-visual.zip
@@ -370,7 +370,7 @@ jobs:
 
       # The diff images are the whole point of a failed visual run: without them
       # the reviewer has a percentage and no way to judge it.
-      - name: Publier les différences visuelles
+      - name: Upload visual diffs
         if: failure()
         uses: actions/upload-artifact@v7
         with:
@@ -418,29 +418,29 @@ jobs:
           name: app-build
           path: app/.next
 
-      # Ce job ne lance pas le projet `setup-db`, donc rien ne repassera derrière
-      # pour charger le catalogue : les graines posées ici sont celles que k6
-      # mesure.
+      # This job does not run the `setup-db` project, so nothing will come
+      # along afterwards to load the catalogue: the seed data laid down here is
+      # what k6 measures.
       - uses: ./.github/actions/preparer-base
         with:
           database-url: ${{ env.DATABASE_URL }}
 
       - uses: grafana/setup-k6-action@v1
 
-      - name: Démarrer l’application
+      - name: Start the application
         run: |
           E2E_TEST_MODE=1 npm run start -w app &
           for _ in $(seq 1 60); do
             curl -sf http://localhost:3000/api/health >/dev/null && exit 0
             sleep 1
           done
-          echo "L’application n’a pas répondu dans le délai imparti." >&2
+          echo "The application did not respond within the time limit." >&2
           exit 1
 
-      - name: Smoke de charge (10 VU / 30 s)
+      - name: Load smoke test (10 VUs / 30 s)
         run: k6 run perf/smoke.js
 
-      - name: Ajouter le résumé au job
+      - name: Add the summary to the job
         if: ${{ !cancelled() }}
         run: cat perf/results/smoke.md >> "$GITHUB_STEP_SUMMARY"
 
@@ -486,7 +486,7 @@ jobs:
 
       # Rebuilt on purpose: one of the three defects lives in a client component,
       # so it is baked in at build time through NEXT_PUBLIC_SEED_BUGS.
-      - name: Build avec les défauts activés
+      - name: Build with defects enabled
         env:
           SEED_BUGS: '1'
           NEXT_PUBLIC_SEED_BUGS: '1'
@@ -496,7 +496,7 @@ jobs:
         with:
           database-url: ${{ env.DATABASE_URL }}
 
-      - name: La suite doit détecter les trois défauts
+      - name: The suite must detect all three defects
         id: detection
         continue-on-error: true
         working-directory: e2e
@@ -506,19 +506,19 @@ jobs:
           HOME: /root
         run: npx playwright test --project=chromium --grep @known-bug
 
-      - name: Vérifier que la détection a bien eu lieu
+      - name: Check that detection actually happened
         run: |
           if [ "${{ steps.detection.outcome }}" = "failure" ]; then
             {
-              echo "## ✅ Défauts détectés"
+              echo "## ✅ Defects detected"
               echo ""
-              echo "La suite a échoué comme prévu sur le build \`SEED_BUGS=1\` : les trois défauts délibérés sont bien détectés."
+              echo "The suite failed as expected on the \`SEED_BUGS=1\` build: all three deliberate defects are detected."
             } >> "$GITHUB_STEP_SUMMARY"
           else
             {
-              echo "## ❌ Défauts non détectés"
+              echo "## ❌ Defects not detected"
               echo ""
-              echo "La suite est passée au vert sur le build bogué : la couverture a régressé."
+              echo "The suite went green on the defective build: coverage has regressed."
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
@@ -526,68 +526,68 @@ jobs:
   deploiement:
     name: Image et pile de production
     runs-on: ubuntu-latest
-    # Indépendant de `qualite` : ce job ne consomme aucun artifact, il rebuild
-    # tout dans l'image. C'est le seul endroit où le Dockerfile, le compose et le
-    # Caddyfile sont exécutés avant un déploiement réel — sans lui, ils
-    # pourrissent en silence et on ne l'apprend qu'un soir de mise en ligne.
+    # Independent of `qualite`: this job consumes no artifact, it rebuilds
+    # everything inside the image. It is the only place where the Dockerfile,
+    # the compose file and the Caddyfile are executed before a real deployment —
+    # without it, they rot silently and nobody finds out until a release night.
     steps:
       - uses: actions/checkout@v7
 
-      # Par le générateur du dépôt, et non par un `openssl rand` recopié ici.
-      # La première version l'avait recopié en base64, dont l'alphabet contient
-      # `/` : ce caractère termine la section d'autorité de DATABASE_URL, et le
-      # job échouait environ une fois sur trois. La règle « ce mot de passe doit
-      # traverser une URL » vit dans un seul fichier ; ce job doit la lire là.
-      - name: Configurer la pile
+      # Through the repository's generator, not an `openssl rand` copied here.
+      # The first version copied it in base64, whose alphabet contains `/`: that
+      # character ends DATABASE_URL's authority section, and the job failed
+      # about one time in three. The rule "this password must go through a URL"
+      # lives in a single file; this job must read it there.
+      - name: Configure the stack
         run: |
           node scripts/preparer-env.mjs --production --domain=:80
           cp .env.production .env
 
-      - name: Construire l’image et démarrer la pile
+      - name: Build the image and start the stack
         run: docker compose up -d --build
 
-      - name: Attendre que le site réponde
+      - name: Wait for the site to respond
         run: |
           for _ in $(seq 1 90); do
             curl -sf http://localhost/api/health >/dev/null && exit 0
             sleep 2
           done
-          echo "La pile n’a pas répondu dans le délai imparti." >&2
+          echo "The stack did not respond within the time limit." >&2
           exit 1
 
-      # Les mêmes vérifications que celles lancées après un déploiement réel, sur
-      # les mêmes artefacts. La plus importante est que /api/test/* réponde 404 :
-      # ces routes effacent la base, et rien dans l'interface ne signale qu'elles
-      # sont ouvertes.
+      # The same checks as those run after a real deployment, on the same
+      # artefacts. The most important one is that /api/test/* answers 404: these
+      # routes wipe the database, and nothing in the interface signals that they
+      # are open.
       #
-      # Sans argument, plutôt que http://localhost codé en dur : le script dérive
-      # l'URL de FRETLINE_DOMAIN dans .env.production, généré juste au-dessus
-      # avec --domain=:80. Un appel en dur donnait le même résultat aujourd'hui,
-      # mais pour une raison que rien ne garantissait — changer le domaine à
-      # l'étape « Configurer la pile » sans toucher celle-ci aurait vérifié la
-      # mauvaise URL en silence.
-      - name: Vérifications post-déploiement
+      # Without an argument, rather than a hard-coded http://localhost: the
+      # script derives the URL from FRETLINE_DOMAIN in .env.production, generated
+      # just above with --domain=:80. A hard-coded call gave the same result
+      # today, but for a reason nothing guaranteed — changing the domain in the
+      # "Configure the stack" step without touching this one would have checked
+      # the wrong URL silently.
+      - name: Post-deployment checks
         run: ./scripts/verifier-deploiement.sh
 
-      # La commande est celle du service `migrate`, relancée à la main : elle doit
-      # être rejouable sans effet, sinon toute mise à jour du site est un pari.
-      - name: La préparation de base doit être rejouable
+      # The command is the `migrate` service's, run again by hand: it must be
+      # replayable with no effect, otherwise every site update is a gamble.
+      - name: Database preparation must be replayable
         run: |
           docker compose run --rm migrate 2>&1 | tee /tmp/rejeu.log
-          grep -q 'base déjà peuplée' /tmp/rejeu.log
+          grep -q 'database already populated' /tmp/rejeu.log
 
-      # REQ-DATA-05. La seule vérification que la suite Playwright ne peut pas
-      # porter — elle ne peut pas redémarrer le serveur auquel elle parle — et
-      # celle qui justifie toute la migration : une commande passée avant l'arrêt
-      # doit se relire après.
-      - name: Les données doivent survivre à un arrêt complet
+      # REQ-DATA-05. The only check the Playwright suite cannot carry — it cannot
+      # restart the server it is talking to — and the one that justifies the
+      # whole migration: an order placed before the shutdown must be readable
+      # after it.
+      - name: Data must survive a full shutdown
         run: ./scripts/verifier-persistance.sh http://localhost
 
-      - name: Journaux de la pile
+      - name: Stack logs
         if: failure()
         run: docker compose logs --no-color --tail=200
 
-      - name: Arrêter la pile
+      - name: Stop the stack
         if: always()
         run: docker compose down --volumes
 
@@ -604,7 +604,7 @@ jobs:
           cache: npm
       - run: npm ci
 
-      - name: Récupérer les rapports partiels
+      - name: Download partial reports
         uses: actions/download-artifact@v8
         with:
           pattern: blob-*
@@ -618,11 +618,11 @@ jobs:
       # container (checkout at /__w/...) and half from the runner host
       # (/home/runner/work/...), and merge-reports refuses two testDirs unless
       # a config names the canonical one.
-      - name: Fusionner en un rapport unique
+      - name: Merge into a single report
         working-directory: e2e
         run: npx playwright merge-reports -c merge.config.ts ./all-blobs
 
-      - name: Publier le rapport HTML
+      - name: Upload the HTML report
         uses: actions/upload-artifact@v7
         with:
           name: rapport-playwright

@@ -2,13 +2,13 @@ import { expect, test } from '@/fixtures/test-fixtures';
 import { TAGS, covers, testCase } from '@/utils/tags';
 
 /**
- * Verrou sur la garde du tracker (app/src/app/layout.tsx).
+ * Lock on the tracker guard (app/src/app/layout.tsx).
  *
- * La suite bloque déjà les requêtes vers Matomo au niveau du contexte
- * (fixtures/test-fixtures.ts), donc rien ne casserait visiblement si la garde
- * disparaissait : les tests continueraient de passer, et la protection se
- * réduirait au filet, silencieusement. Cette spec regarde le HTML servi, pas le
- * réseau — c'est le seul endroit où la disparition de la garde se voit.
+ * The suite already blocks requests to Matomo at the context level
+ * (fixtures/test-fixtures.ts), so nothing would visibly break if the guard
+ * disappeared: the tests would keep passing, and the protection would shrink
+ * to the safety net, silently. This spec looks at the served HTML, not the
+ * network — it is the only place where the guard's disappearance shows.
  */
 test.describe('Mesure d’audience', () => {
   test(

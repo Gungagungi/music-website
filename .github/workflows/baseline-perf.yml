@@ -1,22 +1,22 @@
 name: Mesurer la baseline de performance
 
-# Les seuils appartiennent à la machine qui les compare.
+# Thresholds belong to the machine that compares against them.
 #
-# Ceux de ce dépôt ont d'abord été calés sur un VPS — celle de qui les a écrits.
-# Un runner GitHub partagé est plus lent et surtout plus variable : un seuil venu
-# d'ailleurs y devient soit trop large pour rien détecter, soit trop serré pour
-# survivre au voisinage. Le README le disait sans détour, en le rangeant parmi
-# les limites assumées.
+# This repository's were first tuned on a VPS — the one of whoever wrote them.
+# A shared GitHub runner is slower and above all more variable: a threshold
+# brought in from elsewhere becomes either too loose to detect anything, or too
+# tight to survive the neighbours. The README said so plainly, listing it among
+# the accepted limitations.
 #
-# Ce workflow mesure sur le runner, écrit `perf/baseline.json` et le recommite —
-# le même principe que les baselines visuelles, appliqué à des millisecondes
-# plutôt qu'à des pixels.
+# This workflow measures on the runner, writes `perf/baseline.json` and commits
+# it back — the same principle as the visual baselines, applied to milliseconds
+# rather than pixels.
 #
-#   Actions → Mesurer la baseline de performance → Run workflow → choisir la branche
+#   Actions → Mesurer la baseline de performance → Run workflow → pick the branch
 #
-# À relancer quand la machine change (image du runner, version de PostgreSQL),
-# pas à chaque changement de code : une baseline reprise à chaque commit
-# entérine la lenteur qu'elle est censée détecter.
+# Rerun it when the machine changes (runner image, PostgreSQL version), not on
+# every code change: a baseline retaken on every commit endorses the slowness it
+# is meant to detect.
 on:
   workflow_dispatch:
 
@@ -61,7 +61,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Build de production
+      - name: Production build
         run: npm run build
 
       - uses: ./.github/actions/preparer-base
@@ -70,35 +70,35 @@ jobs:
 
       - uses: grafana/setup-k6-action@v1
 
-      - name: Démarrer l’application
+      - name: Start the application
         run: |
           E2E_TEST_MODE=1 npm run start -w app &
           for _ in $(seq 1 60); do
             curl -sf http://localhost:3000/api/health >/dev/null && exit 0
             sleep 1
           done
-          echo "L’application n’a pas répondu dans le délai imparti." >&2
+          echo "The application did not respond within the time limit." >&2
           exit 1
 
-      # Un tour à blanc avant de mesurer. Les premières secondes d'un processus
-      # Next fraîchement démarré paient le remplissage du pool et la compilation
-      # des plans de requête ; les inclure calerait la baseline sur un état que
-      # l'application ne connaît qu'une fois.
-      - name: Préchauffer
+      # A dry run before measuring. The first seconds of a freshly started Next
+      # process pay for filling the pool and compiling query plans; including
+      # them would pin the baseline to a state the application only goes
+      # through once.
+      - name: Warm up
         run: K6_CALIBRATION=1 k6 run --vus 5 --duration 15s perf/smoke.js
 
-      - name: Mesurer le smoke
+      - name: Measure the smoke test
         run: K6_CALIBRATION=1 k6 run perf/smoke.js
 
-      - name: Mesurer la montée en charge
+      - name: Measure the load ramp-up
         run: K6_CALIBRATION=1 k6 run perf/load.js
 
-      - name: Enregistrer la baseline
+      - name: Record the baseline
         env:
-          RUNNER_DESCRIPTION: ${{ runner.os }} · ${{ runner.arch }} · runner GitHub hébergé
+          RUNNER_DESCRIPTION: ${{ runner.os }} · ${{ runner.arch }} · GitHub-hosted runner
         run: node scripts/enregistrer-baseline.mjs smoke load
 
-      - name: Publier les résumés pour relecture
+      - name: Upload the summaries for review
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
@@ -106,24 +106,24 @@ jobs:
           path: perf/results
           retention-days: 14
 
-      - name: Commiter si la baseline a changé
+      - name: Commit if the baseline changed
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add perf/baseline.json
 
           if git diff --cached --quiet; then
-            echo "La baseline est inchangée." >> "$GITHUB_STEP_SUMMARY"
+            echo "The baseline is unchanged." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
           {
-            echo "## 📈 Baseline de performance mise à jour"
+            echo "## 📈 Performance baseline updated"
             echo ""
             echo '```diff'
             git diff --cached -- perf/baseline.json
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-          git commit -m "perf: mesurer la baseline sur le runner CI"
+          git commit -m "perf: measure the baseline on the CI runner"
           git push origin "HEAD:${GITHUB_REF_NAME}"

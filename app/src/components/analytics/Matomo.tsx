@@ -4,34 +4,34 @@ import { Suspense } from 'react';
 import { SuiviDeNavigation } from './SuiviDeNavigation';
 
 /**
- * Adresse de l'instance Matomo et identifiant du site, tous deux figés au build.
+ * Matomo instance address and site ID, both frozen at build time.
  *
- * `NEXT_PUBLIC_*` n'est pas lu à l'exécution : Next remplace l'expression par sa
- * valeur pendant `next build`. Changer l'URL ou le siteId impose donc de
- * reconstruire l'image (`docker compose up -d --build`), pas de redémarrer le
- * conteneur — même piège que NEXT_PUBLIC_SEED_BUGS. C'est la raison pour
- * laquelle l'expression est écrite en toutes lettres ici : un accès indirect
- * (`process.env[nom]`) ne serait pas substitué et vaudrait toujours undefined.
+ * `NEXT_PUBLIC_*` is not read at run time: Next replaces the expression with its
+ * value during `next build`. Changing the URL or the siteId therefore requires
+ * rebuilding the image (`docker compose up -d --build`), not restarting the
+ * container — the same trap as NEXT_PUBLIC_SEED_BUGS. That is why the
+ * expression is spelled out in full here: an indirect access
+ * (`process.env[nom]`) would not be substituted and would always be undefined.
  */
 const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL;
 const MATOMO_SITE_ID = process.env.NEXT_PUBLIC_MATOMO_SITE_ID;
 
-/** Garantit l'unique barre oblique finale attendue par matomo.js. */
+/** Guarantees the single trailing slash matomo.js expects. */
 function baseUrl(url: string): string {
   return url.endsWith('/') ? url : `${url}/`;
 }
 
 /**
- * Tracker Matomo, sans cookie.
+ * Cookieless Matomo tracker.
  *
- * `disableCookies` avant tout le reste : c'est ce qui dispense d'un bandeau de
- * consentement (l'anonymisation des adresses IP, elle, se règle côté serveur
- * Matomo, où le visiteur ne peut pas la contourner). Les deux réglages vont
- * ensemble — activer l'un sans l'autre ne rend pas la mesure exempte.
+ * `disableCookies` before anything else: that is what makes a consent banner
+ * unnecessary (IP anonymisation, for its part, is configured on the Matomo
+ * server side, where the visitor cannot bypass it). The two settings go
+ * together — enabling one without the other does not make the tracking exempt.
  *
- * Le composant ne rend rien tant que la configuration est absente : un
- * développement local n'a pas d'instance Matomo en face, et une requête vers un
- * hôte injoignable à chaque navigation n'apprendrait rien à personne.
+ * The component renders nothing as long as the configuration is missing: a
+ * local development setup has no Matomo instance behind it, and a request to an
+ * unreachable host on every navigation would teach nobody anything.
  */
 export function Matomo({ nonce }: { nonce?: string }) {
   if (!MATOMO_URL || !MATOMO_SITE_ID) return null;
@@ -41,31 +41,30 @@ export function Matomo({ nonce }: { nonce?: string }) {
   return (
     <>
       {/*
-        L'amorçage se PRÉFIXE à la file au lieu de l'alimenter, et c'est tout
-        l'intérêt de ce composant.
+        The bootstrap PREPENDS itself to the queue instead of feeding it, and
+        that is the whole point of this component.
 
-        Deux populations empilent dans `_paq` sans se connaître : cet extrait,
-        qui porte les réglages, et les effets des composants, qui portent les
-        vues et les événements e-commerce. Aucun ordre d'exécution ne peut être
-        garanti entre les deux — `afterInteractive` place l'extrait après
-        l'hydratation, donc après les effets. Un simple `push` laisserait alors
-        `disableCookies` derrière la première vue de page, et cette vue-là
-        serait enregistrée avec cookie : la promesse de dispense de bandeau
-        tombe sur la première page de chaque visite.
+        Two populations push into `_paq` without knowing about each other: this
+        snippet, which carries the settings, and component effects, which carry
+        page views and e-commerce events. No execution order can be guaranteed
+        between the two — `afterInteractive` places the snippet after hydration,
+        hence after the effects. A plain `push` would then leave
+        `disableCookies` behind the first page view, and that view would be
+        recorded with a cookie: the promise of no banner breaks on the first
+        page of every visit.
 
-        Préfixer rend la question sans objet. Les réglages passent devant quoi
-        que ce soit qui attendait déjà, matomo.js vide la file dans l'ordre à son
-        arrivée, et plus personne n'a à savoir qui s'est exécuté en premier.
+        Prepending makes the question moot. The settings go ahead of whatever
+        was already waiting, matomo.js drains the queue in order on arrival,
+        and nobody has to know who ran first any more.
 
-        Deux autres pistes ont été essayées et écartées, chacune pour une raison
-        qui ne se voit qu'à l'exécution. `beforeInteractive` est rangé par Next
-        dans sa file `__next_s` et ne s'exécute jamais dans l'App Router. Une
-        balise <script> inline rendue par React casse l'hydratation
-        (`aB.apply is not a function`) : le HTML servi reste impeccable, et la
-        page perd toute interactivité.
+        Two other approaches were tried and discarded, each for a reason that
+        only shows at run time. `beforeInteractive` is filed by Next into its
+        `__next_s` queue and never runs in the App Router. An inline <script>
+        tag rendered by React breaks hydration (`aB.apply is not a function`):
+        the served HTML stays flawless, and the page loses all interactivity.
 
-        Aucun `trackPageView` ici : SuiviDeNavigation l'émet, pour la première
-        vue comme pour les suivantes.
+        No `trackPageView` here: SuiviDeNavigation emits it, for the first view
+        as for the following ones.
       */}
       <Script id="matomo-init" strategy="afterInteractive" nonce={nonce}>
         {`

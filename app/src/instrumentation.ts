@@ -12,10 +12,10 @@
  * running them at boot would have every replica migrate concurrently the day
  * there is more than one.
  *
- * Ce module doit rester exempt d'API Node.js : Next le compile aussi pour le
- * runtime edge et l'analyse statiquement, donc un `process.exit` écrit ici est
- * signalé même sous un garde d'exécution. Le travail est dans
- * `instrumentation-node.ts`, atteint par un `import()` conditionnel.
+ * This module must stay free of Node.js APIs: Next also compiles it for the edge
+ * runtime and analyses it statically, so a `process.exit` written here is
+ * flagged even behind a run-time guard. The work lives in
+ * `instrumentation-node.ts`, reached through a conditional `import()`.
  */
 export async function register(): Promise<void> {
   // `register()` also runs on the edge runtime, where none of this applies.

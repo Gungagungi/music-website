@@ -1,18 +1,18 @@
-# Audit de sécurité récurrent — voir scripts/audit-securite.py
+# Recurring security audit — see scripts/audit-securite.py
 #
-# Installation :
+# Installation:
 #   sudo cp scripts/systemd/audit-securite.* /etc/systemd/system/
 #   sudo systemctl daemon-reload
 #   sudo systemctl enable --now audit-securite.timer
 #
-# L'unité tourne sous le compte `debian` et non sous root : elle a besoin du
-# groupe docker (trivy interroge le démon) et de `sudo -n` pour les deux seules
-# lectures privilégiées dont elle dépend, `sshd -T` et `nft list ruleset`. Lui
-# donner root entier pour ces deux commandes serait payer très cher un audit
-# qui, par définition, ne modifie rien.
+# The unit runs as the `debian` account, not as root: it needs the docker group
+# (trivy queries the daemon) and `sudo -n` for the only two privileged reads it
+# depends on, `sshd -T` and `nft list ruleset`. Granting it full root for those
+# two commands would be paying a very high price for an audit that, by
+# definition, changes nothing.
 
 [Unit]
-Description=Audit de sécurité Fretline (hôte, images, fin de support, dépôt, cible publique)
+Description=Fretline security audit (host, images, end of support, repository, public target)
 Documentation=file:/home/debian/dev/pro/music-website/docs/security.md
 After=network-online.target docker.service
 Wants=network-online.target
@@ -24,23 +24,24 @@ Group=debian
 SupplementaryGroups=docker
 WorkingDirectory=/home/debian/dev/pro/music-website
 
-# La cible est lue depuis .env.production plutôt que codée ici : le domaine y
-# est déjà, et deux copies d'une même adresse finissent toujours par diverger.
+# The target is read from .env.production rather than hard-coded here: the
+# domain is already there, and two copies of the same address always end up
+# diverging.
 EnvironmentFile=/home/debian/dev/pro/music-website/.env.production
 
-# Le rapport JSON est horodaté et conservé ; `dernier.json` pointe toujours sur
-# la dernière exécution, pour qu'un contrôle externe n'ait pas à deviner un nom.
+# The JSON report is timestamped and kept; `dernier.json` always points to the
+# latest run, so that an external check does not have to guess a name.
 #
-# La notification est enchaînée ici et non en `ExecStartPost=`, ce qui serait
-# pourtant sa place naturelle. systemd n'exécute pas les `ExecStartPost` quand
-# `ExecStart` sort en erreur — or l'audit sort en 1 exactement quand un constat
-# dépasse le seuil, c'est-à-dire dans le seul cas qui mérite d'alerter. La
-# notification n'aurait jamais été envoyée que les jours où tout allait bien.
+# The notification is chained here and not as `ExecStartPost=`, which would
+# nevertheless be its natural place. systemd does not run `ExecStartPost` when
+# `ExecStart` exits with an error — and the audit exits with 1 precisely when a
+# finding exceeds the threshold, that is, in the only case worth alerting on.
+# The notification would only ever have been sent on days when all was well.
 #
-# Le `|| true` garde la même logique dans l'autre sens : c'est le code de
-# l'audit, préservé dans $$CODE, qui décide de l'état de l'unité. Un serveur de
-# notifications éteint est un incident d'exploitation, pas un verdict de
-# sécurité, et il ne doit ni faire rougir ni faire verdir cette unité.
+# The `|| true` keeps the same logic the other way round: the audit's exit
+# code, preserved in $$CODE, decides the unit's state. A notification server
+# that is down is an operations incident, not a security verdict, and it must
+# neither turn this unit red nor green.
 ExecStart=/bin/sh -c '\
   REP="$${HOME}/.local/share/audit-securite"; \
   mkdir -p "$$REP"; \
@@ -55,24 +56,22 @@ ExecStart=/bin/sh -c '\
   /home/debian/dev/pro/music-website/scripts/notifier-audit.py --rapports "$$REP" || true; \
   exit $$CODE'
 
-# Le scan nuclei est bridé à 20 requêtes par seconde mais parcourt plus de
-# treize mille modèles : une heure est large, et la borne existe surtout pour
-# qu'une exécution bloquée ne recouvre pas la suivante.
+# The nuclei scan is throttled to 20 requests per second but goes through more
+# than thirteen thousand templates: one hour is generous, and the bound mostly
+# exists so that a stuck run does not overlap the next one.
 TimeoutStartSec=3600
 
-# L'audit ne modifie rien du système : il lit des fichiers, interroge des
-# services et émet des requêtes HTTP. Il écrit en revanche beaucoup dans le
-# home — son rapport, mais aussi les caches de trivy (base de CVE), de nuclei
-# et de npm.
+# The audit changes nothing on the system: it reads files, queries services and
+# sends HTTP requests. It does, however, write a lot into the home directory —
+# its report, but also the caches of trivy (CVE database), nuclei and npm.
 #
-# D'où `ProtectSystem=full` et non `strict`. `strict` passe le home entier en
-# lecture seule et exige que chaque chemin de `ReadWritePaths` existe déjà au
-# démarrage : l'unité échouait en 226/NAMESPACE avant même d'exécuter quoi que
-# ce soit, parce que le répertoire de rapports n'était pas encore créé. Énumérer
-# à la place les quatre caches serait une liste à tenir à jour au rythme des
-# outils, pour un durcissement qui ne protège pas grand-chose de plus : /usr,
-# /boot et /etc restent en lecture seule dans les deux cas, et c'est là que se
-# trouve ce qu'un audit ne doit jamais pouvoir modifier.
+# Hence `ProtectSystem=full` and not `strict`. `strict` makes the whole home
+# read-only and requires every `ReadWritePaths` entry to already exist at
+# startup: the unit failed with 226/NAMESPACE before running anything, because
+# the reports directory had not been created yet. Listing the four caches
+# instead would be a list to maintain at the pace of the tools, for hardening
+# that protects little more: /usr, /boot and /etc stay read-only in both cases,
+# and that is where what an audit must never be able to modify lives.
 PrivateTmp=true
 ProtectSystem=full
 ProtectKernelTunables=true
@@ -80,8 +79,8 @@ ProtectControlGroups=true
 RestrictSUIDSGID=true
 RestrictRealtime=true
 
-# Un échec est attendu et informatif : il signifie qu'un constat a dépassé le
-# seuil. `systemctl status audit-securite` et le journal le montrent, ce qui
-# suffit sur une machine à un seul opérateur.
+# A failure is expected and informative: it means a finding exceeded the
+# threshold. `systemctl status audit-securite` and the journal show it, which is
+# enough on a single-operator machine.
 StandardOutput=journal
 StandardError=journal

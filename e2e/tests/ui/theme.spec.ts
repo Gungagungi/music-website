@@ -4,13 +4,13 @@ import { expect, test } from '@/fixtures/test-fixtures';
 import { TAGS, covers, testCase } from '@/utils/tags';
 
 /**
- * Thème d'affichage : détection de l'appareil, cycle manuel, retour au suivi.
+ * Display theme: device detection, manual cycle, return to following the device.
  *
- * Les assertions portent sur la couleur **calculée** du corps de page plutôt
- * que sur une classe ou un attribut. C'est ce qui distingue « le thème est
- * demandé » de « le thème est appliqué » : l'attribut peut être posé sans que
- * la cascade suive, et c'est exactement ce qui se produirait si un token
- * sémantique perdait sa branche sombre.
+ * The assertions target the page body's **computed** colour rather than a class
+ * or an attribute. That is what separates "the theme is requested" from "the
+ * theme is applied": the attribute can be set without the cascade following,
+ * and that is exactly what would happen if a semantic token lost its dark
+ * branch.
  */
 const FOND = {
   clair: 'rgb(245, 247, 250)',
@@ -39,8 +39,8 @@ test.describe('Thème d’affichage', () => {
 
         expect(await fondDePage(page)).toBe(FOND.clair);
         expect(await homePage.header.themeMode()).toBe('Système');
-        // Rien n'a été choisi : la page ne doit porter aucun verrou de thème,
-        // sinon elle cesserait de suivre l'appareil s'il changeait d'avis.
+        // Nothing has been chosen: the page must carry no theme lock, otherwise
+        // it would stop following the device if the device changed its mind.
         await expect(page.locator('html')).not.toHaveAttribute('data-theme');
       },
     );
@@ -70,9 +70,9 @@ test.describe('Thème d’affichage', () => {
         await expect(html).toHaveAttribute('data-theme', 'dark');
         expect(await fondDePage(page)).toBe(FOND.sombre);
 
-        // Le cas qui manquait à la première version : sans ce troisième cran,
-        // un visiteur ayant touché le bouton une fois ne pouvait plus revenir
-        // au suivi de son appareil autrement qu'en vidant son stockage.
+        // The case the first version was missing: without this third step, a
+        // visitor who had touched the button once could no longer return to
+        // following their device other than by clearing their storage.
         await homePage.header.cycleTheme();
         expect(await homePage.header.themeMode()).toBe('Système');
         await expect(html).not.toHaveAttribute('data-theme');
@@ -91,8 +91,8 @@ test.describe('Thème d’affichage', () => {
       },
       async ({ homePage, cartPage, page }) => {
         await homePage.open();
-        await homePage.header.cycleTheme(); // clair
-        await homePage.header.cycleTheme(); // sombre
+        await homePage.header.cycleTheme(); // light
+        await homePage.header.cycleTheme(); // dark
 
         await cartPage.open();
 
@@ -116,9 +116,9 @@ test.describe('Thème d’affichage', () => {
 
         await cartPage.open();
 
-        // Un cycle complet doit ramener à l'état initial, y compris dans le
-        // stockage : un « system » mémorisé comme valeur serait indiscernable
-        // d'un choix explicite au prochain chargement.
+        // A full cycle must bring back the initial state, storage included: a
+        // "system" stored as a value would be indistinguishable from an explicit
+        // choice on the next load.
         await expect(page.locator('html')).not.toHaveAttribute('data-theme');
         expect(await page.evaluate(() => localStorage.getItem('fretline-theme'))).toBeNull();
         expect(await homePage.header.themeMode()).toBe('Système');
@@ -136,15 +136,15 @@ test.describe('Thème d’affichage', () => {
       },
       async ({ homePage, page, context }) => {
         await homePage.open();
-        await homePage.header.cycleTheme(); // clair
-        await homePage.header.cycleTheme(); // sombre
+        await homePage.header.cycleTheme(); // light
+        await homePage.header.cycleTheme(); // dark
 
-        // Le défaut visé est un scintillement : la page apparaît dans le mauvais
-        // thème, puis se corrige. Une assertion prise après le chargement ne le
-        // verrait pas — le thème finit toujours par être bon. Couper les scripts
-        // de l'application rend la question décidable : ce qui reste ne peut
-        // avoir été fait que par l'amorçage en tête de document, c'est-à-dire
-        // avant la première peinture. La feuille de style, elle, passe.
+        // The defect targeted is a flash: the page appears in the wrong theme,
+        // then corrects itself. An assertion taken after loading would not see
+        // it — the theme always ends up right. Cutting off the application's
+        // scripts makes the question decidable: whatever remains can only have
+        // been done by the bootstrap at the head of the document, that is,
+        // before first paint. The stylesheet, for its part, goes through.
         await context.route(/\/_next\/static\/.*\.js$/, (route) => route.abort());
         await page.goto('/panier');
 
@@ -187,13 +187,12 @@ test.describe('Thème d’affichage', () => {
       },
       async ({ homePage, page }) => {
         await homePage.open();
-        await homePage.header.cycleTheme(); // clair, à rebours de l'appareil
+        await homePage.header.cycleTheme(); // light, against the device
 
         expect(await fondDePage(page)).toBe(FOND.clair);
 
-        // Un rechargement complet : c'est le cas que la seule bascule en
-        // mémoire ne couvre pas, puisque le thème est alors reconstruit depuis
-        // le stockage par le script d'amorçage.
+        // A full reload: the case an in-memory toggle alone does not cover,
+        // since the theme is then rebuilt from storage by the bootstrap script.
         await page.reload();
         await homePage.waitForHydration();
 

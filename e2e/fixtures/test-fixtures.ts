@@ -63,14 +63,14 @@ interface Fixtures {
 
 export const test = base.extend<Fixtures>({
   /**
-   * Filet de sécurité : rien ne part vers Matomo depuis la suite.
+   * Safety net: nothing goes out to Matomo from the suite.
    *
-   * La vraie protection est côté serveur — le layout n'émet pas la balise quand
-   * `E2E_TEST_MODE=1` — et cette fixture ne fait que doubler la mise. C'est
-   * délibéré : le jour où la garde régresse, les tests ne doivent pas se mettre
-   * à dépendre d'un hôte tiers joignable, sinon la panne se présentera comme de
-   * l'instabilité réseau. `tests/ui/analytics.spec.ts` reste chargée de
-   * constater la disparition de la garde elle-même.
+   * The real protection is server-side — the layout does not emit the tag when
+   * `E2E_TEST_MODE=1` — and this fixture only doubles up on it. That is
+   * deliberate: the day the guard regresses, the tests must not start depending
+   * on a reachable third-party host, otherwise the outage will present itself as
+   * network flakiness. `tests/ui/analytics.spec.ts` remains in charge of
+   * noticing that the guard itself has gone.
    */
   context: async ({ context }, use) => {
     await context.route('**/matomo.{js,php}*', (route) => route.abort());
@@ -139,7 +139,7 @@ export const test = base.extend<Fixtures>({
         await client.addToCartAndTrack({ quantity: 1, ...item });
       }
       const cartId = client.currentCartId;
-      if (!cartId) throw new Error('Aucun panier créé : la liste d’articles était vide.');
+      if (!cartId) throw new Error('No cart created: the list of items was empty.');
 
       await context.addCookies([
         { name: 'fretline_cart', value: cartId, url: BASE_URL, httpOnly: true, sameSite: 'Lax' },
@@ -152,7 +152,7 @@ export const test = base.extend<Fixtures>({
 async function tokenFor(request: APIRequestContext, email: string, password: string): Promise<string> {
   const response = await new ApiClient(request).login({ email, password });
   if (response.status() !== 200) {
-    throw new Error(`Connexion impossible pour ${email} : HTTP ${response.status()}`);
+    throw new Error(`Login failed for ${email}: HTTP ${response.status()}`);
   }
   const body = (await response.json()) as { token: string };
   return body.token;

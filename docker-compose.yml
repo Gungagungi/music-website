@@ -1,25 +1,25 @@
-# Déploiement complet : PostgreSQL, l'application, un reverse proxy, la purge
-# des paniers et la mesure d'audience. Prévu pour un VPS unique.
+# Full deployment: PostgreSQL, the application, a reverse proxy, the cart purge
+# and analytics. Designed for a single VPS.
 #
 #   cp .env.production.example .env
-#   $EDITOR .env                    # au minimum FRETLINE_DOMAIN, POSTGRES_PASSWORD,
+#   $EDITOR .env                    # at least FRETLINE_DOMAIN, POSTGRES_PASSWORD,
 #                                   AUTH_SECRET, MATOMO_DB_PASSWORD
 #   docker compose up -d --build
-#   ./scripts/verifier-deploiement.sh https://exemple.fr
+#   ./scripts/verifier-deploiement.sh https://example.com
 #
-# Sur une machine de développement, ce `.env` entrerait en collision avec celui
-# de la suite de tests. Utiliser alors `npm run prod:up`, qui passe
-# `--env-file .env.production` — voir docs/deployment.md.
+# On a development machine, this `.env` would collide with the test suite's
+# own. Use `npm run prod:up` instead, which passes
+# `--env-file .env.production` — see docs/deployment.md.
 #
-# Aucune variable de mode test n'est définie ici, et c'est la première des trois
-# gardes qui rendent /api/test/{reset,seed,state} inatteignables : sans
-# E2E_TEST_MODE, ces routes répondent 404 avant même de regarder le jeton.
+# No test-mode variable is defined here, and that is the first of the three
+# guards that make /api/test/{reset,seed,state} unreachable: without
+# E2E_TEST_MODE, these routes answer 404 before even looking at the token.
 
-# Nom de projet explicite. Sans lui, Compose le dérive du dossier — le même pour
-# les deux fichiers de ce dépôt — et rapproche les services par leur nom : le
-# `db` de production venait alors recréer le conteneur PostgreSQL de
-# développement, en silence, à la première commande. Deux noms distincts donnent
-# deux jeux de conteneurs, de volumes et de réseaux qui s'ignorent.
+# Explicit project name. Without it, Compose derives it from the directory — the
+# same for both files in this repository — and matches services by name: the
+# production `db` would then silently recreate the development PostgreSQL
+# container on the first command. Two distinct names give two sets of
+# containers, volumes and networks that ignore each other.
 name: fretline
 
 x-app: &app
@@ -31,8 +31,8 @@ x-app: &app
       NEXT_PUBLIC_MATOMO_SITE_ID: ${NEXT_PUBLIC_MATOMO_SITE_ID:-}
   image: fretline-app:latest
   environment:
-    DATABASE_URL: postgresql://${POSTGRES_USER:-fretline}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire}@db:5432/${POSTGRES_DB:-fretline}
-    AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET est obligatoire — openssl rand -base64 48}
+    DATABASE_URL: postgresql://${POSTGRES_USER:-fretline}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-fretline}
+    AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required — openssl rand -base64 48}
   restart: unless-stopped
 
 services:
@@ -41,13 +41,13 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-fretline}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est obligatoire}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:-fretline}
       POSTGRES_INITDB_ARGS: '--data-checksums'
     volumes:
       - pgdata:/var/lib/postgresql/data
-    # Aucun port publié : seuls les conteneurs du réseau compose atteignent la
-    # base. Les sauvegardes passent par `docker compose exec`, pas par le réseau.
+    # No published port: only containers on the compose network reach the
+    # database. Backups go through `docker compose exec`, not the network.
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-fretline} -d ${POSTGRES_DB:-fretline}']
       interval: 10s
@@ -55,18 +55,18 @@ services:
       retries: 5
       start_period: 10s
 
-  # Service à usage unique : migre, puis charge le catalogue si la base est
-  # vierge. L'application attend qu'il ait terminé avec succès. Les migrations ne
-  # tournent pas au démarrage de l'app, sinon deux répliques les appliqueraient
-  # en concurrence le jour où il y en a deux.
+  # One-shot service: migrates, then loads the catalogue if the database is
+  # empty. The application waits for it to complete successfully. Migrations do
+  # not run on app startup, otherwise two replicas would apply them
+  # concurrently the day there are two.
   migrate:
     <<: *app
     command: ['node', 'app/dist/db/bootstrap.mjs']
     restart: 'no'
-    # Le HEALTHCHECK de l'image interroge le serveur HTTP, que ce conteneur ne
-    # lance pas. Sans cette exclusion il resterait éternellement `unhealthy` — un
-    # état faux qui apprend à ne plus regarder la colonne, et qui ferait tourner
-    # `docker compose up --wait` jusqu'à son délai.
+    # The image HEALTHCHECK queries the HTTP server, which this container does
+    # not start. Without this exclusion it would stay `unhealthy` forever — a
+    # false state that teaches people to stop looking at the column, and that
+    # would keep `docker compose up --wait` spinning until its timeout.
     healthcheck:
       disable: true
     depends_on:
@@ -95,43 +95,43 @@ services:
         aliases:
           - prod-app
 
-  # Applique la politique de rétention des paniers (app/src/lib/retention.ts).
+  # Applies the cart retention policy (app/src/lib/retention.ts).
   #
-  # Une boucle plutôt que pg_cron : l'extension n'est pas fournie par l'image
-  # officielle et imposerait une image Postgres maison plus un
-  # shared_preload_libraries, pour un travail qui n'a rien de spécifique à la
-  # base. Une boucle dans l'image applicative existante se relit en trois lignes,
-  # redémarre avec le reste et fait tourner exactement le code que la suite teste.
+  # A loop rather than pg_cron: the extension does not ship with the official
+  # image and would require a custom Postgres image plus
+  # shared_preload_libraries, for a job with nothing database-specific about
+  # it. A loop in the existing application image reads in three lines,
+  # restarts with everything else and runs exactly the code the suite tests.
   purge:
     <<: *app
     command:
       - sh
       - -c
       - 'while true; do node app/dist/db/purge.mjs || true; sleep "${PURGE_INTERVAL_SECONDS:-86400}"; done'
-    # Même raison que pour `migrate` : pas de serveur HTTP dans ce conteneur.
+    # Same reason as for `migrate`: no HTTP server in this container.
     healthcheck:
       disable: true
     depends_on:
       migrate:
         condition: service_completed_successfully
 
-  # --- Mesure d'audience ----------------------------------------------------
+  # --- Analytics ------------------------------------------------------------
   #
-  # Matomo n'accepte que MySQL ou MariaDB : le service `db` PostgreSQL ci-dessus
-  # ne peut pas l'héberger, d'où un second SGBD. C'est le prix de Matomo, assumé
-  # pour son suivi e-commerce — Umami aurait tenu dans la base existante mais ne
-  # sait pas rattacher une commande à une visite. Voir ADR-006.
+  # Matomo only accepts MySQL or MariaDB: the PostgreSQL `db` service above
+  # cannot host it, hence a second DBMS. That is the price of Matomo, accepted
+  # for its e-commerce tracking — Umami would have fit in the existing database
+  # but cannot tie an order to a visit. See ADR-006.
   matomo-db:
     image: mariadb:11
     restart: unless-stopped
     environment:
       MARIADB_DATABASE: matomo
       MARIADB_USER: matomo
-      MARIADB_PASSWORD: ${MATOMO_DB_PASSWORD:?MATOMO_DB_PASSWORD est obligatoire}
+      MARIADB_PASSWORD: ${MATOMO_DB_PASSWORD:?MATOMO_DB_PASSWORD is required}
       MARIADB_RANDOM_ROOT_PASSWORD: 'yes'
     volumes:
       - matomo-dbdata:/var/lib/mysql
-    # Aucun port publié, même règle que `db`.
+    # No published port, same rule as `db`.
     healthcheck:
       test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
       interval: 10s
@@ -146,10 +146,10 @@ services:
       MATOMO_DATABASE_HOST: matomo-db
       MATOMO_DATABASE_ADAPTER: mysql
       MATOMO_DATABASE_USERNAME: matomo
-      MATOMO_DATABASE_PASSWORD: ${MATOMO_DB_PASSWORD:?MATOMO_DB_PASSWORD est obligatoire}
+      MATOMO_DATABASE_PASSWORD: ${MATOMO_DB_PASSWORD:?MATOMO_DB_PASSWORD is required}
       MATOMO_DATABASE_DBNAME: matomo
-      # Matomo ne voit que l'adresse du proxy sans cela, et range toutes les
-      # visites sous une seule IP — celle du conteneur Caddy.
+      # Without this, Matomo only sees the proxy's address and files every
+      # visit under a single IP — the Caddy container's.
       MATOMO_GENERAL_PROXY_CLIENT_HEADERS: HTTP_X_FORWARDED_FOR
       MATOMO_GENERAL_PROXY_HOST_HEADERS: HTTP_X_FORWARDED_HOST
     volumes:
@@ -160,33 +160,33 @@ services:
       matomo-db:
         condition: service_healthy
 
-  # --- Notifications d'exploitation -----------------------------------------
+  # --- Operations notifications ---------------------------------------------
   #
-  # Destinataire des alertes de l'audit de sécurité (scripts/notifier-audit.py).
-  # Auto-hébergé plutôt que ntfy.sh : le contenu d'une alerte est la liste des
-  # CVE non corrigées de cette machine et des services qu'elle expose, c'est-à-
-  # dire une carte de ce qu'il faut attaquer. Sur le serveur public, un topic se
-  # lit sans compte dès qu'on en connaît le nom.
+  # Receives the security audit alerts (scripts/notifier-audit.py).
+  # Self-hosted rather than ntfy.sh: an alert's content is the list of unpatched
+  # CVEs on this machine and the services it exposes, in other words a map of
+  # what to attack. On the public server, a topic can be read without an
+  # account by anyone who knows its name.
   #
-  # Ce service ne fait pas partie de la boutique et rien dans l'application ne
-  # l'appelle : il vit ici parce que Caddy, les certificats et le réseau y sont
-  # déjà, et qu'une seconde pile pour un conteneur de 20 Mo coûterait plus à
-  # tenir qu'elle ne rapporte.
+  # This service is not part of the shop and nothing in the application calls
+  # it: it lives here because Caddy, the certificates and the network already
+  # do, and a second stack for a 20 MB container would cost more to maintain
+  # than it is worth.
   ntfy:
     image: binwiederhier/ntfy:v2
     restart: unless-stopped
     command: ['serve']
     environment:
-      # ntfy construit les URL qu'il publie (liens de souscription, pièces
-      # jointes) à partir de cette base : sans elle il annonce son adresse
-      # interne, injoignable depuis un téléphone.
+      # ntfy builds the URLs it publishes (subscription links, attachments)
+      # from this base: without it, it announces its internal address,
+      # unreachable from a phone.
       NTFY_BASE_URL: ${NTFY_BASE_URL:-http://localhost:8082}
       NTFY_BEHIND_PROXY: 'true'
       NTFY_CACHE_FILE: /var/lib/ntfy/cache.db
       NTFY_AUTH_FILE: /var/lib/ntfy/auth.db
-      # Sans compte, aucun accès : ni lecture, ni écriture. C'est le réglage qui
-      # justifie d'auto-héberger — le laisser à `read-write` rendrait le serveur
-      # public équivalent à ntfy.sh, en moins bien tenu.
+      # No account, no access: neither read nor write. This is the setting that
+      # justifies self-hosting — leaving it at `read-write` would make the
+      # server as public as ntfy.sh, and less well maintained.
       NTFY_AUTH_DEFAULT_ACCESS: deny-all
       NTFY_ATTACHMENT_CACHE_DIR: ''
     volumes:
@@ -197,45 +197,45 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
-    # Ports d'hôte configurables : sur un serveur ce sont 80 et 443, mais un essai
-    # local se heurte à tout ce qui les occupe déjà, et « le port est pris » est
-    # une raison stupide de ne pas éprouver sa pile avant de la déployer.
+    # Configurable host ports: on a server they are 80 and 443, but a local
+    # trial runs into whatever already occupies them, and "the port is taken"
+    # is a silly reason not to try out a stack before deploying it.
     ports:
       - '${FRETLINE_HTTP_PORT:-80}:80'
       - '${FRETLINE_HTTPS_PORT:-443}:443'
       - '${FRETLINE_HTTPS_PORT:-443}:443/udp'
-      # Matomo sans nom de domaine : Caddy l'écoute alors sur 8081, en clair, et
-      # il faut bien publier ce port pour l'atteindre. Avec un domaine
-      # renseigné, Matomo est servi sur 443 comme le reste et ce mappage ne
-      # porte plus rien.
+      # Matomo without a domain name: Caddy then listens for it on 8081, in
+      # plain HTTP, and that port has to be published to reach it. With a
+      # domain set, Matomo is served on 443 like everything else and this
+      # mapping carries nothing.
       #
-      # Sur la boucle locale, et pas sur 0.0.0.0. Ce port sert un Matomo en
-      # clair, et tant que l'installation guidée n'a pas été faite, le premier
-      # visiteur venu la termine et s'en fait l'administrateur — d'une
-      # application PHP qui a la main sur sa base. Depuis un poste distant,
-      # passer par un tunnel : ssh -L 8081:localhost:8081 <serveur>
+      # On the loopback interface, not on 0.0.0.0. This port serves Matomo in
+      # plain HTTP, and until the guided installation has been completed, the
+      # first passer-by can finish it and become the administrator — of a PHP
+      # application with full control over its database. From a remote
+      # machine, use a tunnel: ssh -L 8081:localhost:8081 <server>
       - '127.0.0.1:${FRETLINE_ANALYTICS_PORT:-8081}:8081'
-      # Même raison, même précaution que pour Matomo : sans nom de domaine, ntfy
-      # est servi en clair sur 8082 et ce port reste sur la boucle locale. Un
-      # serveur de notifications en clair sur l'extérieur laisserait passer le
-      # jeton de publication en clair avec.
+      # Same reason, same precaution as for Matomo: without a domain name, ntfy
+      # is served in plain HTTP on 8082 and this port stays on loopback. A
+      # notification server in plain HTTP on the outside would leak the
+      # publishing token in clear text along with it.
       - '127.0.0.1:${FRETLINE_NTFY_PORT:-8082}:8082'
-      # Pré-production sans nom de domaine : même motif, en clair sur la boucle
-      # locale. Voir docker-compose.preprod.yml.
+      # Pre-production without a domain name: same pattern, plain HTTP on
+      # loopback. See docker-compose.preprod.yml.
       - '127.0.0.1:${FRETLINE_PREPROD_PORT:-8083}:8083'
     environment:
-      FRETLINE_DOMAIN: ${FRETLINE_DOMAIN:?FRETLINE_DOMAIN est obligatoire}
+      FRETLINE_DOMAIN: ${FRETLINE_DOMAIN:?FRETLINE_DOMAIN is required}
       FRETLINE_NTFY_DOMAIN: ${FRETLINE_NTFY_DOMAIN:-:8082}
-      # Le Caddyfile ne voit que ce qu'on lui passe : sans cette ligne, le
-      # `{$FRETLINE_ANALYTICS_DOMAIN}` du bloc analytics retomberait toujours sur
-      # son défaut, et un domaine renseigné dans .env serait ignoré en silence.
+      # The Caddyfile only sees what it is given: without this line, the
+      # `{$FRETLINE_ANALYTICS_DOMAIN}` of the analytics block would always fall
+      # back to its default, and a domain set in .env would be silently ignored.
       FRETLINE_ANALYTICS_DOMAIN: ${FRETLINE_ANALYTICS_DOMAIN:-:8081}
-      # Pré-production. Les défauts sont posés ici et non seulement dans le
-      # Caddyfile : Caddy n'applique le sien qu'à une variable *absente*, et
-      # Compose transmet une variable vide. Un domaine vide fait refuser toute la
-      # configuration — et tomber la boutique avec. Le hash par défaut est celui
-      # d'une chaîne tirée au hasard puis jetée : personne n'entre (`$$` est
-      # l'échappement Compose du `$` de bcrypt).
+      # Pre-production. The defaults are set here and not only in the
+      # Caddyfile: Caddy only applies its own to an *unset* variable, and
+      # Compose passes an empty one. An empty domain makes the whole
+      # configuration fail — and takes the shop down with it. The default hash
+      # is that of a randomly drawn, then discarded string: nobody gets in (`$$`
+      # is Compose's escape for bcrypt's `$`).
       FRETLINE_PREPROD_DOMAIN: ${FRETLINE_PREPROD_DOMAIN:-:8083}
       PREPROD_BASIC_AUTH_USER: ${PREPROD_BASIC_AUTH_USER:-fretline}
       PREPROD_BASIC_AUTH_HASH: ${PREPROD_BASIC_AUTH_HASH:-$$2a$$14$$Bcoh63tinCQaAAH8qPR4teL49GuNTsmWW1dhmSueQ5xHWLqKMKI6e}
@@ -245,8 +245,9 @@ services:
       - edge
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      # Les certificats obtenus vivent ici. Sans ce volume, chaque redéploiement
-      # redemande un certificat et finit par heurter les quotas de Let's Encrypt.
+      # Issued certificates live here. Without this volume, every redeployment
+      # requests a new certificate and eventually hits Let's Encrypt's rate
+      # limits.
       - caddy-data:/data
       - caddy-config:/config
     depends_on:
@@ -256,11 +257,11 @@ services:
 
 networks:
   default:
-  # Le seul pont vers la pré-production (docker-compose.preprod.yml), qui s'y
-  # rattache en réseau externe. Nom fixe, puisque l'autre pile le désigne par ce
-  # nom ; créé ici et non à la main, pour que cette pile démarre seule — en CI
-  # comme sur un serveur neuf. Seul Caddy y est branché : la base de production
-  # reste hors de portée des conteneurs de la pré-prod.
+  # The only bridge to pre-production (docker-compose.preprod.yml), which joins
+  # it as an external network. Fixed name, since the other stack refers to it
+  # by that name; created here rather than by hand, so that this stack starts
+  # on its own — in CI as on a fresh server. Only Caddy is attached to it: the
+  # production database stays out of reach of the pre-production containers.
   edge:
     name: fretline-edge
 
@@ -268,12 +269,12 @@ volumes:
   pgdata:
   caddy-data:
   caddy-config:
-  # Matomo tient sa configuration et ses plugins dans son propre répertoire
-  # d'installation : sans ce volume, chaque `up --build` redemanderait
-  # l'installation guidée depuis zéro.
+  # Matomo keeps its configuration and plugins in its own installation
+  # directory: without this volume, every `up --build` would ask for the guided
+  # installation again from scratch.
   matomo-data:
   matomo-dbdata:
-  # Base des comptes et jeton de publication de ntfy, plus son cache de
-  # messages. Sans ce volume, chaque redémarrage repartirait de `deny-all` sans
-  # aucun compte : plus personne ne pourrait publier ni lire.
+  # ntfy's account database and publishing token, plus its message cache.
+  # Without this volume, every restart would start again from `deny-all` with
+  # no account: nobody could publish or read any more.
   ntfy-data:

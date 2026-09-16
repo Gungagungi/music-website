@@ -1,6 +1,6 @@
-# Ce qui suit ne doit jamais entrer dans le contexte de build : soit c'est
-# reconstruit dans l'image, soit c'est du poids mort, soit — pour `.env` — c'est
-# un secret qui n'a rien à faire dans une couche.
+# What follows must never enter the build context: either it is rebuilt inside
+# the image, or it is dead weight, or — for `.env` — it is a secret that has no
+# business in a layer.
 
 node_modules
 **/node_modules

@@ -20,24 +20,25 @@ import {
 } from '@/api/schemas';
 
 /**
- * Description des opérations de l'API publique.
+ * Description of the public API's operations.
  *
- * Le sens de dérivation mérite d'être explicité, parce qu'il est l'inverse de
- * celui qu'on attend : la spécification OpenAPI est **produite** depuis les
- * schémas de contrat, pas l'inverse.
+ * The direction of derivation deserves to be spelled out, because it is the
+ * opposite of what one expects: the OpenAPI specification is **produced** from
+ * the contract schemas, not the other way round.
  *
- * Écrire la spec à la main et en dériver les schémas donnerait deux descriptions
- * de la même API, dont une seule est exécutée. La seconde dérive — c'est
- * exactement ce que ce dépôt refuse pour la matrice de traçabilité, générée
- * depuis les annotations et vérifiée en CI. Une spec qu'aucun test ne traverse
- * ne décrit pas une API, elle décrit une intention.
+ * Writing the spec by hand and deriving the schemas from it would give two
+ * descriptions of the same API, only one of which is executed. The other one
+ * drifts — exactly what this repository refuses for the traceability matrix,
+ * generated from the annotations and checked in CI. A spec no test goes through
+ * does not describe an API, it describes an intention.
  *
- * Ici, les schémas sont ce que 74 tests d'API valident à chaque run. En faire
- * la source de la spec garantit que le document publié décrit l'API réellement
- * servie, et le contrôle `openapi:check` rend l'écart impossible à ignorer.
+ * Here, the schemas are what 74 API tests validate on every run. Making them
+ * the source of the spec guarantees that the published document describes the
+ * API actually served, and the `openapi:check` control makes any gap impossible
+ * to ignore.
  *
- * Ce qui reste écrit à la main, c'est ce qu'un schéma de réponse ne porte pas :
- * les chemins, les verbes, les codes de statut, les paramètres.
+ * What remains written by hand is what a response schema does not carry: paths,
+ * verbs, status codes, parameters.
  */
 
 const parametreQuery = (nom: string, description: string, schema: z.ZodType) => ({
@@ -71,69 +72,69 @@ export const OPERATIONS: Operation[] = [
   {
     chemin: '/api/health',
     methode: 'get',
-    resume: 'État du service',
-    etiquette: 'Supervision',
-    reponses: [{ code: 200, description: 'Le service répond.', schema: healthSchema }],
+    resume: 'Service status',
+    etiquette: 'Monitoring',
+    reponses: [{ code: 200, description: 'The service is responding.', schema: healthSchema }],
   },
   {
     chemin: '/api/products',
     methode: 'get',
-    resume: 'Lister le catalogue',
+    resume: 'List the catalogue',
     etiquette: 'Catalogue',
     parametres: [
-      parametreQuery('category', 'Slug de catégorie.', z.string()),
-      parametreQuery('brand', 'Marque, répétable.', z.string()),
-      parametreQuery('q', 'Recherche plein texte, sur sous-chaîne.', z.string()),
-      parametreQuery('minPrice', 'Prix minimum, en centimes.', z.number().int()),
-      parametreQuery('maxPrice', 'Prix maximum, en centimes.', z.number().int()),
-      parametreQuery('inStock', 'Ne garder que les produits disponibles.', z.boolean()),
-      parametreQuery('leftHanded', 'Ne garder que les modèles gauchers.', z.boolean()),
-      parametreQuery('onSale', 'Ne garder que les produits remisés.', z.boolean()),
-      parametreQuery('sort', 'Tri appliqué avant pagination.', z.string()),
-      parametreQuery('page', 'Page demandée, à partir de 1.', z.number().int().positive()),
-      parametreQuery('perPage', 'Taille de page.', z.number().int().positive()),
+      parametreQuery('category', 'Category slug.', z.string()),
+      parametreQuery('brand', 'Brand, repeatable.', z.string()),
+      parametreQuery('q', 'Full-text search, by substring.', z.string()),
+      parametreQuery('minPrice', 'Minimum price, in cents.', z.number().int()),
+      parametreQuery('maxPrice', 'Maximum price, in cents.', z.number().int()),
+      parametreQuery('inStock', 'Keep only products in stock.', z.boolean()),
+      parametreQuery('leftHanded', 'Keep only left-handed models.', z.boolean()),
+      parametreQuery('onSale', 'Keep only discounted products.', z.boolean()),
+      parametreQuery('sort', 'Sort applied before pagination.', z.string()),
+      parametreQuery('page', 'Requested page, starting at 1.', z.number().int().positive()),
+      parametreQuery('perPage', 'Page size.', z.number().int().positive()),
     ],
     reponses: [
-      { code: 200, description: 'Page de résultats.', schema: paginatedProductsSchema },
-      erreur(422, 'Paramètre hors du schéma attendu.'),
+      { code: 200, description: 'Page of results.', schema: paginatedProductsSchema },
+      erreur(422, 'Parameter outside the expected schema.'),
     ],
   },
   {
     chemin: '/api/products/{slug}',
     methode: 'get',
-    resume: 'Détail d’un produit',
+    resume: 'Product details',
     etiquette: 'Catalogue',
-    parametres: [parametreChemin('slug', 'Identifiant lisible du produit.', z.string())],
+    parametres: [parametreChemin('slug', 'Human-readable product identifier.', z.string())],
     reponses: [
-      { code: 200, description: 'Le produit et ses avis.', schema: productDetailSchema },
-      erreur(404, 'Aucun produit pour ce slug.'),
+      { code: 200, description: 'The product and its reviews.', schema: productDetailSchema },
+      erreur(404, 'No product for this slug.'),
     ],
   },
   {
     chemin: '/api/products/{slug}/reviews',
     methode: 'get',
-    resume: 'Lister les avis d’un produit',
+    resume: 'List a product’s reviews',
     etiquette: 'Catalogue',
     parametres: [
-      parametreChemin('slug', 'Identifiant lisible du produit.', z.string()),
+      parametreChemin('slug', 'Human-readable product identifier.', z.string()),
       parametreQuery('sort', 'recents | anciens | note-desc | note-asc.', z.string()),
-      parametreQuery('note', 'Ne garder que les avis à ce nombre d’étoiles.', z.number().int()),
-      parametreQuery('page', 'Page demandée, à partir de 1.', z.number().int().positive()),
-      parametreQuery('limit', 'Taille de page, 50 au maximum.', z.number().int().positive()),
+      parametreQuery('note', 'Keep only reviews with this number of stars.', z.number().int()),
+      parametreQuery('page', 'Requested page, starting at 1.', z.number().int().positive()),
+      parametreQuery('limit', 'Page size, 50 at most.', z.number().int().positive()),
     ],
     reponses: [
-      { code: 200, description: 'Page d’avis et répartition des notes.', schema: reviewPageSchema },
-      erreur(404, 'Aucun produit pour ce slug.'),
-      erreur(422, 'Paramètre hors du schéma attendu.'),
+      { code: 200, description: 'Page of reviews and rating distribution.', schema: reviewPageSchema },
+      erreur(404, 'No product for this slug.'),
+      erreur(422, 'Parameter outside the expected schema.'),
     ],
   },
   {
     chemin: '/api/products/{slug}/reviews',
     methode: 'post',
-    resume: 'Déposer un avis',
+    resume: 'Post a review',
     etiquette: 'Catalogue',
     authentification: 'cookie-ou-bearer',
-    parametres: [parametreChemin('slug', 'Identifiant lisible du produit.', z.string())],
+    parametres: [parametreChemin('slug', 'Human-readable product identifier.', z.string())],
     corps: z
       .object({
         rating: z.number().int().min(1).max(5),
@@ -142,32 +143,32 @@ export const OPERATIONS: Operation[] = [
       })
       .strict(),
     reponses: [
-      { code: 201, description: 'Avis enregistré.', schema: reviewSchema },
-      erreur(401, 'Porteur absent ou invalide.'),
-      erreur(404, 'Aucun produit pour ce slug.'),
-      erreur(409, 'Ce client a déjà publié un avis sur ce produit.'),
-      erreur(422, 'Corps hors du schéma attendu.'),
+      { code: 201, description: 'Review saved.', schema: reviewSchema },
+      erreur(401, 'Missing or invalid bearer.'),
+      erreur(404, 'No product for this slug.'),
+      erreur(409, 'This customer has already posted a review for this product.'),
+      erreur(422, 'Body outside the expected schema.'),
     ],
   },
   {
     chemin: '/api/categories',
     methode: 'get',
-    resume: 'Lister les catégories',
+    resume: 'List categories',
     etiquette: 'Catalogue',
-    reponses: [{ code: 200, description: 'Catégories et effectifs.', schema: categoryListSchema }],
+    reponses: [{ code: 200, description: 'Categories and counts.', schema: categoryListSchema }],
   },
   {
     chemin: '/api/brands',
     methode: 'get',
-    resume: 'Lister les marques',
+    resume: 'List brands',
     etiquette: 'Catalogue',
-    reponses: [{ code: 200, description: 'Marques et effectifs.', schema: brandListSchema }],
+    reponses: [{ code: 200, description: 'Brands and counts.', schema: brandListSchema }],
   },
   {
     chemin: '/api/auth/register',
     methode: 'post',
-    resume: 'Créer un compte',
-    etiquette: 'Authentification',
+    resume: 'Create an account',
+    etiquette: 'Authentication',
     corps: z
       .object({
         email: z.string().email(),
@@ -177,129 +178,129 @@ export const OPERATIONS: Operation[] = [
       })
       .strict(),
     reponses: [
-      { code: 201, description: 'Compte créé, porteur émis.', schema: authResponseSchema },
-      erreur(409, 'Adresse déjà enregistrée.'),
-      erreur(422, 'Corps hors du schéma attendu.'),
+      { code: 201, description: 'Account created, bearer issued.', schema: authResponseSchema },
+      erreur(409, 'Email address already registered.'),
+      erreur(422, 'Body outside the expected schema.'),
     ],
   },
   {
     chemin: '/api/auth/login',
     methode: 'post',
-    resume: 'Ouvrir une session',
-    etiquette: 'Authentification',
+    resume: 'Log in',
+    etiquette: 'Authentication',
     corps: z.object({ email: z.string().email(), password: z.string().min(1) }).strict(),
     reponses: [
-      { code: 200, description: 'Porteur émis.', schema: authResponseSchema },
-      erreur(401, 'Identifiants refusés.'),
-      erreur(422, 'Corps hors du schéma attendu.'),
+      { code: 200, description: 'Bearer issued.', schema: authResponseSchema },
+      erreur(401, 'Credentials rejected.'),
+      erreur(422, 'Body outside the expected schema.'),
     ],
   },
   {
     chemin: '/api/auth/logout',
     methode: 'post',
-    resume: 'Fermer la session',
-    etiquette: 'Authentification',
-    reponses: [{ code: 204, description: 'Cookie de session effacé.' }],
+    resume: 'Log out',
+    etiquette: 'Authentication',
+    reponses: [{ code: 204, description: 'Session cookie cleared.' }],
   },
   {
     chemin: '/api/auth/me',
     methode: 'get',
-    resume: 'Profil du porteur',
-    etiquette: 'Authentification',
+    resume: 'Bearer’s profile',
+    etiquette: 'Authentication',
     authentification: 'cookie-ou-bearer',
     reponses: [
-      { code: 200, description: 'Le compte authentifié.', schema: publicUserSchema },
-      erreur(401, 'Porteur absent ou invalide.'),
+      { code: 200, description: 'The authenticated account.', schema: publicUserSchema },
+      erreur(401, 'Missing or invalid bearer.'),
     ],
   },
   {
     chemin: '/api/cart',
     methode: 'get',
-    resume: 'Lire le panier',
-    etiquette: 'Panier',
+    resume: 'Read the cart',
+    etiquette: 'Cart',
     authentification: 'panier',
-    reponses: [{ code: 200, description: 'Le panier et ses totaux.', schema: cartSchema }],
+    reponses: [{ code: 200, description: 'The cart and its totals.', schema: cartSchema }],
   },
   {
     chemin: '/api/cart/items',
     methode: 'post',
-    resume: 'Ajouter une ligne',
-    etiquette: 'Panier',
+    resume: 'Add a line',
+    etiquette: 'Cart',
     authentification: 'panier',
     corps: z
       .object({ productId: z.string().min(1), quantity: z.number().int().min(1).max(10) })
       .strict(),
     reponses: [
-      { code: 201, description: 'Panier après ajout.', schema: cartSchema },
-      erreur(404, 'Produit inconnu.'),
-      erreur(409, 'Stock insuffisant.'),
-      erreur(422, 'Corps hors du schéma attendu.'),
+      { code: 201, description: 'Cart after adding.', schema: cartSchema },
+      erreur(404, 'Unknown product.'),
+      erreur(409, 'Insufficient stock.'),
+      erreur(422, 'Body outside the expected schema.'),
     ],
   },
   {
     chemin: '/api/cart/items/{itemId}',
     methode: 'patch',
-    resume: 'Modifier une quantité',
-    etiquette: 'Panier',
+    resume: 'Change a quantity',
+    etiquette: 'Cart',
     authentification: 'panier',
-    parametres: [parametreChemin('itemId', 'Identifiant de la ligne.', z.string())],
+    parametres: [parametreChemin('itemId', 'Line identifier.', z.string())],
     corps: z.object({ quantity: z.number().int().min(0).max(10) }).strict(),
     reponses: [
-      { code: 200, description: 'Panier après modification.', schema: cartSchema },
-      erreur(404, 'Ligne absente du panier.'),
-      erreur(409, 'Stock insuffisant.'),
-      erreur(422, 'Corps hors du schéma attendu.'),
+      { code: 200, description: 'Cart after the change.', schema: cartSchema },
+      erreur(404, 'Line not in the cart.'),
+      erreur(409, 'Insufficient stock.'),
+      erreur(422, 'Body outside the expected schema.'),
     ],
   },
   {
     chemin: '/api/cart/items/{itemId}',
     methode: 'delete',
-    resume: 'Retirer une ligne',
-    etiquette: 'Panier',
+    resume: 'Remove a line',
+    etiquette: 'Cart',
     authentification: 'panier',
-    parametres: [parametreChemin('itemId', 'Identifiant de la ligne.', z.string())],
+    parametres: [parametreChemin('itemId', 'Line identifier.', z.string())],
     reponses: [
-      { code: 200, description: 'Panier après retrait.', schema: cartSchema },
-      erreur(404, 'Ligne absente du panier.'),
+      { code: 200, description: 'Cart after removal.', schema: cartSchema },
+      erreur(404, 'Line not in the cart.'),
     ],
   },
   {
     chemin: '/api/cart/coupon',
     methode: 'post',
-    resume: 'Appliquer un coupon',
-    etiquette: 'Panier',
+    resume: 'Apply a coupon',
+    etiquette: 'Cart',
     authentification: 'panier',
     corps: z.object({ code: z.string().min(1) }).strict(),
     reponses: [
-      { code: 200, description: 'Panier avec la remise appliquée.', schema: cartSchema },
-      erreur(404, 'Coupon inconnu.'),
-      erreur(409, 'Coupon inapplicable — expiré, minimum non atteint, catégorie absente.'),
+      { code: 200, description: 'Cart with the discount applied.', schema: cartSchema },
+      erreur(404, 'Unknown coupon.'),
+      erreur(409, 'Coupon not applicable — expired, minimum not reached, category missing.'),
     ],
   },
   {
     chemin: '/api/cart/coupon',
     methode: 'delete',
-    resume: 'Retirer le coupon',
-    etiquette: 'Panier',
+    resume: 'Remove the coupon',
+    etiquette: 'Cart',
     authentification: 'panier',
-    reponses: [{ code: 200, description: 'Panier sans remise.', schema: cartSchema }],
+    reponses: [{ code: 200, description: 'Cart without a discount.', schema: cartSchema }],
   },
   {
     chemin: '/api/coupons/validate',
     methode: 'post',
-    resume: 'Éprouver un coupon sans l’appliquer',
-    etiquette: 'Panier',
+    resume: 'Try a coupon without applying it',
+    etiquette: 'Cart',
     corps: z.object({ code: z.string().min(1) }).strict(),
     reponses: [
-      { code: 200, description: 'Verdict et remise simulée.', schema: couponPreviewSchema },
-      erreur(422, 'Corps hors du schéma attendu.'),
+      { code: 200, description: 'Verdict and simulated discount.', schema: couponPreviewSchema },
+      erreur(422, 'Body outside the expected schema.'),
     ],
   },
   {
     chemin: '/api/orders',
     methode: 'post',
-    resume: 'Passer commande',
-    etiquette: 'Commandes',
+    resume: 'Place an order',
+    etiquette: 'Orders',
     authentification: 'panier',
     corps: z
       .object({
@@ -309,32 +310,32 @@ export const OPERATIONS: Operation[] = [
       })
       .strict(),
     reponses: [
-      { code: 201, description: 'Commande créée, jeton d’accès émis.', schema: orderWithTokenSchema },
-      erreur(409, 'Panier vide ou stock insuffisant.'),
-      erreur(422, 'Corps hors du schéma attendu.'),
+      { code: 201, description: 'Order created, access token issued.', schema: orderWithTokenSchema },
+      erreur(409, 'Empty cart or insufficient stock.'),
+      erreur(422, 'Body outside the expected schema.'),
     ],
   },
   {
     chemin: '/api/orders',
     methode: 'get',
-    resume: 'Lister ses commandes',
-    etiquette: 'Commandes',
+    resume: 'List one’s orders',
+    etiquette: 'Orders',
     authentification: 'cookie-ou-bearer',
     reponses: [
-      { code: 200, description: 'Commandes du compte.', schema: orderListSchema },
-      erreur(401, 'Porteur absent ou invalide.'),
+      { code: 200, description: 'The account’s orders.', schema: orderListSchema },
+      erreur(401, 'Missing or invalid bearer.'),
     ],
   },
   {
     chemin: '/api/orders/{id}',
     methode: 'get',
-    resume: 'Détail d’une commande',
-    etiquette: 'Commandes',
-    parametres: [parametreChemin('id', 'Référence de la commande.', z.string())],
+    resume: 'Order details',
+    etiquette: 'Orders',
+    parametres: [parametreChemin('id', 'Order reference.', z.string())],
     reponses: [
-      { code: 200, description: 'La commande.', schema: orderSchema },
-      erreur(403, 'Jeton d’accès absent ou étranger à la commande.'),
-      erreur(404, 'Référence inconnue.'),
+      { code: 200, description: 'The order.', schema: orderSchema },
+      erreur(403, 'Access token missing or not for this order.'),
+      erreur(404, 'Unknown reference.'),
     ],
   },
 ];

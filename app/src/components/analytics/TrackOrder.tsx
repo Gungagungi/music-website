@@ -5,27 +5,27 @@ import { useEffect } from 'react';
 import { enUnitesMonetaires, push } from '@/lib/analytics';
 import type { CartItem, CartTotals } from '@/lib/types';
 
-/** Ce que le tracker a besoin de connaître d'une ligne de commande. */
+/** What the tracker needs to know about an order line. */
 type Ligne = Pick<CartItem, 'sku' | 'brand' | 'name' | 'unitPrice' | 'quantity'>;
 
 /**
- * Enregistre une commande auprès de Matomo, depuis la page de confirmation.
+ * Records an order with Matomo, from the confirmation page.
  *
- * C'est le seul endroit du parcours où toutes les données sont déjà là — lignes,
- * référence, totaux — sans requête supplémentaire. Matomo déduplique sur la
- * référence : un rechargement de la page ou un retour arrière ne comptent pas
- * une seconde commande.
+ * It is the only place in the journey where all the data is already at hand —
+ * lines, reference, totals — without an extra request. Matomo deduplicates on
+ * the reference: reloading the page or going back does not count a second
+ * order.
  *
- * Les champs sont énumérés plutôt que de recevoir l'`Order` entier : ce qu'un
- * composant client reçoit est sérialisé dans la charge utile envoyée au
- * navigateur, et `Order` porte `accessToken`, le jeton qui autorise à consulter
- * la commande. Le passer ici l'écrirait dans le HTML de toutes les commandes,
- * pour un tracker qui n'en a aucun usage.
+ * The fields are listed individually rather than receiving the whole `Order`:
+ * whatever a client component receives is serialised into the payload sent to
+ * the browser, and `Order` carries `accessToken`, the token that grants access
+ * to the order. Passing it here would write it into the HTML of every order,
+ * for a tracker that has no use for it.
  *
- * Les totaux du domaine sont TTC et la remise est déjà déduite de `total` (voir
- * lib/money.ts). Le sous-total transmis est donc le sous-total moins la remise,
- * faute de quoi Matomo signalerait un écart entre le grand total et la somme de
- * ses composantes.
+ * Domain totals are VAT-inclusive and the discount is already deducted from
+ * `total` (see lib/money.ts). The subtotal sent is therefore the subtotal minus
+ * the discount, otherwise Matomo would report a gap between the grand total and
+ * the sum of its parts.
  */
 export function TrackOrder({
   reference,

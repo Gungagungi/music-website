@@ -15,9 +15,9 @@ import { loginSchema } from '@/lib/schemas';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  // Avant tout le reste : refuser coûte alors une comparaison de compteur, là
-  // où laisser passer engage un scrypt de 50 à 100 ms. Placer la limite après
-  // la validation du corps rendrait le refus aussi cher que l'acceptation.
+  // Before anything else: refusing then costs a counter comparison, whereas
+  // letting the request through commits a 50 to 100 ms scrypt. Placing the limit
+  // after body validation would make refusal as expensive as acceptance.
   const limited = enforceRateLimit('login', request);
   if (limited) return limited;
 

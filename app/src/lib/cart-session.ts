@@ -32,22 +32,21 @@ export async function resolveCart(request: Request): Promise<Cart> {
 }
 
 /**
- * Un panier rattaché à un compte n'est atteignable que par ce compte.
+ * A cart attached to an account is only reachable by that account.
  *
- * `getCart()` rend n'importe quel panier dont on présente l'identifiant, et
- * `x-cart-id` permet de le présenter sans cookie — un audit a relevé qu'un
- * appelant quelconque pouvait donc lire, garnir et surtout *commander* le
- * panier d'un autre, `POST /api/orders` partant de ce panier-là.
+ * `getCart()` returns any cart whose identifier is presented, and `x-cart-id`
+ * lets it be presented without a cookie — an audit found that any caller could
+ * therefore read, fill and above all *order* someone else's cart, since
+ * `POST /api/orders` starts from that cart.
  *
- * Les identifiants sont des UUID v4, donc non devinables : c'est de la défense
- * en profondeur, pas la fermeture d'une porte ouverte. Elle vaut quand même,
- * parce qu'un identifiant de panier voyage dans des endroits où un secret n'a
- * rien à faire — journaux du proxy, historique de navigation, capture d'écran
- * d'une session de support.
+ * Identifiers are UUID v4, hence not guessable: this is defence in depth, not
+ * closing an open door. It is still worth having, because a cart identifier
+ * travels to places where a secret has no business — proxy logs, browsing
+ * history, a screenshot from a support session.
  *
- * Un panier invité (`userId === null`) reste atteignable par quiconque présente
- * son identifiant : c'est exactement la règle du cookie, et la rétention est
- * déjà alignée dessus (lib/retention.ts).
+ * A guest cart (`userId === null`) stays reachable by anyone presenting its
+ * identifier: that is exactly the cookie's rule, and retention is already
+ * aligned with it (lib/retention.ts).
  */
 function isReachableBy(cart: Cart, userId: string | null): boolean {
   return cart.userId === null || cart.userId === userId;
@@ -63,9 +62,9 @@ export async function resolveCartForWrite(request: Request): Promise<Cart> {
   const userId = user?.id ?? null;
   const requestedId = await cartIdFromRequest(request);
 
-  // Même règle qu'en lecture : un identifiant désignant le panier de quelqu'un
-  // d'autre est traité comme s'il n'avait pas été fourni, donc un panier neuf
-  // est créé. Refuser par une erreur dirait à l'appelant qu'il a visé juste.
+  // Same rule as for reads: an identifier pointing at someone else's cart is
+  // treated as if it had not been supplied, so a new cart is created. Refusing
+  // with an error would tell the caller they had hit the mark.
   const existing = requestedId ? await getCart(requestedId) : undefined;
   const usableId = existing && !isReachableBy(existing, userId) ? null : requestedId;
 

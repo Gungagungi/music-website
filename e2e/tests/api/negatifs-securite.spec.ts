@@ -228,18 +228,18 @@ test.describe('API — robustesse et sécurité', () => {
       const response = await request.get('/');
       const csp = response.headers()['content-security-policy'];
 
-      // Ce qui doit rester strict quel que soit le protocole.
+      // What must stay strict whatever the protocol.
       expect(csp).toBeTruthy();
       expect(csp).toMatch(/script-src [^;]*'nonce-[a-f0-9]+'/);
       expect(csp).toContain("object-src 'none'");
       expect(csp).toContain("frame-ancestors 'none'");
 
-      // Et ce qui n'a pas sa place ici. La suite est servie en clair sur
-      // localhost ; WebKit n'exempte pas les origines locales de
-      // `upgrade-insecure-requests` et partait chercher les chunks de
-      // `_next/static` en `https://` sur un port sans TLS. Résultat : aucun
-      // script exécuté, `data-hydrated` jamais posé, et les 28 specs WebKit en
-      // timeout sur `waitForHydration()` sans qu'une seule assertion soit fausse.
+      // And what does not belong here. The suite is served in plain HTTP on
+      // localhost; WebKit does not exempt local origins from
+      // `upgrade-insecure-requests` and went fetching the `_next/static` chunks
+      // over `https://` on a port without TLS. Result: no script executed,
+      // `data-hydrated` never set, and all 28 WebKit specs timing out on
+      // `waitForHydration()` without a single wrong assertion.
       expect(csp).not.toContain('upgrade-insecure-requests');
     },
   );

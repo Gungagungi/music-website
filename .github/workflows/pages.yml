@@ -1,18 +1,18 @@
 name: Publier le rapport sur GitHub Pages
 
-# Publie le rapport Playwright sur https://gungagungi.github.io/music-website/
-# — un lien partageable, ce qu'un artifact de CI n'est pas.
+# Publishes the Playwright report at https://gungagungi.github.io/music-website/
+# — a shareable link, which a CI artifact is not.
 #
-# Le workflow relance sa propre suite plutôt que de réutiliser le rapport du
-# nightly : les deux runs sont indépendants, et dépendre d'un artifact produit
-# par un autre workflow ferait échouer la publication chaque fois que le nightly
-# échoue — alors que publier un rapport rouge est précisément ce qu'on veut.
+# The workflow reruns its own suite rather than reusing the nightly's report:
+# the two runs are independent, and depending on an artifact produced by
+# another workflow would make publishing fail every time the nightly fails —
+# whereas publishing a red report is precisely what we want.
 #
-# La cadence est calée après le nightly pour ne pas se disputer les runners.
+# The schedule sits after the nightly so the two do not compete for runners.
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 2 * * *' # 02:30 UTC, après le nightly
+    - cron: '30 2 * * *' # 02:30 UTC, after the nightly
 
 permissions:
   contents: read
@@ -34,8 +34,8 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --user root
-    # Job conteneurisé : il joint la base par le nom du service, pas par
-    # localhost, qui désignerait ici le conteneur du job lui-même.
+    # Containerised job: it reaches the database by the service name, not
+    # through localhost, which here would refer to the job's own container.
     services:
       postgres:
         image: postgres:17-alpine
@@ -64,19 +64,18 @@ jobs:
         with:
           database-url: ${{ env.DATABASE_URL }}
 
-      # Une exécution par projet, et non les trois d'un coup.
+      # One run per project, not all three at once.
       #
-      # Les trois partagent une base — la même, puisqu'un seul service tourne
-      # pour le job. Lancés ensemble, les commandes passées par la suite API
-      # consomment du stock réel pendant que les specs UI le comptent : TC-025
-      # attend 11 guitares électriques disponibles et en trouve 8. `ci.yml` ne
-      # rencontre pas le défaut parce qu'il donne un job — donc une base — à
-      # chaque projet.
+      # The three share a database — the same one, since a single service runs
+      # for the job. Run together, the orders placed by the API suite consume
+      # real stock while the UI specs count it: TC-025 expects 11 electric
+      # guitars in stock and finds 8. `ci.yml` does not hit the defect because
+      # it gives each project a job — and therefore a database.
       #
-      # Séparer les exécutions rejoue `setup-db` à chaque fois, donc repart des
-      # graines. Chacune nomme son blob : sans quoi les trois `report.zip`
-      # s'écrasent et la fusion ne voit que le dernier.
-      - name: Suite API
+      # Separate runs replay `setup-db` each time, so they start again from the
+      # seed data. Each one names its blob: otherwise the three `report.zip`
+      # overwrite each other and the merge only sees the last one.
+      - name: API suite
         working-directory: e2e
         continue-on-error: true
         env:
@@ -84,7 +83,7 @@ jobs:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-api.zip
         run: npx playwright test --project=api
 
-      - name: Suite UI (chromium)
+      - name: UI suite (chromium)
         working-directory: e2e
         continue-on-error: true
         env:
@@ -92,7 +91,7 @@ jobs:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-chromium.zip
         run: npx playwright test --project=chromium
 
-      - name: Suite accessibilité
+      - name: Accessibility suite
         working-directory: e2e
         continue-on-error: true
         env:
@@ -100,30 +99,30 @@ jobs:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/report-a11y.zip
         run: npx playwright test --project=a11y
 
-      # `continue-on-error` sur les trois suites, et c'est le fond du workflow :
-      # il existe pour publier le rapport, rouge compris. Un échec de suite qui
-      # interrompt la publication produit exactement ce que l'en-tête de ce
-      # fichier dit vouloir éviter — plus de rapport le jour où il y aurait le
-      # plus à lire dedans.
-      - name: Fusionner en un rapport unique
+      # `continue-on-error` on all three suites, and that is the heart of the
+      # workflow: it exists to publish the report, red included. A suite failure
+      # that stops publishing produces exactly what this file's header says it
+      # wants to avoid — no report on the day there would be the most to read
+      # in it.
+      - name: Merge into a single report
         working-directory: e2e
         run: npx playwright merge-reports -c merge.config.ts ./blob-report
 
-      # La tendance vient de la branche `historique-qa`, alimentée par le
-      # nightly. Absente au premier passage : la page se rend alors vide plutôt
-      # que de faire échouer la publication.
-      - name: Récupérer l’historique des runs
+      # The trend comes from the `historique-qa` branch, fed by the nightly.
+      # Missing on the first run: the page then renders empty rather than
+      # making publishing fail.
+      - name: Fetch run history
         continue-on-error: true
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git fetch --depth=1 origin historique-qa && git show FETCH_HEAD:runs.jsonl > runs.jsonl
 
-      # Le rapport Playwright à la racine, la documentation QA rendue sous /docs,
-      # la tendance à côté. La documentation était copiée en Markdown brut : le
-      # navigateur la télécharge ou l'affiche en texte selon le type MIME deviné,
-      # et un tableau de traçabilité de 139 lignes y devient illisible —
-      # précisément le document qu'un lecteur extérieur vient voir.
-      - name: Assembler le site
+      # The Playwright report at the root, the QA documentation rendered under
+      # /docs, the trend next to them. The documentation used to be copied as
+      # raw Markdown: the browser downloads it or shows it as text depending on
+      # the guessed MIME type, and a 139-row traceability table becomes
+      # unreadable there — precisely the document an outside reader comes to see.
+      - name: Assemble the site
         run: |
           mkdir -p site
           cp -r e2e/reports/html/* site/

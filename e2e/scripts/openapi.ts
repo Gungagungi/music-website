@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * Produit `docs/api/openapi.json` depuis les schémas de contrat.
+ * Produces `docs/api/openapi.json` from the contract schemas.
  *
- *   npx tsx scripts/openapi.ts           # régénère
- *   npx tsx scripts/openapi.ts --check   # échoue si le fichier committé diverge
+ *   npx tsx scripts/openapi.ts           # regenerates
+ *   npx tsx scripts/openapi.ts --check   # fails if the committed file diverges
  *
- * Même règle que la matrice de traçabilité : l'artefact est généré, committé, et
- * vérifié en CI. Un document qui décrit une API et que rien ne confronte à cette
- * API finit par décrire l'API d'il y a six mois — et il est alors pire
- * qu'absent, puisqu'on continue de s'y fier.
+ * Same rule as the traceability matrix: the artefact is generated, committed,
+ * and checked in CI. A document that describes an API and that nothing ever
+ * confronts with that API ends up describing the API of six months ago — and it
+ * is then worse than missing, since people keep relying on it.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -24,9 +24,9 @@ const E2E_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CIBLE = resolve(E2E_DIR, '..', 'docs', 'api', 'openapi.json');
 
 /**
- * OpenAPI 3.1 est un sur-ensemble de JSON Schema 2020-12, donc la conversion de
- * Zod est directe. Le `$schema` que Zod ajoute n'a en revanche rien à faire dans
- * un document OpenAPI, qui porte déjà sa propre version.
+ * OpenAPI 3.1 is a superset of JSON Schema 2020-12, so converting from Zod is
+ * direct. The `$schema` Zod adds, however, has no business in an OpenAPI
+ * document, which already carries its own version.
  */
 function jsonSchema(schema: z.ZodType): Record<string, unknown> {
   const { $schema, ...reste } = z.toJSONSchema(schema, { io: 'output' }) as Record<string, unknown>;
@@ -91,11 +91,11 @@ const document = {
     title: 'Fretline — API',
     version: '1.0.0',
     description:
-      'Généré depuis les schémas de contrat que la suite d’API valide à chaque run ' +
-      '(`e2e/api/schemas.ts`). Ne pas éditer à la main : `npm run openapi:check -w e2e` ' +
-      'échoue si le fichier committé diverge du code.',
+      'Generated from the contract schemas the API suite validates on every run ' +
+      '(`e2e/api/schemas.ts`). Do not edit by hand: `npm run openapi:check -w e2e` ' +
+      'fails if the committed file diverges from the code.',
   },
-  servers: [{ url: 'http://localhost:3000', description: 'Développement et suite de tests' }],
+  servers: [{ url: 'http://localhost:3000', description: 'Development and test suite' }],
   tags: [...new Set(OPERATIONS.map((operation) => operation.etiquette))].map((name) => ({ name })),
   components: {
     securitySchemes: {
@@ -111,18 +111,17 @@ const document = {
 const rendu = `${JSON.stringify(document, null, 2)}\n`;
 
 /**
- * La spec est validée avant d'être écrite ou comparée.
+ * The spec is validated before being written or compared.
  *
- * Une conversion Zod → JSON Schema peut produire un document syntaxiquement
- * correct et invalide au sens d'OpenAPI — un `format` inconnu, une combinaison
- * de mots-clés que la 3.1 refuse. Publier ce document-là, c'est offrir aux
- * lecteurs un fichier que leurs outils rejetteront, ce qu'aucun test de forme
- * sur nos propres schémas ne dirait.
+ * A Zod → JSON Schema conversion can produce a document that is syntactically
+ * correct yet invalid in the OpenAPI sense — an unknown `format`, a combination
+ * of keywords 3.1 rejects. Publishing that document means handing readers a file
+ * their tools will reject, which no shape test on our own schemas would reveal.
  */
 async function principal(): Promise<void> {
   const rapport = await validate(JSON.parse(rendu));
   if (!rapport.valid) {
-    console.error('La spécification produite n’est pas un document OpenAPI valide :');
+    console.error('The generated specification is not a valid OpenAPI document:');
     console.error(rapport.errors ?? rapport);
     process.exit(1);
   }
@@ -132,28 +131,28 @@ async function principal(): Promise<void> {
     try {
       committe = readFileSync(CIBLE, 'utf8');
     } catch {
-      console.error(`${CIBLE} est absent. Lancer \`npm run openapi -w e2e\`.`);
+      console.error(`${CIBLE} is missing. Run \`npm run openapi -w e2e\`.`);
       process.exit(1);
     }
     if (committe !== rendu) {
       console.error(
-        'La spécification committée diverge des schémas de contrat.\n' +
-          'Lancer `npm run openapi -w e2e` et committer le résultat.',
+        'The committed specification diverges from the contract schemas.\n' +
+          'Run `npm run openapi -w e2e` and commit the result.',
       );
       process.exit(1);
     }
-    console.log(`Spécification à jour et valide : ${OPERATIONS.length} opérations.`);
+    console.log(`Specification up to date and valid: ${OPERATIONS.length} operations.`);
     return;
   }
 
   mkdirSync(dirname(CIBLE), { recursive: true });
   writeFileSync(CIBLE, rendu);
-  console.log(`${OPERATIONS.length} opérations écrites dans ${CIBLE}`);
+  console.log(`${OPERATIONS.length} operations written to ${CIBLE}`);
 }
 
-// Pas d'`await` de premier niveau : `e2e` est compilé en CommonJS, où esbuild le
-// refuse. Le rejet est propagé à la main, sans quoi le script sortirait en 0
-// après avoir signalé une spec invalide.
+// No top-level `await`: `e2e` is compiled as CommonJS, where esbuild rejects it.
+// The rejection is propagated by hand, otherwise the script would exit with 0
+// after reporting an invalid spec.
 principal().catch((erreur) => {
   console.error(erreur);
   process.exit(1);

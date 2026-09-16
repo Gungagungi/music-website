@@ -11,15 +11,15 @@
  * Next bundles it into its own server chunks — so it has to be bundled in here
  * too, or the migrator would start and fail on a missing module.
  *
- * La profondeur de sortie est contrainte : `migrate.ts` cherche ses migrations à
- * `../../drizzle` par rapport à son propre fichier. `dist/db/migrate.mjs` tombe
- * donc sur `<app>/drizzle`, exactement comme `src/db/migrate.ts` en
- * développement. Déplacer `outdir` d'un cran casserait les migrations dans
- * l'image, et nulle part ailleurs.
+ * The output depth is constrained: `migrate.ts` looks for its migrations at
+ * `../../drizzle` relative to its own file. `dist/db/migrate.mjs` therefore
+ * lands on `<app>/drizzle`, exactly like `src/db/migrate.ts` in development.
+ * Moving `outdir` by one level would break migrations in the image, and nowhere
+ * else.
  *
- * Les points d'entrée sont ceux de `src/db/cli/`, qui ne contiennent que
- * l'invocation. Les modules qui font le travail n'ont aucun effet de bord à
- * l'import — voir cli/run.ts pour ce qui arrive quand ce n'est pas le cas.
+ * The entry points are those of `src/db/cli/`, which contain only the
+ * invocation. The modules that do the work have no side effect on import — see
+ * cli/run.ts for what happens when that is not the case.
  *
  * Usage: node scripts/build-db-cli.mjs
  */
@@ -29,10 +29,10 @@ import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 
 const appRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
-// `reset` est volontairement absent : il tronque toutes les tables. Il n'a
-// aucune raison d'exister dans une image de production, où il ne serait qu'une
-// arme chargée à portée d'un `docker compose run`. C'est une commande de
-// développement, lancée par `npm run db:reset` via tsx.
+// `reset` is deliberately absent: it truncates every table. It has no reason to
+// exist in a production image, where it would only be a loaded weapon within
+// reach of a `docker compose run`. It is a development command, run by
+// `npm run db:reset` through tsx.
 const COMMANDS = ['bootstrap', 'migrate', 'seed', 'purge'];
 
 await build({
@@ -50,4 +50,4 @@ await build({
   logLevel: 'info',
 });
 
-console.log(`[build] commandes de base compilées : ${COMMANDS.join(', ')}`);
+console.log(`[build] database commands compiled: ${COMMANDS.join(', ')}`);

@@ -1,22 +1,21 @@
 /**
- * Crée un fichier d'environnement s'il n'existe pas, en tirant au hasard les
- * valeurs qui sont des secrets.
+ * Creates an environment file if it does not exist, drawing the values that are
+ * secrets at random.
  *
- *   node scripts/preparer-env.mjs               → .env, depuis .env.example
- *   node scripts/preparer-env.mjs --production  → .env.production, depuis .env.production.example
- *   ... --production --domain=:80               → renseigne aussi FRETLINE_DOMAIN
- *   node scripts/preparer-env.mjs --preprod     → .env.preprod, depuis .env.preprod.example
+ *   node scripts/preparer-env.mjs               → .env, from .env.example
+ *   node scripts/preparer-env.mjs --production  → .env.production, from .env.production.example
+ *   ... --production --domain=:80               → also sets FRETLINE_DOMAIN
+ *   node scripts/preparer-env.mjs --preprod     → .env.preprod, from .env.preprod.example
  *
- * Rien n'est jamais écrasé : une variable déjà renseignée est laissée telle
- * quelle, quel que soit le nombre de passages.
+ * Nothing is ever overwritten: a variable that already has a value is left as
+ * it is, however many times the script runs.
  *
- * Le hasard est le point : une clé de signature en clair dans un fichier
- * d'exemple finirait un jour recopiée sur un serveur, et personne ne s'en
- * apercevrait — c'est exactement la faille que la garde de lib/deployment.ts
- * cherche à empêcher. Une valeur par machine, jamais versionnée, ferme cette
- * porte sans rien coûter.
+ * Randomness is the point: a signing key in clear text in an example file would
+ * one day be copied onto a server, and nobody would notice — that is exactly
+ * the hole the guard in lib/deployment.ts tries to prevent. One value per
+ * machine, never versioned, closes that door at no cost.
  *
- * Node plutôt qu'`openssl` : c'est la seule dépendance dont on soit certain.
+ * Node rather than `openssl`: it is the only dependency we can be sure of.
  */
 import { randomBytes } from 'node:crypto';
 import { appendFileSync, chmodSync, copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -33,29 +32,29 @@ const modele = `${nom}.example`;
 const cible = join(repoRoot, nom);
 
 /**
- * `base64url`, pas `base64`.
+ * `base64url`, not `base64`.
  *
- * POSTGRES_PASSWORD finit dans DATABASE_URL, et l'alphabet base64 contient `/`,
- * qui termine la section d'autorité d'une URL : le pilote lit alors un hôte
- * tronqué et échoue sur « Invalid URL ». Trente-neuf pour cent des tirages de
- * 24 octets contenaient un `/` — un déploiement sur trois échouait, au hasard,
- * sur une erreur qui ne désigne rien. `base64url` (A-Za-z0-9-_) traverse une URL
- * sans encodage, à entropie identique.
+ * POSTGRES_PASSWORD ends up in DATABASE_URL, and the base64 alphabet contains
+ * `/`, which ends a URL's authority section: the driver then reads a truncated
+ * host and fails with "Invalid URL". Thirty-nine percent of 24-byte draws
+ * contained a `/` — one deployment in three failed, at random, on an error that
+ * points at nothing. `base64url` (A-Za-z0-9-_) goes through a URL without
+ * encoding, with identical entropy.
  */
 const secret = (octets) => randomBytes(octets).toString('base64url');
 
-/** Le sous-ensemble qui traverse une URL de connexion sans encodage. */
+/** The subset that goes through a connection URL without encoding. */
 const traverseUneUrl = (valeur) => /^[A-Za-z0-9._~-]+$/.test(valeur);
 
 const valeurDe = (contenu, variable) =>
   contenu.match(new RegExp(String.raw`^[ \t]*${variable}[ \t]*=[ \t]*(.+?)[ \t]*$`, 'm'))?.[1];
 
 /**
- * True si la variable est présente ET renseignée.
+ * True if the variable is present AND has a value.
  *
- * Espaces et tabulations, pas `\s` : `\s` couvre le saut de ligne, donc
- * `VARIABLE=` suivie d'une ligne quelconque paraissait renseignée — la valeur
- * trouvée était le premier caractère de la ligne d'après.
+ * Spaces and tabs, not `\s`: `\s` covers the newline, so `VARIABLE=` followed by
+ * any line looked set — the value found was the first character of the next
+ * line.
  */
 const renseignee = (contenu, variable) =>
   new RegExp(String.raw`^[ \t]*${variable}[ \t]*=[ \t]*\S`, 'm').test(contenu);
@@ -63,28 +62,27 @@ const renseignee = (contenu, variable) =>
 const creation = !existsSync(cible);
 if (creation) {
   copyFileSync(join(repoRoot, modele), cible);
-  // `copyFileSync` reprend les droits du modèle, versionné donc lisible par tous
-  // (664) : le fichier de secrets l'était aussi, par le groupe entier.
+  // `copyFileSync` keeps the template's permissions, versioned and therefore
+  // world-readable (664): the secrets file was readable too, by the whole group.
   chmodSync(cible, 0o600);
 }
 
 let contenu = readFileSync(cible, 'utf8');
 
-// Les modèles de production et de pré-production déclarent les variables sans
-// valeur, pour que le compose refuse de démarrer tant qu'on ne les a pas
-// remplies. Celles qui sont de purs secrets n'ont aucune raison de demander une
-// décision humaine : on les remplit ici. FRETLINE_DOMAIN, si.
+// The production and pre-production templates declare the variables without a
+// value, so that compose refuses to start until they are filled in. Those that
+// are pure secrets have no reason to ask for a human decision: they are filled
+// in here. FRETLINE_DOMAIN does.
 const remplies = [];
 
-/** Renseigne une variable déclarée vide par le modèle, sans jamais écraser. */
+/** Sets a variable the template declares empty, never overwriting. */
 function remplir(variable, valeur) {
   if (valeur === undefined || renseignee(contenu, variable)) return;
   const declaration = new RegExp(String.raw`^[ \t]*${variable}[ \t]*=.*$`, 'm');
-  // Une variable arrivée après coup n'est pas déclarée par les fichiers créés
-  // avant elle : sans cet ajout, le remplacement ne trouverait rien, le
-  // script sortirait en silence, et le compose échouerait plus loin sur une
-  // interpolation manquante — une erreur qui ne désigne pas le fichier à
-  // corriger.
+  // A variable added later is not declared by files created before it: without
+  // this append, the replacement would find nothing, the script would exit
+  // silently, and compose would fail further on with a missing interpolation —
+  // an error that does not point at the file to fix.
   contenu = declaration.test(contenu)
     ? contenu.replace(declaration, `${variable}=${valeur}`)
     : `${contenu}\n${variable}=${valeur}\n`;
@@ -92,18 +90,18 @@ function remplir(variable, valeur) {
 }
 
 /**
- * Un mot de passe écrit à la main, lui, peut venir d'un `openssl rand -base64`
- * et rapporter le problème que la génération vient d'éviter. Autant le dire
- * ici plutôt que de laisser le conteneur échouer sur « Invalid URL ».
+ * A password written by hand, however, may come from `openssl rand -base64`
+ * and bring back the very problem generation just avoided. Better to say so
+ * here than to let the container fail with "Invalid URL".
  */
 function exigerMotDePasseCompatibleUrl() {
   const motDePasse = valeurDe(contenu, 'POSTGRES_PASSWORD');
   if (motDePasse !== undefined && !traverseUneUrl(motDePasse)) {
     console.error(
-      `\nPOSTGRES_PASSWORD contient un caractère que DATABASE_URL ne supporte pas.\n` +
-        'Le mot de passe est injecté dans une URL de connexion ; `/` y termine\n' +
-        "l'autorité, et le pilote échoue sur « Invalid URL ».\n\n" +
-        `  openssl rand -hex 32   puis recopier dans ${nom}`,
+      `\nPOSTGRES_PASSWORD contains a character DATABASE_URL does not support.\n` +
+        'The password is injected into a connection URL; `/` ends the authority\n' +
+        'there, and the driver fails with "Invalid URL".\n\n' +
+        `  openssl rand -hex 32   then copy it into ${nom}`,
     );
     process.exit(1);
   }
@@ -112,39 +110,39 @@ function exigerMotDePasseCompatibleUrl() {
 function ecrireEtRapporter() {
   if (remplies.length > 0) writeFileSync(cible, contenu);
 
-  if (creation) console.log(`${nom} créé depuis ${modele} — ${remplies.join(', ')}`);
-  else if (remplies.length > 0) console.log(`${nom} complété : ${remplies.join(', ')}`);
-  else console.log(`${nom} existe déjà — inchangé`);
+  if (creation) console.log(`${nom} created from ${modele} — ${remplies.join(', ')}`);
+  else if (remplies.length > 0) console.log(`${nom} completed: ${remplies.join(', ')}`);
+  else console.log(`${nom} already exists — unchanged`);
 }
 
 if (production) {
   remplir('POSTGRES_PASSWORD', secret(24));
   remplir('AUTH_SECRET', secret(36));
-  // Même raison que POSTGRES_PASSWORD : la valeur traverse une chaîne de
-  // connexion. Elle n'appelle aucune décision humaine non plus.
+  // Same reason as POSTGRES_PASSWORD: the value goes through a connection
+  // string. It calls for no human decision either.
   remplir('MATOMO_DB_PASSWORD', secret(24));
   exigerMotDePasseCompatibleUrl();
-  // Seule variable que le script ne devine pas — il faut la lui donner.
+  // The only variable the script cannot guess — it has to be given.
   remplir('FRETLINE_DOMAIN', domaine);
 
   ecrireEtRapporter();
 
-  // Sortie en échec, et non un simple avertissement : `prod:up` enchaîne sur
-  // `docker compose` avec `&&`. Un code 0 laissait la commande suivante
-  // s'exécuter et échouer sur une erreur d'interpolation — le dernier message à
-  // l'écran étant alors celui qui aide le moins.
+  // Exit with a failure, not a mere warning: `prod:up` chains into
+  // `docker compose` with `&&`. An exit code of 0 let the next command run and
+  // fail on an interpolation error — the last message on screen then being the
+  // least helpful one.
   if (!renseignee(contenu, 'FRETLINE_DOMAIN')) {
     console.error(
-      `\nIl reste FRETLINE_DOMAIN à renseigner dans ${nom}. Le donner ici :\n\n` +
-        '  npm run prod:env -- --domain=:80           essai local, en clair, sans certificat\n' +
-        '  npm run prod:env -- --domain=exemple.fr    domaine public — Caddy obtient le certificat\n\n' +
-        '  puis : npm run prod:up',
+      `\nFRETLINE_DOMAIN still needs to be set in ${nom}. Pass it here:\n\n` +
+        '  npm run prod:env -- --domain=:80           local trial, plain HTTP, no certificate\n' +
+        '  npm run prod:env -- --domain=example.com   public domain — Caddy obtains the certificate\n\n' +
+        '  then: npm run prod:up',
     );
     process.exit(1);
   }
 } else if (preprod) {
-  // Rien à décider ici : le domaine et l'accès de la pré-prod sont portés par le
-  // Caddy de la production, donc par .env.production.
+  // Nothing to decide here: the pre-production domain and access are carried by
+  // the production Caddy, hence by .env.production.
   remplir('POSTGRES_PASSWORD', secret(24));
   remplir('AUTH_SECRET', secret(36));
   remplir('TEST_API_TOKEN', secret(24));
@@ -152,20 +150,20 @@ if (production) {
 
   ecrireEtRapporter();
 } else {
-  // Un `.env` existant est laissé tel quel, à une exception près : la clé de
-  // signature. Elle est arrivée après coup, donc les fichiers créés avant ce
-  // script n'en ont pas — et `npm start` refuserait de démarrer sans, avec une
-  // erreur qui n'aide personne à comprendre qu'un fichier local est en retard.
+  // An existing `.env` is left as it is, with one exception: the signing key.
+  // It was added later, so files created before this script lack it — and
+  // `npm start` would refuse to start without it, with an error that helps
+  // nobody understand that a local file is out of date.
   const aUneCle = renseignee(contenu, 'AUTH_SECRET');
 
   if (!aUneCle) {
     appendFileSync(
       cible,
-      `\n# Générée à la création de ce fichier, propre à ce poste.\nAUTH_SECRET=${secret(36)}\n`,
+      `\n# Generated when this file was created, specific to this machine.\nAUTH_SECRET=${secret(36)}\n`,
     );
   }
 
-  if (creation) console.log('.env créé depuis .env.example, avec une AUTH_SECRET tirée au hasard');
-  else if (!aUneCle) console.log('.env complété : AUTH_SECRET tirée au hasard ajoutée');
-  else console.log('.env existe déjà — inchangé');
+  if (creation) console.log('.env created from .env.example, with a randomly drawn AUTH_SECRET');
+  else if (!aUneCle) console.log('.env completed: randomly drawn AUTH_SECRET added');
+  else console.log('.env already exists — unchanged');
 }

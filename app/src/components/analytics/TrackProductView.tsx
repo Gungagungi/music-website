@@ -5,19 +5,19 @@ import { useEffect } from 'react';
 import { enUnitesMonetaires, push } from '@/lib/analytics';
 
 /**
- * Déclare la fiche produit courante à Matomo.
+ * Declares the current product page to Matomo.
  *
- * `setEcommerceView` ne fait qu'armer la prochaine vue de page : c'est le
- * `trackPageView` qui suit qui l'enregistre. Ce `trackPageView` n'est pas ici —
- * il appartient à SuiviDeNavigation, qui l'émet pour toutes les pages. En
- * pousser un second produirait deux vues pour une seule consultation.
+ * `setEcommerceView` only arms the next page view: it is the `trackPageView`
+ * that follows which records it. That `trackPageView` is not here — it belongs
+ * to SuiviDeNavigation, which emits it for every page. Pushing a second one
+ * would produce two views for a single visit.
  *
- * L'ordre entre les deux tient au fait que React exécute les effets des enfants
- * avant ceux des parents : ce composant vit dans la page, SuiviDeNavigation
- * dans le layout. Voir le commentaire de SuiviDeNavigation.
+ * The order between the two holds because React runs children's effects before
+ * their parents': this component lives in the page, SuiviDeNavigation in the
+ * layout. See the comment in SuiviDeNavigation.
  *
- * Le composant appartient à la page produit et pas au layout : l'appel n'a de
- * sens qu'une fois qu'on sait quel produit est affiché.
+ * The component belongs to the product page and not to the layout: the call
+ * only makes sense once it is known which product is displayed.
  */
 export function TrackProductView({
   sku,
@@ -28,7 +28,7 @@ export function TrackProductView({
   sku: string;
   name: string;
   category: string;
-  /** En centimes, comme partout dans le domaine. */
+  /** In cents, as everywhere in the domain. */
   price: number;
 }) {
   useEffect(() => {

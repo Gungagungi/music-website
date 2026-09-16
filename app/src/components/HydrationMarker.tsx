@@ -3,18 +3,17 @@
 import { useEffect } from 'react';
 
 /**
- * Signale que la page est hydratée, donc réellement interactive.
+ * Signals that the page is hydrated, hence actually interactive.
  *
- * Entre l'arrivée du HTML rendu côté serveur et la fin de l'hydratation, les
- * champs contrôlés acceptent la saisie mais React les réinitialise au premier
- * re-rendu, et les gestionnaires d'événements ne sont pas encore attachés. Un
- * automate est assez rapide pour tomber dans cette fenêtre ; un humain sur une
- * connexion lente aussi.
+ * Between the arrival of the server-rendered HTML and the end of hydration,
+ * controlled inputs accept typing but React resets them on the first re-render,
+ * and event handlers are not attached yet. An automated browser is fast enough
+ * to fall into that window; so is a human on a slow connection.
  *
- * L'attribut posé ici donne un point d'attente explicite, à la place des
- * temporisations arbitraires qu'on finit toujours par écrire — et par
- * rallonger — quand aucun signal n'existe. Il est inerte en production :
- * `document.documentElement` porte un attribut de plus, rien d'autre.
+ * The attribute set here gives an explicit point to wait on, instead of the
+ * arbitrary timeouts that always end up being written — and lengthened — when
+ * no signal exists. It is inert in production: `document.documentElement`
+ * carries one more attribute, nothing else.
  */
 export function HydrationMarker() {
   useEffect(() => {

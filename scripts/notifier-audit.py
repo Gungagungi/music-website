@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
-"""Notifie sur ntfy ce qui a *changé* entre les deux derniers audits de sécurité.
+"""Notifies on ntfy what *changed* between the last two security audits.
 
-Le rapport quotidien de `audit-securite.py` ne bouge presque jamais : les mêmes
-CVE y figurent tant que les images n'ont pas été repoussées. Une notification par
-exécution serait donc une notification par jour disant la même chose, et une
-alerte qu'on apprend à balayer ne protège plus de rien — c'est exactement le
-défaut que le scanner reproche déjà aux motifs de secrets trop larges.
+The daily report from `audit-securite.py` almost never moves: the same CVEs
+stay listed as long as the images have not been bumped. One notification per
+run would therefore be one notification a day saying the same thing, and an
+alert people learn to swipe away no longer protects anything — exactly the
+flaw the scanner already holds against overly broad secret patterns.
 
-Ce script ne publie donc que les différences, dans les deux sens :
+This script therefore only publishes the differences, in both directions:
 
-  corrigé   un constat présent hier a disparu — c'est le signal demandé, celui
-            qui confirme qu'un correctif a produit son effet
-  nouveau   un constat est apparu
-  aggravé   le même constat a changé de sévérité
+  fixed      a finding present yesterday has disappeared — the signal being
+             asked for, the one that confirms a fix took effect
+  new        a finding has appeared
+  worsened   the same finding has changed severity
 
-Sans changement, il ne publie rien et sort en 0. `--forcer` publie l'état
-complet, pour vérifier la chaîne de bout en bout après l'avoir installée.
+With no change, it publishes nothing and exits with 0. `--forcer` publishes the
+full state, to check the chain end to end after installing it.
 
-Usage :
+Usage:
     notifier-audit.py --rapports ~/.local/share/audit-securite
-    notifier-audit.py --forcer --format texte      # sans rien envoyer
+    notifier-audit.py --forcer --format texte      # without sending anything
 """
 
 from __future__ import annotations
@@ -35,20 +35,20 @@ from pathlib import Path
 
 SEVERITES = ("critique", "eleve", "moyen", "faible", "info")
 
-# L'API ntfy par en-têtes accepte les mots-clés ("default", "high"...), mais
-# l'API JSON — celle que `publier()` utilise — exige un entier 1-5 et rejette
-# la chaîne avec un 400 « request body must be valid JSON », message trompeur
-# qui ne pointe pas vers le champ fautif.
+# ntfy's header-based API accepts keywords ("default", "high"...), but the JSON
+# API — the one `publier()` uses — requires an integer 1-5 and rejects the
+# string with a 400 "request body must be valid JSON", a misleading message that
+# does not point at the offending field.
 PRIORITES_NTFY = {"min": 1, "low": 2, "default": 3, "high": 4, "urgent": 5, "max": 5}
 
 
 def cle(constat: dict) -> tuple[str, str]:
-    """Identité d'un constat, insensible aux nombres qu'il contient.
+    """A finding's identity, insensitive to the numbers it contains.
 
-    Le titre porte des compteurs — « 19 CVE HIGH corrigeable(s) dans
-    caddy:2-alpine ». Sans cette normalisation, une CVE de plus ou de moins sur
-    la même image se lirait comme un constat corrigé *et* un constat nouveau,
-    soit deux notifications fausses pour un événement qui n'en mérite aucune.
+    The title carries counters — « 19 CVE HIGH corrigeable(s) dans
+    caddy:2-alpine ». Without this normalisation, one CVE more or less on the
+    same image would read as a fixed finding *and* a new one, that is, two false
+    notifications for an event that deserves none.
     """
     return constat.get("famille", ""), re.sub(r"\d+", "#", constat.get("titre", ""))
 
@@ -59,11 +59,11 @@ def charger(chemin: Path) -> dict[tuple[str, str], dict]:
 
 
 def rapports(repertoire: Path) -> list[Path]:
-    """Les rapports du plus ancien au plus récent.
+    """Reports from oldest to newest.
 
-    Le nom porte un horodatage ISO en UTC, donc l'ordre lexicographique est
-    l'ordre chronologique. `dernier.json` est un lien vers l'un d'eux et est
-    exclu : le compter donnerait le dernier rapport comparé à lui-même.
+    The name carries an ISO timestamp in UTC, so lexicographic order is
+    chronological order. `dernier.json` is a link to one of them and is
+    excluded: counting it would compare the latest report with itself.
     """
     return sorted(p for p in repertoire.glob("audit-*.json") if p.is_file())
 
@@ -73,7 +73,7 @@ def pire(severites: list[str]) -> str:
 
 
 def composer(avant: dict, apres: dict) -> tuple[str, str, str, list[str]] | None:
-    """Rend (titre, message, priorité, tags), ou None s'il n'y a rien à dire."""
+    """Returns (title, message, priority, tags), or None when there is nothing to say."""
     corriges = [avant[k] for k in avant.keys() - apres.keys()]
     nouveaux = [apres[k] for k in apres.keys() - avant.keys()]
     aggraves = [
@@ -107,9 +107,9 @@ def composer(avant: dict, apres: dict) -> tuple[str, str, str, list[str]] | None
     if aggraves:
         resume.append(f"{len(aggraves)} modifié(s)")
 
-    # Une régression réveille ; une correction se lit à tête reposée. La
-    # priorité suit donc la gravité de ce qui est *apparu*, jamais le volume de
-    # ce qui a disparu.
+    # A regression wakes people up; a fix can be read at leisure. Priority
+    # therefore follows the severity of what *appeared*, never the volume of
+    # what disappeared.
     graves = [c["severite"] for c in nouveaux] + [b["severite"] for _, b in aggraves]
     urgent = bool(graves) and SEVERITES.index(pire(graves)) <= SEVERITES.index("eleve")
 
@@ -139,12 +139,12 @@ def etat_complet(apres: dict) -> tuple[str, str, str, list[str]]:
 
 
 def publier(base: str, topic: str, token: str, titre: str, message: str, priorite: str, tags: list[str]) -> None:
-    """Publie en JSON sur la racine du serveur, et non en en-têtes sur /topic.
+    """Publishes as JSON on the server root, not as headers on /topic.
 
-    ntfy accepte les deux, mais l'API par en-têtes impose un encodage RFC 2047
-    pour tout ce qui n'est pas ASCII : « Corrigés », « Sévérité » — c'est-à-dire
-    la quasi-totalité des titres de ce dépôt — y arriveraient mutilés. Le corps
-    JSON est en UTF-8 par construction.
+    ntfy accepts both, but the header-based API requires RFC 2047 encoding for
+    anything that is not ASCII: « Corrigés », « Sévérité » — that is, nearly all
+    of this repository's titles — would arrive mangled. The JSON body is UTF-8
+    by construction.
     """
     corps = json.dumps(
         {
@@ -165,27 +165,27 @@ def publier(base: str, topic: str, token: str, titre: str, message: str, priorit
 
 
 def main() -> int:
-    analyseur = argparse.ArgumentParser(description="Notifie sur ntfy les changements entre deux audits.")
+    analyseur = argparse.ArgumentParser(description="Notifies on ntfy the changes between two audits.")
     analyseur.add_argument(
         "--rapports",
         type=Path,
         default=Path(os.environ.get("AUDIT_REPERTOIRE", Path.home() / ".local/share/audit-securite")),
-        help="Répertoire des rapports JSON horodatés.",
+        help="Directory of timestamped JSON reports.",
     )
-    # `NTFY_BASE_URL` est déjà dans .env.production — c'est ce que le conteneur
-    # ntfy annonce comme sa propre adresse. En faire le défaut évite d'écrire la
-    # même URL deux fois ; `NTFY_URL` reste là pour le cas où l'on publierait
-    # ailleurs que là où l'on s'abonne.
+    # `NTFY_BASE_URL` is already in .env.production — it is what the ntfy
+    # container announces as its own address. Making it the default avoids
+    # writing the same URL twice; `NTFY_URL` remains for the case where one
+    # publishes somewhere other than where one subscribes.
     analyseur.add_argument(
         "--url",
         default=os.environ.get("NTFY_URL") or os.environ.get("NTFY_BASE_URL", ""),
-        help="Base du serveur ntfy.",
+        help="Base URL of the ntfy server.",
     )
     analyseur.add_argument("--topic", default=os.environ.get("NTFY_TOPIC", "fretline-securite"))
     analyseur.add_argument("--token", default=os.environ.get("NTFY_TOKEN", ""))
-    analyseur.add_argument("--forcer", action="store_true", help="Publie l'état complet même sans changement.")
+    analyseur.add_argument("--forcer", action="store_true", help="Publishes the full state even without changes.")
     analyseur.add_argument("--format", choices=("texte", "ntfy"), default="ntfy",
-                           help="« texte » affiche la notification sans l'envoyer.")
+                           help="\"texte\" prints the notification without sending it.")
     arguments = analyseur.parse_args()
 
     fichiers = rapports(arguments.rapports)
@@ -203,8 +203,8 @@ def main() -> int:
     if arguments.forcer:
         notification = etat_complet(apres)
     elif len(fichiers) == 1:
-        # Premier audit de la machine : il n'y a rien à comparer, mais l'état
-        # initial est en lui-même un événement.
+        # The machine's first audit: there is nothing to compare, but the
+        # initial state is an event in itself.
         notification = etat_complet(apres)
     else:
         notification = composer(avant, apres)
@@ -224,10 +224,10 @@ def main() -> int:
     try:
         publier(arguments.url, arguments.topic, arguments.token, titre, message, priorite, tags)
     except (urllib.error.URLError, urllib.error.HTTPError, OSError) as erreur:
-        # Un échec d'envoi ne doit pas masquer le résultat de l'audit lui-même :
-        # on rapporte sur stderr, le journal systemd le garde, et le code de
-        # sortie reste 0 pour que l'unité continue de refléter l'état de
-        # sécurité et non celui du serveur de notifications.
+        # A sending failure must not hide the result of the audit itself: it is
+        # reported on stderr, the systemd journal keeps it, and the exit code
+        # stays 0 so that the unit keeps reflecting the security state and not
+        # the notification server's.
         print(f"Envoi ntfy impossible : {erreur}", file=sys.stderr)
         print(f"{titre}\n\n{message}", file=sys.stderr)
         return 0

@@ -14,8 +14,8 @@ export default tseslint.config(
     },
   },
   {
-    // Les scripts de maintenance tournent sous Node, hors du contexte Playwright :
-    // `process` et `console` y sont légitimes.
+    // Maintenance scripts run under Node, outside the Playwright context:
+    // `process` and `console` are legitimate there.
     files: ['scripts/**/*.mjs', '*.config.mjs'],
     languageOptions: {
       globals: { process: 'readonly', console: 'readonly' },
