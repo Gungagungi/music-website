@@ -139,6 +139,21 @@ export const PRODUCTS = {
     brand: 'Epiphone',
   },
   /**
+   * Reserved for the co-purchase spec, which orders the pair together and then
+   * asserts that each one suggests the other. Ordering either of them anywhere
+   * else would add noise to a ranking the spec reads position by position.
+   */
+  coPurchaseA: {
+    slug: 'fender-american-pro-iii-telecaster',
+    sku: 'FEN-AMERIC-002',
+    brand: 'Fender',
+  },
+  coPurchaseB: {
+    slug: 'harley-benton-d-120ce',
+    sku: 'HAR-D120CE-017',
+    brand: 'Harley Benton',
+  },
+  /**
    * Reserved for the restock-alert specs, which force the stock to zero and
    * back. Two products rather than one: subscribing and sweeping are different
    * assertions, and a spec that sweeps would fire the other spec's alert.
