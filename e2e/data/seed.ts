@@ -139,6 +139,16 @@ export const PRODUCTS = {
     brand: 'Epiphone',
   },
   /**
+   * Reserved for the "a favourite shows today's state" spec, which forces the
+   * stock after saving and reads it back. Sharing a product with another spec
+   * that arranges stock would move the number under the assertion.
+   */
+  wishlistTarget: {
+    slug: 'yamaha-fg800m',
+    sku: 'YAM-FG800M-016',
+    brand: 'Yamaha',
+  },
+  /**
    * Reserved for the co-purchase spec, which orders the pair together and then
    * asserts that each one suggests the other. Ordering either of them anywhere
    * else would add noise to a ranking the spec reads position by position.
