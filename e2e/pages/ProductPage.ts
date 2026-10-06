@@ -32,7 +32,7 @@ export class ProductPage extends BasePage {
   readonly quantityInput: Locator;
   readonly addToCartButton: Locator;
   readonly addToCartStatus: Locator;
-  readonly compareLink: Locator;
+  readonly compareToggle: Locator;
   readonly relatedProducts: Locator;
 
   private slug = '';
@@ -73,7 +73,7 @@ export class ProductPage extends BasePage {
     this.quantityInput = page.getByTestId('product-quantity');
     this.addToCartButton = page.getByTestId('add-to-cart');
     this.addToCartStatus = page.getByTestId('add-to-cart-status');
-    this.compareLink = page.getByTestId('add-to-compare');
+    this.compareToggle = buyBox.getByTestId('compare-toggle');
     this.relatedProducts = page.getByTestId('related-products').getByTestId('product-card');
   }
 

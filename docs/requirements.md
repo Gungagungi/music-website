@@ -120,6 +120,8 @@ individually. The two figures are therefore expected to disagree, and the page h
 | `REQ-CMP-02` | The comparator holds at most three products | A fourth addition is refused with an explanation |
 | `REQ-CMP-03` | Heterogeneous specifications align | A specification absent from one product renders as an explicit gap, not a shifted row |
 | `REQ-CMP-04` | An empty comparator invites a selection | An empty state with a route back to the catalogue is shown |
+| `REQ-CMP-05` | The selection follows the visitor | Adding from a card or a product page shows a persistent bar that survives navigation; the same control removes, and the selection can be emptied |
+| `REQ-CMP-06` | A shared comparison link is honoured | A URL carrying references wins over the visitor's own selection and leaves it untouched |
 
 ## Cart and checkout
 
