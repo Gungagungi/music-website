@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 # Deploys a branch to pre-production, replacing the previous one.
 #
-#   npm run preprod:deploy -- <branch>
-#   ./scripts/deployer-preprod.sh <branch>
+#   npm run preprod:deploy -- <branch> [<commit>]
+#   ./scripts/deployer-preprod.sh <branch> [<commit>]
 #
 # The branch is read from `origin`, not from this checkout: what gets deployed is
-# what was pushed, and a locally modified file does not sneak in.
+# what was pushed, and a locally modified file does not sneak in. The optional
+# commit pins the deployment to one revision of that branch: the pre-production
+# check (scripts/verifier-preprod.py) reports on a given commit, and a push landing
+# between the moment it reads the PR and the fetch below would otherwise be
+# tested under the previous commit's status.
 #
 # The database is reset on every deployment. A pre-production that keeps the
 # previous branch's data tests the migration of a database production will never
@@ -23,9 +27,25 @@ ENV_PREPROD="$DEPOT/.env.preprod"
 ENV_PRODUCTION="$DEPOT/.env.production"
 
 branche=${1:-}
+commit=${2:-}
 if [ -z "$branche" ]; then
-  echo "Usage: $0 <branch>   (e.g. $0 feature/avis-clients)" >&2
+  echo "Usage: $0 <branch> [<commit>]   (e.g. $0 feature/avis-clients)" >&2
   exit 2
+fi
+
+# One slot, and a deployment wipes it: a manual deployment started while the
+# check is running would swap the build under its API suite, and the PR would be
+# judged on another branch's code. The check holds this same lock for the whole
+# deploy-and-test sequence and says so through PREPROD_LOCK_HELD — a second
+# `flock` here, on a new descriptor, would wait forever on its own parent.
+VERROU=$HOME/.local/share/fretline-preprod/deploy.lock
+if [ "${PREPROD_LOCK_HELD:-}" != 1 ]; then
+  mkdir -p "$(dirname "$VERROU")"
+  exec 9>"$VERROU"
+  if ! flock -n 9; then
+    echo "Pre-production busy: a deployment or the PR check is running ($VERROU)." >&2
+    exit 1
+  fi
 fi
 
 if [ ! -f "$ENV_PREPROD" ]; then
@@ -47,16 +67,24 @@ if ! git -C "$DEPOT" rev-parse --verify --quiet "origin/$branche^{commit}" >/dev
   echo "Branch not found on origin: $branche" >&2
   exit 1
 fi
+cible="origin/$branche"
+if [ -n "$commit" ]; then
+  if ! git -C "$DEPOT" merge-base --is-ancestor "$commit" "origin/$branche" 2>/dev/null; then
+    echo "Commit $commit is not on origin/$branche" >&2
+    exit 1
+  fi
+  cible=$commit
+fi
 
 # A dedicated worktree, never this checkout: the build reads the context as it is
 # on disk, and work in progress would end up in the image without anyone meaning
 # it to. Same rule as the CI self-healing agent.
 if [ -e "$WORKTREE/.git" ]; then
-  git -C "$WORKTREE" checkout --quiet --detach --force "origin/$branche"
+  git -C "$WORKTREE" checkout --quiet --detach --force "$cible"
   git -C "$WORKTREE" clean --quiet -fdx
 else
   mkdir -p "$(dirname "$WORKTREE")"
-  git -C "$DEPOT" worktree add --quiet --detach "$WORKTREE" "origin/$branche"
+  git -C "$DEPOT" worktree add --quiet --detach "$WORKTREE" "$cible"
 fi
 revision=$(git -C "$WORKTREE" log -1 --format='%h %s')
 echo "  $revision"

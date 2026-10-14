@@ -73,3 +73,17 @@ pre-production:
   warning; the pre-production uses `fretline-app:preprod`.
 - **The pre-production depends on production being up**: no `fretline-edge` network, no proxy.
   The deployment script checks it and refuses to go on.
+
+## Amendment — 2026-10: a required check
+
+Deployed by hand, the slot was skipped as soon as it was inconvenient: it sat on a September
+branch while three changes, two of them dependency upgrades (`next`, `sharp`), reached production
+without going through it. The deployment is now driven by `scripts/verifier-preprod.py`, a
+systemd timer on this host that deploys each pull request's head commit, runs the API suite
+against it, and posts the `Pré-production` commit status that `main` requires.
+
+The agent polls rather than being called: a runner cannot reach the host, and the two ways of
+letting it — an SSH key in the repository secrets, a self-hosted runner executing pull request
+code on the production machine — cost more than a five-minute delay. Pull requests from forks are
+never deployed, for the same reason. The queue is the one this ADR already accepted: one slot,
+so one pull request at a time.
