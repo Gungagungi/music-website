@@ -1,0 +1,16 @@
+# Pre-production check schedule.
+#
+# Every five minutes: the status is required to merge, so a push should get its
+# verdict within a coffee break. A tick with nothing new costs two GitHub API
+# calls per open PR; a tick that overlaps a running one exits on the lock.
+
+[Unit]
+Description=Fretline pre-production check of open pull requests, every 5 minutes
+Documentation=file:/home/debian/dev/pro/music-website/docs/deployment.md
+
+[Timer]
+OnBootSec=5min
+OnUnitInactiveSec=5min
+
+[Install]
+WantedBy=timers.target
