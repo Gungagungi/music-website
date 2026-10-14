@@ -219,14 +219,18 @@ test.describe('API — robustesse et sécurité', () => {
   );
 
   test(
-    'la CSP est stricte sans forcer le TLS sur une origine en clair',
+    'la CSP est stricte et ne force le TLS que sur une origine chiffrée',
     {
       tag: [TAGS.security, TAGS.regression],
-      annotation: [testCase('TC-447', 'CSP sur origine en clair'), covers('REQ-SEC-17')],
+      annotation: [testCase('TC-447', 'CSP selon le protocole de l\'origine'), covers('REQ-SEC-17')],
     },
     async ({ request }) => {
       const response = await request.get('/');
       const csp = response.headers()['content-security-policy'];
+      // The suite runs on plain-HTTP localhost in CI and on workstations, but
+      // over HTTPS against pre-production: the expectation follows the origin
+      // actually served, not the one this spec was first written against.
+      const chiffre = new URL(response.url()).protocol === 'https:';
 
       // What must stay strict whatever the protocol.
       expect(csp).toBeTruthy();
@@ -234,13 +238,13 @@ test.describe('API — robustesse et sécurité', () => {
       expect(csp).toContain("object-src 'none'");
       expect(csp).toContain("frame-ancestors 'none'");
 
-      // And what does not belong here. The suite is served in plain HTTP on
-      // localhost; WebKit does not exempt local origins from
-      // `upgrade-insecure-requests` and went fetching the `_next/static` chunks
-      // over `https://` on a port without TLS. Result: no script executed,
-      // `data-hydrated` never set, and all 28 WebKit specs timing out on
-      // `waitForHydration()` without a single wrong assertion.
-      expect(csp).not.toContain('upgrade-insecure-requests');
+      // And what belongs only on TLS. On plain-HTTP localhost, WebKit does not
+      // exempt local origins from `upgrade-insecure-requests` and went fetching
+      // the `_next/static` chunks over `https://` on a port without TLS. Result:
+      // no script executed, `data-hydrated` never set, and all 28 WebKit specs
+      // timing out on `waitForHydration()` without a single wrong assertion.
+      if (chiffre) expect(csp).toContain('upgrade-insecure-requests');
+      else expect(csp).not.toContain('upgrade-insecure-requests');
     },
   );
 });
