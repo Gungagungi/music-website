@@ -28,6 +28,11 @@ Les scripts sont dans `package.json` (racine et workspaces). Ce que leurs noms n
   `docker-compose.yml` en `${VAR:-…}`, pas seulement dans le Caddyfile — Caddy n'applique son
   défaut qu'à une variable absente, Compose transmet une variable vide, et un domaine ou un hash
   vide fait tomber tout le proxy, boutique comprise.
+  Ce déploiement manuel est désormais l'exception : le timer `verifier-preprod` (toutes les
+  5 min, sur le VPS) déploie chaque PR ouverte et pose le statut **requis** `Pré-production`
+  (santé + projet `api` contre la pré-prod). Le slot est verrouillé pendant une vérification,
+  `preprod:deploy` refuse alors de partir. Une spec qui suppose `http://localhost` casse ce
+  check — la pré-prod est en HTTPS, voir `TC-447`.
 - Les seuils k6 sont dérivés de `perf/baseline.json`, mesuré sur le runner CI par le workflow
   dédié — ne jamais éditer ce fichier à la main, et ne jamais relever un seuil pour faire passer
   un run : c'est la mesure qu'on refait, pas la borne qu'on déplace.
