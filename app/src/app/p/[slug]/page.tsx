@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import { AddToCartForm } from '@/components/AddToCartForm';
@@ -7,9 +7,12 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { PriceTag } from '@/components/PriceTag';
 import { ProductGrid } from '@/components/ProductGrid';
 import { Rating } from '@/components/Rating';
+import { CompareToggle } from '@/components/compare/CompareToggle';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { TrackProductView } from '@/components/analytics/TrackProductView';
 import { CATEGORY_BY_SLUG } from '@/data/categories';
+import { availabilityFor } from '@/lib/availability';
+import { COMPARE_COOKIE, parseCompareCookie } from '@/lib/compare';
 import { currentUser } from '@/lib/auth';
 import { getProductBySlug, queryProducts, reviewPage } from '@/lib/catalog';
 import { formatPrice } from '@/lib/money';
@@ -38,6 +41,8 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   if (!product) notFound();
 
   const reviewQuery = parseReviewParams(await searchParams);
+  const availability = availabilityFor(product.stock);
+  const comparedSlugs = parseCompareCookie((await cookies()).get(COMPARE_COOKIE)?.value);
   const category = CATEGORY_BY_SLUG.get(product.category);
   const [reviews, sameCategory, user] = await Promise.all([
     reviewPage(product.id, reviewQuery),
@@ -142,16 +147,29 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
 
           <p className="mt-1 text-xs text-fg-muted">TVA incluse</p>
 
+          {/* Two lines, not one: whether it can be had, and when. The second is
+              what a customer actually decides on, and a bare "En stock" said
+              nothing about waiting three weeks for a back-ordered instrument.
+              Both are pure functions of the stock level — no date is computed,
+              or the buy box would drift every night and take the visual
+              baseline with it. */}
           <p
             className={
-              product.stock > 0
+              availability.orderable
                 ? 'mt-4 text-sm font-semibold text-success'
                 : 'mt-4 text-sm font-semibold text-danger'
             }
             data-testid="product-availability"
             data-stock={product.stock}
+            data-availability={availability.level}
           >
-            {product.stock > 0 ? `En stock — ${product.stock} disponible(s)` : 'Rupture de stock'}
+            {availability.orderable
+              ? `${availability.label} — ${product.stock} disponible(s)`
+              : availability.label}
+          </p>
+
+          <p className="mt-1 text-sm text-fg-muted" data-testid="product-shipping">
+            {availability.shipping}
           </p>
 
           {product.leftHanded && (
@@ -170,13 +188,13 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
             <li>Garantie 3 ans</li>
           </ul>
 
-          <Link
-            href={`/comparateur?refs=${product.slug}`}
-            className="mt-4 inline-block text-sm underline hover:text-amber-brand"
-            data-testid="add-to-compare"
-          >
-            Comparer ce produit
-          </Link>
+          <div className="mt-4">
+            <CompareToggle
+              slug={product.slug}
+              selected={comparedSlugs.includes(product.slug)}
+              variant="button"
+            />
+          </div>
         </aside>
       </div>
 

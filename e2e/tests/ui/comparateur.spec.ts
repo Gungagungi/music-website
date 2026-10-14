@@ -87,17 +87,127 @@ test.describe('Comparateur', () => {
   );
 
   test(
-    'le lien « comparer » de la fiche produit alimente le comparateur',
+    'le bouton de la fiche produit alimente le comparateur',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-145', 'Ajout au comparateur depuis la fiche'), covers('REQ-CMP-01')],
+      annotation: [testCase('TC-145', 'Ajout au comparateur depuis la fiche'), covers('REQ-CMP-05')],
     },
     async ({ productPage, comparePage, page }) => {
       await productPage.openProduct(PRODUCTS.inStock.slug);
-      await productPage.compareLink.click();
+      await productPage.compareToggle.click();
+      await expect(comparePage.bar).toBeVisible();
+
+      await comparePage.openFromBar.click();
       await page.waitForURL('**/comparateur**');
 
       expect(await comparePage.comparedSlugs()).toEqual([PRODUCTS.inStock.slug]);
+    },
+  );
+
+  test(
+    'la sélection suit le visiteur d’une page à l’autre',
+    {
+      tag: [TAGS.smoke, TAGS.regression],
+      annotation: [testCase('TC-462', 'Persistance de la sélection'), covers('REQ-CMP-05')],
+    },
+    async ({ productPage, catalogPage, comparePage }) => {
+      await productPage.openProduct(PRODUCTS.inStock.slug);
+      await productPage.compareToggle.click();
+      await expect(comparePage.bar).toHaveAttribute('data-count', '1');
+
+      // The bar is rendered by the root layout from a cookie, so it survives a
+      // full navigation — that is the whole reason the selection is not held in
+      // component state.
+      await catalogPage.openCategory('guitares-electriques');
+      expect(await comparePage.selectionCount()).toBe(1);
+      await expect(comparePage.barItems).toHaveCount(1);
+    },
+  );
+
+  test(
+    'le même bouton retire ce qu’il a ajouté',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-463', 'Retrait depuis le bouton'), covers('REQ-CMP-05')],
+    },
+    async ({ productPage, comparePage }) => {
+      await productPage.openProduct(PRODUCTS.cheap.slug);
+
+      await productPage.compareToggle.click();
+      await expect(productPage.compareToggle).toHaveAttribute('data-selected', 'true');
+
+      // A mis-click is undone where it was made, rather than sending the
+      // visitor to the comparator to unpick it.
+      await productPage.compareToggle.click();
+      await expect(productPage.compareToggle).toHaveAttribute('data-selected', 'false');
+      expect(await comparePage.selectionCount()).toBe(0);
+    },
+  );
+
+  test(
+    'un quatrième produit est refusé plutôt que d’en évincer un',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-464', 'Limite atteinte'), covers('REQ-CMP-02')],
+    },
+    async ({ catalogPage, comparePage, page }) => {
+      await catalogPage.openCategory('guitares-electriques');
+
+      const toggles = page.getByTestId('compare-toggle');
+      for (let index = 0; index < 3; index += 1) {
+        await toggles.nth(index).click();
+        await expect(comparePage.bar).toHaveAttribute('data-count', String(index + 1));
+      }
+
+      await toggles.nth(3).click();
+
+      // Refused, and said so: silently dropping the oldest would discard
+      // something the visitor deliberately picked.
+      await expect(page.getByTestId('compare-limit').first()).toBeVisible();
+      expect(await comparePage.selectionCount()).toBe(3);
+    },
+  );
+
+  test(
+    '« tout retirer » vide la sélection et fait disparaître la barre',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-465', 'Vidage de la sélection'), covers('REQ-CMP-05')],
+    },
+    async ({ productPage, comparePage }) => {
+      await productPage.openProduct(PRODUCTS.leftHanded.slug);
+      await productPage.compareToggle.click();
+      await expect(comparePage.bar).toBeVisible();
+
+      await comparePage.clear.click();
+
+      // Absent, not merely empty: an empty bar would occupy screen space on
+      // every page to say nothing.
+      await expect(comparePage.bar).toHaveCount(0);
+    },
+  );
+
+  test(
+    'un lien de comparaison partagé l’emporte sur la sélection du visiteur',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-466', 'Lien de comparaison partagé'), covers('REQ-CMP-06')],
+    },
+    async ({ productPage, comparePage }) => {
+      await productPage.openProduct(PRODUCTS.inStock.slug);
+      await productPage.compareToggle.click();
+      await expect(comparePage.bar).toBeVisible();
+
+      // Somebody else's comparison link has to keep meaning what it says, so
+      // the URL wins over what this visitor happens to have collected.
+      await comparePage.compare([PRODUCTS.cheap.slug, PRODUCTS.leftHanded.slug]);
+
+      expect(await comparePage.comparedSlugs()).toEqual([
+        PRODUCTS.cheap.slug,
+        PRODUCTS.leftHanded.slug,
+      ]);
+      // And it leaves that selection alone.
+      expect(await comparePage.selectionCount()).toBe(1);
     },
   );
 });

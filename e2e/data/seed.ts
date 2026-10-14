@@ -139,6 +139,16 @@ export const PRODUCTS = {
     brand: 'Epiphone',
   },
   /**
+   * Reserved for the low-stock display spec, which forces the stock to an exact
+   * value and asserts the wording derived from it. Any other spec ordering this
+   * product would move the number under the assertion.
+   */
+  lowStock: {
+    slug: 'taylor-214ce-plus',
+    sku: 'TAY-214CEP-015',
+    brand: 'Taylor',
+  },
+  /**
    * Reserved for the UI review-publishing specs, and used by nothing else.
    * Publishing moves the product's average and its stored review count, both of
    * which those specs assert on — a second spot writing here would make them
@@ -218,6 +228,17 @@ export const RETENTION = {
 } as const;
 
 /** Business rules the suite asserts against. Mirrors `app/src/lib/money.ts`. */
+/**
+ * Availability thresholds, mirroring `app/src/lib/availability.ts`. Below the
+ * threshold the page names how many units are left, at or above it it says
+ * nothing more than "En stock".
+ */
+export const AVAILABILITY = {
+  lowStockThreshold: 3,
+  shippingInStock: 'Expédié sous 24 h',
+  shippingOutOfStock: 'Réapprovisionnement sous 3 à 4 semaines',
+} as const;
+
 export const RULES = {
   vatRate: 0.2,
   freeShippingThresholdCents: 19900,

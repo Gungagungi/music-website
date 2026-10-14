@@ -94,6 +94,8 @@ concatenation for exactly that reason.
 | `REQ-PDP-05` | Rating and review count agree with the reviews shown | The aggregate matches the review list; publishing a review moves it |
 | `REQ-PDP-06` | Related products are suggested | Suggestions exist and exclude the current product |
 | `REQ-PDP-07` | An unknown product returns 404 | The response status is 404 and a not-found page is shown |
+| `REQ-PDP-08` | A shipping delay is stated, not only availability | An available product ships within 24 h; an unavailable one states a restocking delay and stays unorderable |
+| `REQ-PDP-09` | A dwindling stock is named | At or below the threshold the remaining units are stated, above it they are not, and the catalogue card agrees with the product page |
 
 ### Customer reviews
 
@@ -118,6 +120,8 @@ individually. The two figures are therefore expected to disagree, and the page h
 | `REQ-CMP-02` | The comparator holds at most three products | A fourth addition is refused with an explanation |
 | `REQ-CMP-03` | Heterogeneous specifications align | A specification absent from one product renders as an explicit gap, not a shifted row |
 | `REQ-CMP-04` | An empty comparator invites a selection | An empty state with a route back to the catalogue is shown |
+| `REQ-CMP-05` | The selection follows the visitor | Adding from a card or a product page shows a persistent bar that survives navigation; the same control removes, and the selection can be emptied |
+| `REQ-CMP-06` | A shared comparison link is honoured | A URL carrying references wins over the visitor's own selection and leaves it untouched |
 
 ## Cart and checkout
 
