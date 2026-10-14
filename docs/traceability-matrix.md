@@ -417,7 +417,7 @@ if the committed copy differs.
 | `TC-444` | Scan a11y sombre — connexion | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
 | `TC-445` | Scan a11y sombre — inscription | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
 | `TC-446` | Scan a11y sombre — comparateur | `REQ-A11Y-07` | `a11y/accessibilite.spec.ts` |
-| `TC-447` | CSP sur origine en clair | `REQ-SEC-17` | `api/negatifs-securite.spec.ts` |
+| `TC-447` | CSP selon le protocole de l'origine | `REQ-SEC-17` | `api/negatifs-securite.spec.ts` |
 | `TC-448` | Histogramme des notes | `REQ-REV-01` | `ui/avis.spec.ts` |
 | `TC-449` | Pagination des avis | `REQ-REV-02` | `ui/avis.spec.ts` |
 | `TC-450` | Tri des avis | `REQ-REV-03` | `ui/avis.spec.ts` |

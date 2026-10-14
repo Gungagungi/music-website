@@ -277,6 +277,33 @@ does on any workstation.
 With nothing configured, the pre-production host answers 401 to everyone: Compose supplies a
 locked password hash and an empty key, which the Caddyfile never accepts.
 
+### Pull request check
+
+Every open, non-draft pull request goes through pre-production before it can be merged: the
+`Pré-production` commit status is required on `main`. A GitHub runner cannot reach this host, so
+the check is driven from the host itself — `scripts/verifier-preprod.py`, run every five minutes
+by a systemd timer:
+
+```bash
+sudo cp scripts/systemd/verifier-preprod.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now verifier-preprod.timer
+```
+
+For each PR head commit without a verdict, it posts `pending`, deploys that exact commit with
+`deployer-preprod.sh <branch> <commit>`, runs the `api` project against the slot, and posts
+`success` or `failure`. Nothing listens and no secret leaves the host: the agent polls and
+writes statuses with the host's `gh` session.
+
+- **One slot, one queue.** PRs are checked one after the other (~2 min each when the build cache
+  is warm). The slot holds the last PR checked; `preprod:deploy` waits for nothing and refuses
+  while a check holds the lock.
+- **Forks are never deployed.** The repository is public: a fork's PR would get its Dockerfile
+  built by the production host's Docker daemon. Such PRs receive an `error` status saying so.
+- **Logs stay on the host**, in `~/.local/share/fretline-preprod/journaux/pr-<n>-<sha>.log`
+  (30 days); the status description names the file.
+- **Re-running a check**: `./scripts/verifier-preprod.py --pr <n>`.
+
 ## Cart retention
 
 The `purge` service runs `node app/dist/db/purge.mjs` every `PURGE_INTERVAL_SECONDS`

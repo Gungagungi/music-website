@@ -1,0 +1,45 @@
+# Pre-production check for pull requests — see scripts/verifier-preprod.py
+#
+# Installation:
+#   sudo cp scripts/systemd/verifier-preprod.* /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now verifier-preprod.timer
+#
+# Runs as `debian`: it needs the docker group (deployment) and the `gh` session
+# of that account (commit statuses). Nothing here needs root.
+
+[Unit]
+Description=Fretline pre-production check of open pull requests
+Documentation=file:/home/debian/dev/pro/music-website/docs/deployment.md
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=debian
+Group=debian
+SupplementaryGroups=docker
+WorkingDirectory=/home/debian/dev/pro/music-website
+Environment=HOME=/home/debian
+
+# Node 22 through fnm's default alias, as the CI and the production image use.
+# Without it the suite would run on Debian's Node 20 in /usr/bin: ~/.bashrc stops
+# before the fnm block for non-interactive shells, and a systemd unit is one.
+Environment=PATH=/home/debian/.local/share/fnm/aliases/default/bin:/usr/local/bin:/usr/bin:/bin
+
+ExecStart=/home/debian/dev/pro/music-website/scripts/verifier-preprod.py
+
+# The store comes first. The application containers are capped by Compose, but
+# the build runs inside the Docker daemon, out of reach of these settings; they
+# still keep npm ci and the Playwright run behind the store's own processes.
+Nice=10
+IOSchedulingClass=idle
+CPUWeight=20
+
+# A tick can deploy several PRs one after the other — six were open when this
+# was installed, ~4 min each. The bound mostly exists so that a stuck build does
+# not hold the slot forever; the next tick redoes a PR left on `pending`.
+TimeoutStartSec=90min
+
+StandardOutput=journal
+StandardError=journal
