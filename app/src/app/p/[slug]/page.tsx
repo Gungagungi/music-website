@@ -7,6 +7,7 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { PriceTag } from '@/components/PriceTag';
 import { ProductGrid } from '@/components/ProductGrid';
 import { Rating } from '@/components/Rating';
+import { ProductTabs, parseProductTab } from '@/components/ProductTabs';
 import { StockAlertForm } from '@/components/StockAlertForm';
 import { CompareToggle } from '@/components/compare/CompareToggle';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
@@ -15,6 +16,7 @@ import { CATEGORY_BY_SLUG } from '@/data/categories';
 import { availabilityFor } from '@/lib/availability';
 import { COMPARE_COOKIE, parseCompareCookie } from '@/lib/compare';
 import { hasAlert } from '@/lib/repositories/stock-alerts';
+import { accessoriesFor, boughtTogetherWith } from '@/lib/repositories/suggestions';
 import { currentUser } from '@/lib/auth';
 import { getProductBySlug, queryProducts, reviewPage } from '@/lib/catalog';
 import { formatPrice } from '@/lib/money';
@@ -42,14 +44,18 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const reviewQuery = parseReviewParams(await searchParams);
+  const search = await searchParams;
+  const reviewQuery = parseReviewParams(search);
+  const tab = parseProductTab(search.onglet);
   const availability = availabilityFor(product.stock);
   const comparedSlugs = parseCompareCookie((await cookies()).get(COMPARE_COOKIE)?.value);
   const category = CATEGORY_BY_SLUG.get(product.category);
-  const [reviews, sameCategory, user] = await Promise.all([
+  const [reviews, sameCategory, user, accessories, boughtTogether] = await Promise.all([
     reviewPage(product.id, reviewQuery),
     queryProducts({ category: product.category, limit: 5 }),
     currentUser(),
+    accessoriesFor(product),
+    boughtTogetherWith(product.id),
   ]);
 
   // Only asked when it can matter: an available product shows no alert control,
@@ -115,19 +121,12 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
             </div>
           </div>
 
-          <section className="mt-10" aria-labelledby="specs-title">
-            <h2 id="specs-title" className="text-xl font-bold">
-              Caractéristiques
-            </h2>
-            <dl className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2" data-testid="product-specs">
-              {Object.entries(product.specs).map(([key, value]) => (
-                <div key={key} className="flex justify-between border-b border-line py-2">
-                  <dt className="text-sm text-fg-muted">{key}</dt>
-                  <dd className="text-sm font-medium">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
+          <ProductTabs
+            slug={product.slug}
+            active={tab}
+            specs={product.specs}
+            accessories={accessories}
+          />
 
           <ReviewsSection
             product={product}
@@ -215,6 +214,19 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           </div>
         </aside>
       </div>
+
+      {boughtTogether.length > 0 && (
+        <section className="mt-14" aria-labelledby="bought-together-title">
+          <h2 id="bought-together-title" className="text-2xl font-bold">
+            Souvent acheté avec
+          </h2>
+          {/* Read from the orders that actually contain this product, so the
+              section says something true or is not rendered at all. */}
+          <div className="mt-4">
+            <ProductGrid products={boughtTogether} testId="bought-together" />
+          </div>
+        </section>
+      )}
 
       {related.length > 0 && (
         <section className="mt-14" aria-labelledby="related-title">
