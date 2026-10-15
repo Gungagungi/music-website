@@ -139,6 +139,32 @@ export const PRODUCTS = {
     brand: 'Epiphone',
   },
   /**
+   * Reserved for the restock-alert specs, which force the stock to zero and
+   * back. Two products rather than one: subscribing and sweeping are different
+   * assertions, and a spec that sweeps would fire the other spec's alert.
+   */
+  alertTarget: {
+    slug: 'jackson-pro-series-soloist-sl2',
+    sku: 'JAC-PROSER-012',
+    brand: 'Jackson',
+  },
+  restockTarget: {
+    slug: 'gretsch-g2622-streamliner',
+    sku: 'GRE-G2622S-013',
+    brand: 'Gretsch',
+  },
+  /**
+   * The one alert spec that needs an *available* product. It cannot share
+   * `alertTarget`, which the other alert specs hold at zero: `fullyParallel`
+   * would let the two arrangements interleave, and the failure would read as a
+   * broken rule rather than as two specs fighting over one shelf.
+   */
+  alertAvailableTarget: {
+    slug: 'ibanez-az2402-prestige',
+    sku: 'IBA-AZ2402-008',
+    brand: 'Ibanez',
+  },
+  /**
    * Reserved for the low-stock display spec, which forces the stock to an exact
    * value and asserts the wording derived from it. Any other spec ordering this
    * product would move the number under the assertion.

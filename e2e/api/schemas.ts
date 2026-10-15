@@ -87,6 +87,21 @@ export const reviewPageSchema = z
   })
   .strict();
 
+export const stockAlertSchema = z
+  .object({
+    id: z.string().uuid(),
+    productId: z.string().min(1),
+    slug: z.string(),
+    name: z.string(),
+    brand: z.string(),
+    createdAt: z.string().datetime(),
+    /** NULL while pending, a timestamp once the restock notice went out. */
+    notifiedAt: z.string().datetime().nullable(),
+  })
+  .strict();
+
+export const stockAlertListSchema = z.object({ items: z.array(stockAlertSchema) }).strict();
+
 export const productDetailSchema = productSchema.extend({
   reviews: z.array(reviewSchema),
 });

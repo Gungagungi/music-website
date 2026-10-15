@@ -153,6 +153,17 @@ export interface Review {
   verifiedPurchase: boolean;
 }
 
+export interface StockAlert {
+  id: string;
+  productId: string;
+  slug: string;
+  name: string;
+  brand: string;
+  createdAt: string;
+  /** NULL while waiting; a timestamp once the restock notice went out. */
+  notifiedAt: string | null;
+}
+
 export type ReviewSortKey = 'recents' | 'anciens' | 'note-desc' | 'note-asc';
 
 export const REVIEW_SORT_KEYS = ['recents', 'anciens', 'note-desc', 'note-asc'] as const;

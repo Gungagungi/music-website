@@ -15,6 +15,13 @@
       "when": 1788116718965,
       "tag": "0001_reviews_verified_purchase",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788159970856,
+      "tag": "0002_stock_alerts",
+      "breakpoints": true
     }
   ]
 }
