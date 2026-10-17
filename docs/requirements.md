@@ -127,6 +127,14 @@ alerts fire, and that each fires exactly once.
 | `REQ-ALERT-02` | The alert is offered only where it means something | Absent on an available product; a visitor without an account is offered sign-in, and the alerts page is not reachable without one |
 | `REQ-ALERT-03` | A customer manages their own alerts | Subscribing and cancelling happen from the product page; the alerts page lists them with their state |
 
+### Buying guides and browsing history
+
+| ID | Requirement | Acceptance criteria |
+| --- | --- | --- |
+| `REQ-GUIDE-01` | Buying guides are reachable and addressable | Listed from the footer, each one at its own URL; an unknown guide returns 404 |
+| `REQ-GUIDE-02` | A guide is tied to the shelf it describes | The guide links back to its category and its products; the category links to the guide |
+| `REQ-GUIDE-03` | Recently viewed products follow the visitor | A visited product appears on the *next* page, never on its own, and revisiting reorders rather than duplicates |
+
 ### Favourites
 
 | ID | Requirement | Acceptance criteria |

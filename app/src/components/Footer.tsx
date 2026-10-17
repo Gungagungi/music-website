@@ -39,6 +39,11 @@ export function Footer() {
         <nav aria-label="Informations">
           <p className="font-semibold text-white">Informations</p>
           <ul className="mt-3 space-y-1 text-sm">
+            <li>
+              <Link href="/guides" className="hover:text-amber-brand" data-testid="footer-guides">
+                Guides d’achat
+              </Link>
+            </li>
             <li>Livraison offerte dès 199 €</li>
             <li>Retour sous 30 jours</li>
             <li>Garantie 3 ans</li>

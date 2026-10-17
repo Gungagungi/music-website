@@ -8,6 +8,7 @@ import { Pagination } from '@/components/Pagination';
 import { ProductGrid } from '@/components/ProductGrid';
 import { SortSelect } from '@/components/SortSelect';
 import { CATEGORY_BY_SLUG } from '@/data/categories';
+import { guidesForCategory } from '@/data/guides';
 import { listBrands, priceRangeFor, queryProducts } from '@/lib/catalog';
 import { activeFilterCount, buildCatalogHref, parseCatalogParams } from '@/lib/search-params';
 import type { CategorySlug } from '@/lib/types';
@@ -33,6 +34,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   const raw = await searchParams;
   const query = { ...parseCatalogParams(raw), category: definition.slug };
+  const guides = guidesForCategory(definition.slug);
   // The shelf and its two facets do not depend on each other — one round trip.
   const [result, brands, priceBounds] = await Promise.all([
     queryProducts(query),
@@ -58,6 +60,24 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         {definition.label}
       </h1>
       <p className="mt-2 max-w-3xl text-fg-muted">{definition.tagline}</p>
+
+      {/* A shelf links to the guide written for it, when there is one. The guide
+          names its own category, so no second table maps the two. */}
+      {guides.length > 0 && (
+        <ul className="mt-3 flex flex-wrap gap-3 text-sm" data-testid="category-guides">
+          {guides.map((guide) => (
+            <li key={guide.slug}>
+              <Link
+                href={`/guides/${guide.slug}`}
+                className="underline hover:text-amber-brand"
+                data-testid="category-guide-link"
+              >
+                {guide.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[280px_1fr]">
         <FacetPanel brands={brands} priceBounds={priceBounds} />
