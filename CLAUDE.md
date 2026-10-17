@@ -258,9 +258,10 @@ travail à la main :
 
 ## Conventions
 
-- Français pour l'interface, les commentaires, les messages d'erreur API, les noms de tests et les messages de commit (`feat|fix|test|ci(scope): …`). Identifiants de code en anglais.
+- Français pour l'interface, les messages d'erreur API, les noms de tests et les messages de commit (`feat|fix|test|ci(scope): …`).
+- Anglais pour les identifiants de code et pour les commentaires — code, infrastructure, CI (depuis la PR #46). Ne pas écrire un nouveau commentaire en français à côté des autres.
 - Les commentaires du dépôt expliquent *pourquoi* une décision a été prise, souvent en citant le défaut concret qui l'a motivée. Conserver ce registre plutôt que de paraphraser le code.
-- Documentation QA en anglais (`docs/`, `README.md`), tout le reste en français. C'est un arbitrage assumé : le dépôt sert de portfolio, la doc doit être lisible par un recruteur anglophone.
+- Documentation QA en anglais (`docs/`, `README.md`). C'est un arbitrage assumé : le dépôt sert de portfolio, le code et la doc doivent être lisibles par un recruteur anglophone.
 - `docs/api/openapi.json` est **généré** par `npm run openapi -w e2e` depuis `e2e/api/schemas.ts` et la table d'opérations `e2e/api/openapi.ts`. Le sens de dérivation est délibérément l'inverse de l'habitude : les schémas sont la source, la spec en découle. Écrire la spec à la main donnerait deux descriptions de la même API dont une seule est exécutée, et c'est la seconde qui dérive. Le job `qualite` lance `openapi:check`, qui valide le document et échoue si le committé diverge.
 - `docs/traceability-matrix.md` et `docs/test-cases/test-cases.csv` sont **générés** par `npm run trace -w e2e` depuis les annotations `testCase()` / `covers()`. Ne jamais les éditer à la main : le job `qualite` lance `trace:check` et échoue si le committé diverge du code. Toute nouvelle spec doit donc porter ses annotations, et la régénération doit être committée dans le même changement.
 - Un identifiant `TC-xxx` couvre **une** vérification. Un cas paramétré donne un identifiant par scénario, sinon la matrice ment (une ligne prétendrait couvrir trois vérifications, et en supprimer une passerait inaperçu).
