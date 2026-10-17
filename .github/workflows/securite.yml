@@ -36,14 +36,14 @@ jobs:
     name: Dépendances et secrets
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Full history: the committed-secrets check only judges HEAD's
           # content, but a useful diagnosis needs to be able to trace back to
           # the offending commit without re-cloning.
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -63,7 +63,7 @@ jobs:
     name: CVE des images
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The application image is built here rather than pulled from a registry:
       # the repository publishes none, and scanning the image the current
@@ -108,7 +108,7 @@ jobs:
     name: Fin de support
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # No dependency: the check reads the compose file, the Dockerfile and
       # app/package.json, then queries endoflife.date. It is the only job in
@@ -132,7 +132,7 @@ jobs:
     # that succeeds for lack of doing anything is worse than no job at all.
     if: vars.FRETLINE_URL != ''
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Headers, TLS, test endpoints
         run: |
