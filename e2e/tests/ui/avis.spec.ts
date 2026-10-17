@@ -179,7 +179,7 @@ test.describe('Fiche produit — avis clients', () => {
     },
     async ({ productPage, registeredUser, signInAs }) => {
       await signInAs(registeredUser.credentials.email, registeredUser.credentials.password);
-      await productPage.openProduct(PRODUCTS.reviewTarget.slug);
+      await productPage.openProduct(PRODUCTS.reviewDuplicate.slug);
 
       const payload = {
         rating: 5,
