@@ -254,4 +254,94 @@ test.describe('API — commandes', () => {
       expect(body.error.code).toBe('UNAUTHORIZED');
     },
   );
+
+  test(
+    'GET /api/orders/{id} accepte la référence lisible autant que l’identifiant',
+    {
+      tag: [TAGS.regression, TAGS.contract],
+      annotation: [testCase('TC-503', 'Commande lue par sa référence'), covers('REQ-API-37')],
+    },
+    async ({ authedApi }) => {
+      await authedApi.addToCartAndTrack({ sku: PRODUCTS.cheap.sku, quantity: 1 });
+      const order = await authedApi.expectOk(
+        await authedApi.createOrder(new OrderBuilder().build()),
+        orderWithTokenSchema,
+        201,
+      );
+
+      // The route resolves `id::text OR reference`: that is what makes the
+      // confirmation URL shareable without exposing a UUID. Only the id was
+      // exercised, so half of that disjunction could fall silently.
+      //
+      // `orderWithTokenSchema`, not `orderSchema`: the route does return the
+      // access token on the detail, whereas `docs/api/openapi.json` announces an
+      // `orderSchema` without it, and the history strips it explicitly
+      // (TC-259). A divergence recorded, not endorsed — this test describes
+      // what the API does today.
+      const parReference = await authedApi.expectOk(
+        await authedApi.order(order.reference),
+        orderWithTokenSchema,
+      );
+      expect(parReference.id).toBe(order.id);
+    },
+  );
+
+  test(
+    'GET /api/orders/{id} distingue la commande absente de la commande interdite',
+    {
+      tag: [TAGS.regression, TAGS.contract],
+      annotation: [testCase('TC-504', 'Commande introuvable'), covers('REQ-API-37')],
+    },
+    async ({ authedApi }) => {
+      // 404 here, 403 in TC-258: the route makes the distinction on purpose,
+      // and only one side of it was guarded. A blanket `NOT_FOUND` would pass
+      // TC-258 without anything noticing.
+      const inconnue = await authedApi.expectOk(
+        await authedApi.order('FRT-999999'),
+        apiErrorSchema,
+        404,
+      );
+      expect(inconnue.error.code).toBe('NOT_FOUND');
+
+      // An identifier that is not a UUID must not surface as a 500: the
+      // comparison is done as text precisely for that.
+      const malforme = await authedApi.expectOk(
+        await authedApi.order('pas-un-identifiant'),
+        apiErrorSchema,
+        404,
+      );
+      expect(malforme.error.code).toBe('NOT_FOUND');
+    },
+  );
+
+  test(
+    'un jeton de commande erroné ne vaut pas mieux qu’un jeton absent',
+    {
+      tag: [TAGS.security, TAGS.regression],
+      annotation: [testCase('TC-505', 'Jeton de commande falsifié'), covers('REQ-SEC-05')],
+    },
+    async ({ api, otherApi }) => {
+      await api.addToCartAndTrack({ sku: PRODUCTS.cheap.sku, quantity: 1 });
+      const order = await api.expectOk(
+        await api.createOrder(new OrderBuilder().asGuest(uniqueEmail('invite')).build()),
+        orderWithTokenSchema,
+        201,
+      );
+
+      // TC-257 exercises a missing token. A wrong token takes another path —
+      // `timingSafeEqual`, which throws when the two buffers differ in length.
+      // All three lengths are therefore tested: otherwise a 500 could stand in
+      // for a refusal.
+      const memeLongueur = order.accessToken.replace(/.$/, (c) => (c === '0' ? '1' : '0'));
+
+      for (const jeton of [memeLongueur, 'trop-court', `${order.accessToken}-de-trop`]) {
+        const refus = await otherApi.expectOk(
+          await otherApi.order(order.id, jeton),
+          apiErrorSchema,
+          401,
+        );
+        expect(refus.error.code, `jeton ${jeton}`).toBe('UNAUTHORIZED');
+      }
+    },
+  );
 });

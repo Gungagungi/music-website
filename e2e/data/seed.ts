@@ -200,15 +200,26 @@ export const PRODUCTS = {
     brand: 'Taylor',
   },
   /**
-   * Reserved for the UI review-publishing specs, and used by nothing else.
-   * Publishing moves the product's average and its stored review count, both of
-   * which those specs assert on — a second spot writing here would make them
-   * fail for a reason unrelated to the behaviour under test.
+   * Reserved for the UI spec that publishes a review and counts the list
+   * (TC-455), and used by nothing else. Publishing moves the product's average
+   * and its stored review count — a second spot writing here would make that
+   * count fail for a reason unrelated to the behaviour under test.
+   *
+   * This includes the duplicate-review spec, which has its own product below:
+   * both once shared this one, and under `fullyParallel` the duplicate spec's
+   * review regularly landed between TC-455 reading its baseline and asserting
+   * `before + 1`.
    */
   reviewTarget: {
     slug: 'martin-guitar-d-28-standard',
     sku: 'MAR-D28STA-014',
     brand: 'Martin Guitar',
+  },
+  /** Reserved for the duplicate-review spec (TC-456) — see `reviewTarget`. */
+  reviewDuplicate: {
+    slug: 'gibson-j-45-studio-walnut',
+    sku: 'GIB-J45STU-018',
+    brand: 'Gibson',
   },
   /** Reserved for the checkout atomicity spec — the line that must survive. */
   atomicityIntact: {
