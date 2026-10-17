@@ -270,3 +270,6 @@ TC-499,Guide depuis le rayon,UI,Guides d’achat,un rayon met en avant le guide 
 TC-500,Guide inconnu,UI,Guides d’achat,un guide inexistant renvoie une page 404,ui/guides.spec.ts,@regression,REQ-GUIDE-01,
 TC-501,Historique de consultation,UI,Vus récemment,"la fiche consultée apparaît sur la suivante, jamais sur elle-même",ui/guides.spec.ts,@regression,REQ-GUIDE-03,
 TC-502,Ordre de l’historique,UI,Vus récemment,revoir un produit le remonte au lieu de le dupliquer,ui/guides.spec.ts,@regression,REQ-GUIDE-03,
+TC-503,Commande lue par sa référence,API,API — commandes,GET /api/orders/{id} accepte la référence lisible autant que l’identifiant,api/commandes.spec.ts,@contract @regression,REQ-API-37,
+TC-504,Commande introuvable,API,API — commandes,GET /api/orders/{id} distingue la commande absente de la commande interdite,api/commandes.spec.ts,@contract @regression,REQ-API-37,
+TC-505,Jeton de commande falsifié,API,API — commandes,un jeton de commande erroné ne vaut pas mieux qu’un jeton absent,api/commandes.spec.ts,@regression @security,REQ-SEC-05,

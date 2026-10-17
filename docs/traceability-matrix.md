@@ -10,13 +10,13 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 181 |
-| — covered by this suite | 180 |
+| Requirements declared | 182 |
+| — covered by this suite | 181 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 271 |
+| Automated test cases | 274 |
 | — Accessibility | 20 |
-| — API | 93 |
+| — API | 96 |
 | — UI | 140 |
 | — Visual | 18 |
 | Test cases without a requirement | 0 |
@@ -63,6 +63,7 @@ if the committed copy differs.
 | `REQ-API-34` | `TC-254` | API | @contract @regression |
 | `REQ-API-35` | `TC-255` | API | @regression |
 | `REQ-API-36` | `TC-256` | API | @regression |
+| `REQ-API-37` | `TC-503`, `TC-504` | API | @contract @regression |
 | `REQ-API-40` | `TC-270` | API | @critical @smoke |
 | `REQ-API-41` | `TC-271`, `TC-276`, `TC-277` | API | @contract @regression |
 | `REQ-API-42` | `TC-272` | API | @regression |
@@ -175,7 +176,7 @@ if the committed copy differs.
 | `REQ-SEC-02` | `TC-203`, `TC-260` | API | @security @smoke |
 | `REQ-SEC-03` | `TC-128` | UI | @regression @security |
 | `REQ-SEC-04` | `TC-241` | API | @critical @regression @security |
-| `REQ-SEC-05` | `TC-257` | API | @critical @regression @security |
+| `REQ-SEC-05` | `TC-257`, `TC-505` | API | @critical @regression @security |
 | `REQ-SEC-06` | `TC-258`, `TC-259` | API | @contract @critical @security |
 | `REQ-SEC-07` | `TC-280` | API | @regression @security |
 | `REQ-SEC-08` | `TC-292` | API | @critical @regression @security |
@@ -481,6 +482,9 @@ if the committed copy differs.
 | `TC-500` | Guide inconnu | `REQ-GUIDE-01` | `ui/guides.spec.ts` |
 | `TC-501` | Historique de consultation | `REQ-GUIDE-03` | `ui/guides.spec.ts` |
 | `TC-502` | Ordre de l’historique | `REQ-GUIDE-03` | `ui/guides.spec.ts` |
+| `TC-503` | Commande lue par sa référence | `REQ-API-37` | `api/commandes.spec.ts` |
+| `TC-504` | Commande introuvable | `REQ-API-37` | `api/commandes.spec.ts` |
+| `TC-505` | Jeton de commande falsifié | `REQ-SEC-05` | `api/commandes.spec.ts` |
 
 ## Verified outside the automated suite
 
