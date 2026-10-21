@@ -4,7 +4,7 @@ The `REQ-*` catalogue the suite is written against. Each identifier is reference
 through `covers('REQ-XXX-NN')`, which is what makes the
 [traceability matrix](traceability-matrix.md) derivable rather than aspirational.
 
-129 requirements, all covered. Coverage per requirement is in the matrix; this document is the
+130 requirements, all covered. Coverage per requirement is in the matrix; this document is the
 statement of intent.
 
 A note on framing: Fretline has no product owner, so these were written the way a QA engineer
@@ -23,6 +23,7 @@ falsifiable, never implementation. "The cart shows VAT contained within the tota
 | `REQ-HOME-01` | The home page presents the shop | Hero, department list, and three product selections (best sellers, new arrivals, deals) are visible |
 | `REQ-NAV-01` | Departments are reachable from the header | Selecting a department navigates to its catalogue page with the matching heading |
 | `REQ-NAV-02` | A breadcrumb reflects the catalogue hierarchy | The product page shows its category; following the breadcrumb returns to that category |
+| `REQ-NAV-03` | Every page has its own title | Each route's `<title>` names the page, followed by the shop name; the home page carries the shop's name; a 404 says the page was not found instead of inheriting the home title |
 
 ### Display theme
 

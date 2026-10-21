@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 182 |
-| — covered by this suite | 181 |
+| Requirements declared | 183 |
+| — covered by this suite | 182 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 274 |
+| Automated test cases | 293 |
 | — Accessibility | 20 |
 | — API | 96 |
-| — UI | 140 |
+| — UI | 159 |
 | — Visual | 18 |
 | Test cases without a requirement | 0 |
 
@@ -134,6 +134,7 @@ if the committed copy differs.
 | `REQ-HOME-01` | `TC-010` | UI | @critical @smoke |
 | `REQ-NAV-01` | `TC-012` | UI | @smoke |
 | `REQ-NAV-02` | `TC-062` | UI | @regression |
+| `REQ-NAV-03` | `TC-506`, `TC-507`, `TC-508`, `TC-509`, `TC-510`, `TC-511`, `TC-512`, `TC-513`, `TC-514`, `TC-515`, `TC-516`, `TC-517`, `TC-518`, `TC-519`, `TC-520`, `TC-521`, `TC-522`, `TC-523`, `TC-524` | UI | @regression |
 | `REQ-OPS-01` | `TC-001` | API | @contract @smoke |
 | `REQ-ORDER-01` | `TC-120` | UI | @critical @smoke |
 | `REQ-ORDER-02` | `TC-121` | UI | @critical @smoke |
@@ -485,6 +486,25 @@ if the committed copy differs.
 | `TC-503` | Commande lue par sa référence | `REQ-API-37` | `api/commandes.spec.ts` |
 | `TC-504` | Commande introuvable | `REQ-API-37` | `api/commandes.spec.ts` |
 | `TC-505` | Jeton de commande falsifié | `REQ-SEC-05` | `api/commandes.spec.ts` |
+| `TC-506` | Titre — Accueil | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-507` | Titre — Rayon | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-508` | Titre — Fiche produit | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-509` | Titre — Recherche | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-510` | Titre — Panier | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-511` | Titre — Commande | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-512` | Titre — Comparateur | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-513` | Titre — Connexion | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-514` | Titre — Inscription | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-515` | Titre — Liste des guides | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-516` | Titre — Guide | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-517` | Titre — Route inconnue | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-518` | Titre — Produit inconnu | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-519` | Titre — Mes commandes | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-520` | Titre — Mes favoris | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-521` | Titre — Mes alertes | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-522` | Titre — Confirmation de commande | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-523` | Titre — Rayon inconnu | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-524` | Titre — Guide inconnu | `REQ-NAV-03` | `ui/titres.spec.ts` |
 
 ## Verified outside the automated suite
 

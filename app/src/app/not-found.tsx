@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+// Without its own title the 404 inherited the home page's default, so an
+// unknown URL announced itself as the shop's front page in tabs and history.
+export const metadata: Metadata = { title: 'Page introuvable' };
 
 export default function NotFound() {
   return (
