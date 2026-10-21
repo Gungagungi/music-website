@@ -24,6 +24,7 @@ falsifiable, never implementation. "The cart shows VAT contained within the tota
 | `REQ-NAV-01` | Departments are reachable from the header | Selecting a department navigates to its catalogue page with the matching heading |
 | `REQ-NAV-02` | A breadcrumb reflects the catalogue hierarchy | The product page shows its category; following the breadcrumb returns to that category |
 | `REQ-NAV-03` | Every page has its own title | Each route's `<title>` names the page, followed by the shop name; the home page carries the shop's name; a 404 says the page was not found instead of inheriting the home title |
+| `REQ-NAV-04` | Every indexable page has its own meta description | Each catalogue and content route serves exactly one `<meta name="description">`; the home page carries the shop's description; a department, a product and a guide each describe themselves instead of inheriting it |
 
 ### Display theme
 

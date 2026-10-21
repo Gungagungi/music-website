@@ -24,7 +24,10 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { category } = await params;
   const definition = CATEGORY_BY_SLUG.get(category as CategorySlug);
-  return { title: definition ? definition.label : 'Catégorie introuvable' };
+  // The tagline is the shelf's own summary; without it every department would
+  // share the layout's description and read as duplicates to a search engine.
+  if (!definition) return { title: 'Catégorie introuvable' };
+  return { title: definition.label, description: definition.tagline };
 }
 
 export default async function CategoryPage({ params, searchParams }: PageProps) {

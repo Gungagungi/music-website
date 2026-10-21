@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 183 |
-| — covered by this suite | 182 |
+| Requirements declared | 184 |
+| — covered by this suite | 183 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 293 |
+| Automated test cases | 298 |
 | — Accessibility | 20 |
 | — API | 96 |
-| — UI | 159 |
+| — UI | 164 |
 | — Visual | 18 |
 | Test cases without a requirement | 0 |
 
@@ -135,6 +135,7 @@ if the committed copy differs.
 | `REQ-NAV-01` | `TC-012` | UI | @smoke |
 | `REQ-NAV-02` | `TC-062` | UI | @regression |
 | `REQ-NAV-03` | `TC-506`, `TC-507`, `TC-508`, `TC-509`, `TC-510`, `TC-511`, `TC-512`, `TC-513`, `TC-514`, `TC-515`, `TC-516`, `TC-517`, `TC-518`, `TC-519`, `TC-520`, `TC-521`, `TC-522`, `TC-523`, `TC-524` | UI | @regression |
+| `REQ-NAV-04` | `TC-525`, `TC-526`, `TC-527`, `TC-528`, `TC-529` | UI | @regression |
 | `REQ-OPS-01` | `TC-001` | API | @contract @smoke |
 | `REQ-ORDER-01` | `TC-120` | UI | @critical @smoke |
 | `REQ-ORDER-02` | `TC-121` | UI | @critical @smoke |
@@ -505,6 +506,11 @@ if the committed copy differs.
 | `TC-522` | Titre — Confirmation de commande | `REQ-NAV-03` | `ui/titres.spec.ts` |
 | `TC-523` | Titre — Rayon inconnu | `REQ-NAV-03` | `ui/titres.spec.ts` |
 | `TC-524` | Titre — Guide inconnu | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-525` | Description — Accueil | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
+| `TC-526` | Description — Rayon | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
+| `TC-527` | Description — Fiche produit | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
+| `TC-528` | Description — Liste des guides | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
+| `TC-529` | Description — Guide | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
 
 ## Verified outside the automated suite
 

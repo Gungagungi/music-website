@@ -258,7 +258,11 @@ export const STOCK_TOP_UP = [
 ] as const;
 
 export const CATEGORIES = {
-  electricGuitars: { slug: 'guitares-electriques', label: 'Guitares électriques' },
+  electricGuitars: {
+    slug: 'guitares-electriques',
+    label: 'Guitares électriques',
+    tagline: 'Solid body, semi-hollow et signatures, du modèle d’étude à la lutherie haut de gamme.',
+  },
   effectPedals: { slug: 'pedales-effets', label: 'Pédales d’effets' },
   strings: { slug: 'cordes', label: 'Cordes' },
 } as const;
