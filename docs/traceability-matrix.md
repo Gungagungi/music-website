@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 185 |
-| — covered by this suite | 184 |
+| Requirements declared | 186 |
+| — covered by this suite | 185 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 300 |
+| Automated test cases | 312 |
 | — Accessibility | 20 |
 | — API | 98 |
-| — UI | 164 |
+| — UI | 176 |
 | — Visual | 18 |
 | Test cases without a requirement | 0 |
 
@@ -137,6 +137,7 @@ if the committed copy differs.
 | `REQ-NAV-03` | `TC-506`, `TC-507`, `TC-508`, `TC-509`, `TC-510`, `TC-511`, `TC-512`, `TC-513`, `TC-514`, `TC-515`, `TC-516`, `TC-517`, `TC-518`, `TC-519`, `TC-520`, `TC-521`, `TC-522`, `TC-523`, `TC-524` | UI | @regression |
 | `REQ-NAV-04` | `TC-525`, `TC-526`, `TC-527`, `TC-528`, `TC-529` | UI | @regression |
 | `REQ-NAV-05` | `TC-530`, `TC-531` | API | @regression @smoke |
+| `REQ-NAV-06` | `TC-532`, `TC-533`, `TC-534`, `TC-535`, `TC-536`, `TC-537`, `TC-538`, `TC-539`, `TC-540`, `TC-541`, `TC-542`, `TC-543` | UI | @regression |
 | `REQ-OPS-01` | `TC-001` | API | @contract @smoke |
 | `REQ-ORDER-01` | `TC-120` | UI | @critical @smoke |
 | `REQ-ORDER-02` | `TC-121` | UI | @critical @smoke |
@@ -514,6 +515,18 @@ if the committed copy differs.
 | `TC-529` | Description — Guide | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
 | `TC-530` | robots.txt — boutique fictive | `REQ-NAV-05` | `api/robots.spec.ts` |
 | `TC-531` | robots.txt — chemins exclus | `REQ-NAV-05` | `api/robots.spec.ts` |
+| `TC-532` | Indexation — Panier | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-533` | Indexation — Commande | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-534` | Indexation — Connexion | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-535` | Indexation — Inscription | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-536` | Indexation — Mes commandes | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-537` | Indexation — Mes favoris | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-538` | Indexation — Mes alertes | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-539` | Indexation — Confirmation de commande | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-540` | Indexation — Accueil | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-541` | Indexation — Rayon | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-542` | Indexation — Fiche produit | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-543` | Indexation — Guide | `REQ-NAV-06` | `ui/indexation.spec.ts` |
 
 ## Verified outside the automated suite
 
