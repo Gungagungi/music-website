@@ -216,3 +216,76 @@ test.describe('Accessibilité — thème sombre', () => {
     );
   }
 });
+
+/**
+ * What axe lets through. Each of these was found by reading the components
+ * while every scan above was green: the patterns involved are either "needs
+ * review" in axe or not rules at all, only guidance from the ARIA authoring
+ * practices.
+ */
+test.describe('Accessibilité — noms et états des contrôles', () => {
+  test(
+    'les bascules annoncent leur état par leur libellé, sans aria-pressed contradictoire',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-530', 'Bascules sans double état'), covers('REQ-A11Y-08')],
+    },
+    async ({ productPage, page }) => {
+      // The out-of-stock product renders all three toggles: compare, wishlist
+      // and back-in-stock alert.
+      await productPage.openProduct(PRODUCTS.outOfStock.slug);
+
+      // A label that flips plus `aria-pressed` is read as "Retirer du
+      // comparateur, pressed": the state is said twice, and the two readings
+      // contradict each other.
+      await expect(page.locator('[aria-pressed]')).toHaveCount(0);
+
+      await expect(productPage.compareToggle).toHaveAccessibleName('Comparer ce produit');
+      await productPage.compareToggle.click();
+      await expect(productPage.compareToggle).toHaveAccessibleName('Retirer du comparateur');
+    },
+  );
+
+  test(
+    'le lien du panier énonce le nombre d’articles dans son nom accessible',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-531', 'Nom du lien panier'), covers('REQ-A11Y-08')],
+    },
+    async ({ page }) => {
+      await page.goto('/');
+
+      // An `aria-label` on the badge span is dropped — a span has no role to
+      // carry a name — and the link reads as a bare "Panier 0".
+      await expect(page.getByTestId('cart-link')).toHaveAccessibleName('Panier (0 article)');
+    },
+  );
+
+  test(
+    'le refus d’un quatrième produit arrive dans une région live déjà présente',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-532', 'Région live du comparateur'), covers('REQ-A11Y-08')],
+    },
+    async ({ catalogPage, page }) => {
+      await catalogPage.openCategory(CATEGORIES.electricGuitars.slug);
+
+      const cards = page.getByTestId('product-card');
+      const fourthStatus = cards.nth(3).getByRole('status');
+
+      // Present and empty before anything happens: a region inserted together
+      // with its text is often never announced.
+      await expect(fourthStatus).toBeAttached();
+      await expect(fourthStatus).toBeEmpty();
+
+      for (let index = 0; index < 3; index += 1) {
+        const toggle = cards.nth(index).getByTestId('compare-toggle');
+        await toggle.click();
+        await expect(toggle).toHaveAttribute('data-selected', 'true');
+      }
+      await cards.nth(3).getByTestId('compare-toggle').click();
+
+      await expect(fourthStatus).toHaveText('Comparaison limitée à 3 produits.');
+    },
+  );
+});

@@ -292,3 +292,6 @@ TC-521,Titre — Mes alertes,UI,Titres de page,la page « Mes alertes » porte s
 TC-522,Titre — Confirmation de commande,UI,Titres de page,la confirmation de commande porte son propre titre,ui/titres.spec.ts,@regression,REQ-NAV-03,
 TC-523,Titre — Rayon inconnu,UI,Titres de page,la page « Rayon inconnu » porte son propre titre,ui/titres.spec.ts,@regression,REQ-NAV-03,
 TC-524,Titre — Guide inconnu,UI,Titres de page,la page « Guide inconnu » porte son propre titre,ui/titres.spec.ts,@regression,REQ-NAV-03,
+TC-530,Bascules sans double état,Accessibility,Accessibilité — noms et états des contrôles,"les bascules annoncent leur état par leur libellé, sans aria-pressed contradictoire",a11y/accessibilite.spec.ts,@regression,REQ-A11Y-08,
+TC-531,Nom du lien panier,Accessibility,Accessibilité — noms et états des contrôles,le lien du panier énonce le nombre d’articles dans son nom accessible,a11y/accessibilite.spec.ts,@regression,REQ-A11Y-08,
+TC-532,Région live du comparateur,Accessibility,Accessibilité — noms et états des contrôles,le refus d’un quatrième produit arrive dans une région live déjà présente,a11y/accessibilite.spec.ts,@regression,REQ-A11Y-08,

@@ -27,9 +27,14 @@ export function Pagination({
               Précédent
             </Link>
           ) : (
-            <span className="rounded border border-line px-3 py-2 text-sm text-disabled" aria-disabled="true">
+            // The ARIA disabled-link pattern: an `<a>` without `href` given the
+            // link role back. `aria-disabled` on a bare span is not allowed by
+            // ARIA 1.2 and only silenced axe's contrast check; here the state is
+            // real, announced ("lien, indisponible"), and the dimmed text falls
+            // under the WCAG 1.4.3 exemption for inactive components.
+            <a role="link" aria-disabled="true" className="rounded border border-line px-3 py-2 text-sm text-disabled">
               Précédent
-            </span>
+            </a>
           )}
         </li>
 
@@ -61,9 +66,9 @@ export function Pagination({
               Suivant
             </Link>
           ) : (
-            <span className="rounded border border-line px-3 py-2 text-sm text-disabled" aria-disabled="true">
+            <a role="link" aria-disabled="true" className="rounded border border-line px-3 py-2 text-sm text-disabled">
               Suivant
-            </span>
+            </a>
           )}
         </li>
       </ul>

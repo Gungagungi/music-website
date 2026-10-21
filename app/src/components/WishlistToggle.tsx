@@ -56,7 +56,7 @@ export function WishlistToggle({
       type="button"
       onClick={toggle}
       disabled={pending}
-      aria-pressed={saved}
+      // No `aria-pressed`: the label flips with the state already, see CompareToggle.
       data-testid="wishlist-toggle"
       data-saved={saved ? 'true' : 'false'}
       data-slug={slug}

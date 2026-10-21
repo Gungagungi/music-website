@@ -10,12 +10,12 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 183 |
-| — covered by this suite | 182 |
+| Requirements declared | 184 |
+| — covered by this suite | 183 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 293 |
-| — Accessibility | 20 |
+| Automated test cases | 296 |
+| — Accessibility | 23 |
 | — API | 96 |
 | — UI | 159 |
 | — Visual | 18 |
@@ -32,6 +32,7 @@ if the committed copy differs.
 | `REQ-A11Y-05` | `TC-321` | Accessibility | @critical @regression |
 | `REQ-A11Y-06` | `TC-322` | Accessibility | @regression |
 | `REQ-A11Y-07` | `TC-440`, `TC-441`, `TC-442`, `TC-443`, `TC-444`, `TC-445`, `TC-446` | Accessibility | @regression |
+| `REQ-A11Y-08` | `TC-530`, `TC-531`, `TC-532` | Accessibility | @regression |
 | `REQ-ACC-01` | `TC-088` | UI | @regression |
 | `REQ-ALERT-01` | `TC-478`, `TC-479` | API | @critical @regression |
 | `REQ-ALERT-02` | `TC-467`, `TC-468`, `TC-472` | UI | @regression @security |
@@ -505,6 +506,9 @@ if the committed copy differs.
 | `TC-522` | Titre — Confirmation de commande | `REQ-NAV-03` | `ui/titres.spec.ts` |
 | `TC-523` | Titre — Rayon inconnu | `REQ-NAV-03` | `ui/titres.spec.ts` |
 | `TC-524` | Titre — Guide inconnu | `REQ-NAV-03` | `ui/titres.spec.ts` |
+| `TC-530` | Bascules sans double état | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
+| `TC-531` | Nom du lien panier | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
+| `TC-532` | Région live du comparateur | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
 
 ## Verified outside the automated suite
 
