@@ -8,9 +8,11 @@
  * prices and stock levels for real offers. Comments are the only place the
  * format leaves for that, so the body is served verbatim.
  *
- * Disallowed paths are the ones with nothing to index: the API, the cart and
- * checkout, the account area, and search, whose query space is unbounded. The
- * catalogue, product pages and guides stay open.
+ * Disallowed paths are the ones with nothing to fetch: the API, and search,
+ * whose query space is unbounded. The cart, checkout and account area are left
+ * crawlable on purpose: they carry `noindex`, and a disallowed page is one whose
+ * `noindex` is never read — a URL linked from elsewhere then stays indexed,
+ * snippet-less. The catalogue, product pages and guides stay open.
  *
  * Pre-production serves this same file. Its `X-Robots-Tag: noindex` header
  * (Caddyfile) is what keeps it out of search results, and a `Disallow: /` here
@@ -27,9 +29,6 @@ export const ROBOTS_TXT = `# Fretline is a fictional shop: a QA automation portf
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /panier
-Disallow: /commande
-Disallow: /compte
 Disallow: /recherche
 `;
 

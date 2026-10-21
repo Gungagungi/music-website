@@ -53,9 +53,9 @@ test.describe('robots.txt', () => {
       expect(body).toMatch(/^User-agent: \*$/m);
       // A bare `Disallow: /` would close the whole site, the catalogue included.
       expect(disallowed(body)).not.toContain('/');
-      expect(disallowed(body).sort()).toEqual(
-        ['/api/', '/commande', '/compte', '/panier', '/recherche'].sort(),
-      );
+      // The private pages are not listed: barred, their `noindex` would go
+      // unread (REQ-NAV-06).
+      expect(disallowed(body).sort()).toEqual(['/api/', '/recherche'].sort());
     },
   );
 });
