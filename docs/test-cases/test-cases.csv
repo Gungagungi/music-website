@@ -297,3 +297,5 @@ TC-526,Description — Rayon,UI,Descriptions de page,un rayon est décrit par so
 TC-527,Description — Fiche produit,UI,Descriptions de page,la page « Fiche produit » porte sa propre description,ui/descriptions.spec.ts,@regression,REQ-NAV-04,
 TC-528,Description — Liste des guides,UI,Descriptions de page,la page « Liste des guides » porte sa propre description,ui/descriptions.spec.ts,@regression,REQ-NAV-04,
 TC-529,Description — Guide,UI,Descriptions de page,la page « Guide » porte sa propre description,ui/descriptions.spec.ts,@regression,REQ-NAV-04,
+TC-530,robots.txt — boutique fictive,API,robots.txt,robots.txt annonce que la boutique est fictive,api/robots.spec.ts,@smoke,REQ-NAV-05,
+TC-531,robots.txt — chemins exclus,API,robots.txt,robots.txt ouvre le catalogue et ferme les espaces sans contenu à indexer,api/robots.spec.ts,@regression,REQ-NAV-05,
