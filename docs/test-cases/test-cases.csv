@@ -294,7 +294,7 @@ TC-523,Titre — Rayon inconnu,UI,Titres de page,la page « Rayon inconnu » por
 TC-524,Titre — Guide inconnu,UI,Titres de page,la page « Guide inconnu » porte son propre titre,ui/titres.spec.ts,@regression,REQ-NAV-03,
 TC-525,Description — Accueil,UI,Descriptions de page,l’accueil porte la description de la boutique,ui/descriptions.spec.ts,@regression,REQ-NAV-04,
 TC-526,Description — Rayon,UI,Descriptions de page,un rayon est décrit par son accroche,ui/descriptions.spec.ts,@regression,REQ-NAV-04,
-TC-527,Description — Fiche produit,UI,Descriptions de page,la page « Fiche produit » porte sa propre description,ui/descriptions.spec.ts,@regression,REQ-NAV-04,
+TC-527,Description — Fiche produit,UI,Descriptions de page,une fiche produit est décrite par son extrait dédié,ui/descriptions.spec.ts,@regression,REQ-NAV-04,
 TC-528,Description — Liste des guides,UI,Descriptions de page,la page « Liste des guides » porte sa propre description,ui/descriptions.spec.ts,@regression,REQ-NAV-04,
 TC-529,Description — Guide,UI,Descriptions de page,la page « Guide » porte sa propre description,ui/descriptions.spec.ts,@regression,REQ-NAV-04,
 TC-530,robots.txt — boutique fictive,API,robots.txt,robots.txt annonce que la boutique est fictive,api/robots.spec.ts,@smoke,REQ-NAV-05,

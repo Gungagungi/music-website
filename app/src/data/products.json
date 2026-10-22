@@ -29,7 +29,8 @@
       "Micros": "3x Single Coil",
       "Frettes": "22"
     },
-    "description": "La Fender Player II Stratocaster MN reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Aulne · Manche : Érable · Touche : Érable."
+    "description": "La Fender Player II Stratocaster MN reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Aulne · Manche : Érable · Touche : Érable.",
+    "metaDescription": "Stratocaster Player II à manche érable : corps aulne, trois micros simple bobinage et 22 frettes pour le son Fender clair et incisif."
   },
   {
     "id": "PRD-0002",
@@ -60,7 +61,8 @@
       "Micros": "2x Single Coil",
       "Frettes": "22"
     },
-    "description": "La Fender American Pro III Telecaster reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Frêne · Manche : Érable · Touche : Palissandre."
+    "description": "La Fender American Pro III Telecaster reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Frêne · Manche : Érable · Touche : Palissandre.",
+    "metaDescription": "Telecaster American Professional III : corps frêne, touche palissandre et deux simples bobinages. Le twang Fender, fabriqué aux États-Unis."
   },
   {
     "id": "PRD-0003",
@@ -91,7 +93,8 @@
       "Micros": "2x Humbucker",
       "Frettes": "22"
     },
-    "description": "La Gibson Les Paul Standard 60s reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Table : Érable flammé · Touche : Palissandre."
+    "description": "La Gibson Les Paul Standard 60s reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Table : Érable flammé · Touche : Palissandre.",
+    "metaDescription": "Les Paul Standard 60s : corps acajou, table érable flammé et deux humbuckers. Le manche et le son des Gibson du début des années 60."
   },
   {
     "id": "PRD-0004",
@@ -122,7 +125,8 @@
       "Micros": "2x Humbucker",
       "Frettes": "22"
     },
-    "description": "La Gibson SG Standard reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Manche : Acajou · Touche : Palissandre."
+    "description": "La Gibson SG Standard reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Manche : Acajou · Touche : Palissandre.",
+    "metaDescription": "Gibson SG Standard : corps et manche acajou, deux humbuckers et une double découpe qui libère l’accès aux aigus. Un classique du rock."
   },
   {
     "id": "PRD-0005",
@@ -153,7 +157,8 @@
       "Micros": "2x Humbucker",
       "Frettes": "22"
     },
-    "description": "La Epiphone Les Paul Classic reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Table : Érable · Touche : Laurier."
+    "description": "La Epiphone Les Paul Classic reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Table : Érable · Touche : Laurier.",
+    "metaDescription": "Epiphone Les Paul Classic : corps acajou, table érable et deux humbuckers. La silhouette Les Paul à un prix accessible."
   },
   {
     "id": "PRD-0006",
@@ -184,7 +189,8 @@
       "Micros": "3x Single Coil",
       "Frettes": "21"
     },
-    "description": "La Squier Classic Vibe 60s Stratocaster reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Peuplier · Manche : Érable · Touche : Laurier."
+    "description": "La Squier Classic Vibe 60s Stratocaster reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Peuplier · Manche : Érable · Touche : Laurier.",
+    "metaDescription": "Squier Classic Vibe 60s Stratocaster : trois simples bobinages, touche laurier et 21 frettes pour un son Strat vintage à petit budget."
   },
   {
     "id": "PRD-0007",
@@ -215,7 +221,8 @@
       "Micros": "HSH",
       "Frettes": "24"
     },
-    "description": "La Ibanez RG550 Genesis reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Tilleul · Manche : Érable/Noyer · Touche : Érable."
+    "description": "La Ibanez RG550 Genesis reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Tilleul · Manche : Érable/Noyer · Touche : Érable.",
+    "metaDescription": "Ibanez RG550 Genesis : corps tilleul, manche fin érable/noyer, 24 frettes et micros HSH. La guitare de shred des années 80, rééditée."
   },
   {
     "id": "PRD-0008",
@@ -246,7 +253,8 @@
       "Micros": "2x Humbucker",
       "Frettes": "24"
     },
-    "description": "La Ibanez AZ2402 Prestige reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Aulne · Manche : Érable rôti · Touche : Érable."
+    "description": "La Ibanez AZ2402 Prestige reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Aulne · Manche : Érable rôti · Touche : Érable.",
+    "metaDescription": "Ibanez AZ2402 Prestige : manche érable rôti, 24 frettes et deux humbuckers. Une guitare japonaise polyvalente au jeu très confortable."
   },
   {
     "id": "PRD-0009",
@@ -277,7 +285,8 @@
       "Micros": "2x Humbucker",
       "Frettes": "24"
     },
-    "description": "La PRS SE Custom 24 reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Table : Érable · Touche : Palissandre."
+    "description": "La PRS SE Custom 24 reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Table : Érable · Touche : Palissandre.",
+    "metaDescription": "PRS SE Custom 24 : corps acajou, table érable, deux humbuckers et 24 frettes. La PRS emblématique dans sa version abordable."
   },
   {
     "id": "PRD-0010",
@@ -309,7 +318,8 @@
       "Micros": "3x Single Coil",
       "Frettes": "21"
     },
-    "description": "La Harley Benton ST-62 Vintage Series reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Tilleul · Manche : Érable · Touche : Laurier."
+    "description": "La Harley Benton ST-62 Vintage Series reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Tilleul · Manche : Érable · Touche : Laurier.",
+    "metaDescription": "Harley Benton ST-62 : corps tilleul, trois simples bobinages et touche laurier. Une guitare de type Strat pour débuter sans se ruiner."
   },
   {
     "id": "PRD-0011",
@@ -340,7 +350,8 @@
       "Micros": "2x Humbucker",
       "Frettes": "22"
     },
-    "description": "La ESP LTD EC-256 reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Manche : Acajou · Touche : Jatoba."
+    "description": "La ESP LTD EC-256 reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Acajou · Manche : Acajou · Touche : Jatoba.",
+    "metaDescription": "ESP LTD EC-256 : corps et manche acajou, deux humbuckers et touche jatoba. Une simple découpe taillée pour le rock et le metal."
   },
   {
     "id": "PRD-0012",
@@ -371,7 +382,8 @@
       "Micros": "2x Humbucker",
       "Frettes": "24"
     },
-    "description": "La Jackson Pro Series Soloist SL2 reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Aulne · Manche : Érable · Touche : Ébène."
+    "description": "La Jackson Pro Series Soloist SL2 reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Aulne · Manche : Érable · Touche : Ébène.",
+    "metaDescription": "Jackson Soloist SL2 : manche érable, touche ébène, deux humbuckers et 24 frettes. Une guitare de metal rapide et précise."
   },
   {
     "id": "PRD-0013",
@@ -402,7 +414,8 @@
       "Micros": "2x Broad’Tron",
       "Frettes": "22"
     },
-    "description": "La Gretsch G2622 Streamliner reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Érable laminé · Manche : Nato · Touche : Laurier."
+    "description": "La Gretsch G2622 Streamliner reprend les codes qui ont fait l'histoire de la guitare électrique, avec une lutherie soignée et un rapport qualité/prix maîtrisé. Corps : Érable laminé · Manche : Nato · Touche : Laurier.",
+    "metaDescription": "Gretsch G2622 Streamliner : demi-caisse en érable laminé et deux micros Broad’Tron. Le son Gretsch, du rockabilly au rock garage."
   },
   {
     "id": "PRD-0014",
@@ -432,7 +445,8 @@
       "Touche": "Ébène",
       "Électronique": "Non"
     },
-    "description": "La Martin Guitar D-28 Standard offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought · Table : Épicéa Sitka · Dos & éclisses : Palissandre."
+    "description": "La Martin Guitar D-28 Standard offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought · Table : Épicéa Sitka · Dos & éclisses : Palissandre.",
+    "metaDescription": "Martin D-28 Standard : dreadnought en épicéa Sitka et palissandre, touche ébène. La référence de la guitare folk, sans électronique."
   },
   {
     "id": "PRD-0015",
@@ -462,7 +476,8 @@
       "Touche": "Ébène",
       "Électronique": "Expression System 2"
     },
-    "description": "La Taylor 214ce Plus offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Grand Auditorium · Table : Épicéa Sitka · Dos & éclisses : Koa laminé."
+    "description": "La Taylor 214ce Plus offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Grand Auditorium · Table : Épicéa Sitka · Dos & éclisses : Koa laminé.",
+    "metaDescription": "Taylor 214ce Plus : grand auditorium en épicéa Sitka et koa laminé, pan coupé et électronique Expression System 2 pour la scène."
   },
   {
     "id": "PRD-0016",
@@ -492,7 +507,8 @@
       "Touche": "Palissandre",
       "Électronique": "Non"
     },
-    "description": "La Yamaha FG800M offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought · Table : Épicéa massif · Dos & éclisses : Nato."
+    "description": "La Yamaha FG800M offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought · Table : Épicéa massif · Dos & éclisses : Nato.",
+    "metaDescription": "Yamaha FG800M : dreadnought à table épicéa massif, dos et éclisses nato. Une guitare acoustique fiable et abordable pour bien débuter."
   },
   {
     "id": "PRD-0017",
@@ -523,7 +539,8 @@
       "Touche": "Amarante",
       "Électronique": "Oui"
     },
-    "description": "La Harley Benton D-120CE offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought Cutaway · Table : Épicéa · Dos & éclisses : Acajou."
+    "description": "La Harley Benton D-120CE offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought Cutaway · Table : Épicéa · Dos & éclisses : Acajou.",
+    "metaDescription": "Harley Benton D-120CE : dreadnought à pan coupé, table épicéa et électronique intégrée. Une électro-acoustique d’entrée de gamme."
   },
   {
     "id": "PRD-0018",
@@ -553,7 +570,8 @@
       "Touche": "Palissandre",
       "Électronique": "LR Baggs VTC"
     },
-    "description": "La Gibson J-45 Studio Walnut offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Round Shoulder · Table : Épicéa Sitka · Dos & éclisses : Noyer."
+    "description": "La Gibson J-45 Studio Walnut offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Round Shoulder · Table : Épicéa Sitka · Dos & éclisses : Noyer.",
+    "metaDescription": "Gibson J-45 Studio Walnut : épaules arrondies, table épicéa Sitka, dos noyer et micro LR Baggs VTC. Le classique acoustique de Gibson."
   },
   {
     "id": "PRD-0019",
@@ -583,7 +601,8 @@
       "Touche": "Merbau",
       "Électronique": "Non"
     },
-    "description": "La Cort Earth 70 OP offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought · Table : Épicéa massif · Dos & éclisses : Acajou."
+    "description": "La Cort Earth 70 OP offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought · Table : Épicéa massif · Dos & éclisses : Acajou.",
+    "metaDescription": "Cort Earth 70 OP : dreadnought à table épicéa massif, dos et éclisses acajou, finition pores ouverts. Une guitare folk à petit prix."
   },
   {
     "id": "PRD-0020",
@@ -613,7 +632,8 @@
       "Touche": "Laurier",
       "Électronique": "Fishman"
     },
-    "description": "La Fender CD-60SCE All Mahogany offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought Cutaway · Table : Acajou · Dos & éclisses : Acajou."
+    "description": "La Fender CD-60SCE All Mahogany offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought Cutaway · Table : Acajou · Dos & éclisses : Acajou.",
+    "metaDescription": "Fender CD-60SCE All Mahogany : dreadnought à pan coupé tout acajou et préampli Fishman. Un son chaud et doux, prêt à brancher."
   },
   {
     "id": "PRD-0021",
@@ -643,7 +663,8 @@
       "Touche": "Laurier",
       "Électronique": "TP-4TD"
     },
-    "description": "La Takamine GD30CE-NAT offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought Cutaway · Table : Épicéa massif · Dos & éclisses : Acajou."
+    "description": "La Takamine GD30CE-NAT offre une projection généreuse et un équilibre tonal adapté aussi bien à l'accompagnement qu'au fingerpicking. Format : Dreadnought Cutaway · Table : Épicéa massif · Dos & éclisses : Acajou.",
+    "metaDescription": "Takamine GD30CE : dreadnought à pan coupé, table épicéa massif, dos acajou et préampli TP-4TD avec accordeur intégré."
   },
   {
     "id": "PRD-0022",
@@ -673,7 +694,8 @@
       "Touche": "Palissandre",
       "Cordes": "Nylon"
     },
-    "description": "La Yamaha C40 II propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Épicéa · Dos & éclisses : Meranti."
+    "description": "La Yamaha C40 II propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Épicéa · Dos & éclisses : Meranti.",
+    "metaDescription": "Yamaha C40 II : guitare classique 4/4 à table épicéa et cordes nylon. Le modèle de référence pour apprendre la guitare."
   },
   {
     "id": "PRD-0023",
@@ -703,7 +725,8 @@
       "Touche": "Palissandre",
       "Cordes": "Nylon"
     },
-    "description": "La Alhambra 3C Classical propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Cèdre massif · Dos & éclisses : Sapelli."
+    "description": "La Alhambra 3C Classical propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Cèdre massif · Dos & éclisses : Sapelli.",
+    "metaDescription": "Alhambra 3C : guitare classique espagnole 4/4, table cèdre massif et dos sapelli. Un son chaud pour poursuivre l’étude."
   },
   {
     "id": "PRD-0024",
@@ -733,7 +756,8 @@
       "Touche": "Amarante",
       "Cordes": "Nylon"
     },
-    "description": "La Harley Benton CG-200 3/4 propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 3/4 · Table : Épicéa · Dos & éclisses : Tilleul."
+    "description": "La Harley Benton CG-200 3/4 propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 3/4 · Table : Épicéa · Dos & éclisses : Tilleul.",
+    "metaDescription": "Harley Benton CG-200 3/4 : guitare classique taille 3/4 à cordes nylon, adaptée aux enfants et aux débuts à petit budget."
   },
   {
     "id": "PRD-0025",
@@ -763,7 +787,8 @@
       "Touche": "Palissandre",
       "Cordes": "Nylon"
     },
-    "description": "La Cordoba C5 Cedar propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Cèdre massif · Dos & éclisses : Acajou."
+    "description": "La Cordoba C5 Cedar propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Cèdre massif · Dos & éclisses : Acajou.",
+    "metaDescription": "Cordoba C5 Cedar : guitare classique 4/4, table cèdre massif, dos et éclisses acajou. Un timbre chaleureux et un manche confortable."
   },
   {
     "id": "PRD-0026",
@@ -793,7 +818,8 @@
       "Touche": "Amarante",
       "Cordes": "Nylon"
     },
-    "description": "La Ortega R121 Family Series propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Épicéa · Dos & éclisses : Catalpa."
+    "description": "La Ortega R121 Family Series propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 4/4 · Table : Épicéa · Dos & éclisses : Catalpa.",
+    "metaDescription": "Ortega R121 : guitare classique 4/4 de la Family Series, table épicéa et dos catalpa. Légère et facile à jouer pour débuter."
   },
   {
     "id": "PRD-0027",
@@ -823,7 +849,8 @@
       "Touche": "Palissandre",
       "Cordes": "Nylon"
     },
-    "description": "La La Mancha Rubinito CM 63 propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 7/8 · Table : Cèdre · Dos & éclisses : Sapelli."
+    "description": "La La Mancha Rubinito CM 63 propose un toucher souple et un timbre chaleureux, idéale pour l'apprentissage comme pour le répertoire classique. Taille : 7/8 · Table : Cèdre · Dos & éclisses : Sapelli.",
+    "metaDescription": "La Mancha Rubinito CM 63 : guitare classique 7/8 à table cèdre et dos sapelli. Une taille intermédiaire pour les petites mains."
   },
   {
     "id": "PRD-0028",
@@ -854,7 +881,8 @@
       "Micros": "Split Coil",
       "Cordes": "4"
     },
-    "description": "La Fender Player II Precision Bass délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Aulne · Manche : Érable · Touche : Palissandre."
+    "description": "La Fender Player II Precision Bass délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Aulne · Manche : Érable · Touche : Palissandre.",
+    "metaDescription": "Fender Player II Precision Bass : corps aulne, micro split coil et 4 cordes. Le grave rond et puissant de la P-Bass."
   },
   {
     "id": "PRD-0029",
@@ -885,7 +913,8 @@
       "Micros": "2x Single Coil",
       "Cordes": "5"
     },
-    "description": "La Fender American Pro II Jazz Bass V délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Aulne · Manche : Érable · Touche : Palissandre."
+    "description": "La Fender American Pro II Jazz Bass V délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Aulne · Manche : Érable · Touche : Palissandre.",
+    "metaDescription": "Fender American Pro II Jazz Bass V : basse 5 cordes, corps aulne et deux simples bobinages. Le son Jazz Bass étendu dans le grave."
   },
   {
     "id": "PRD-0030",
@@ -916,7 +945,8 @@
       "Micros": "Humbucker",
       "Cordes": "4"
     },
-    "description": "La Music Man StingRay Special 4H délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Frêne · Manche : Érable rôti · Touche : Érable."
+    "description": "La Music Man StingRay Special 4H délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Frêne · Manche : Érable rôti · Touche : Érable.",
+    "metaDescription": "Music Man StingRay Special 4H : corps frêne, manche érable rôti et humbucker. Le punch de la StingRay dans sa version modernisée."
   },
   {
     "id": "PRD-0031",
@@ -947,7 +977,8 @@
       "Micros": "2x PowerSpan",
       "Cordes": "4"
     },
-    "description": "La Ibanez SR300E délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Peuplier · Manche : Érable/Noyer · Touche : Jatoba."
+    "description": "La Ibanez SR300E délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Peuplier · Manche : Érable/Noyer · Touche : Jatoba.",
+    "metaDescription": "Ibanez SR300E : basse 4 cordes au manche fin, deux micros PowerSpan et préampli actif. Légère et polyvalente, pour tous les styles."
   },
   {
     "id": "PRD-0032",
@@ -978,7 +1009,8 @@
       "Micros": "Split Coil",
       "Cordes": "4"
     },
-    "description": "La Harley Benton PB-50 Vintage Series délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Tilleul · Manche : Érable · Touche : Amarante."
+    "description": "La Harley Benton PB-50 Vintage Series délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Tilleul · Manche : Érable · Touche : Amarante.",
+    "metaDescription": "Harley Benton PB-50 : basse de type Precision, corps tilleul et micro split coil. Une 4 cordes vintage pour débuter à petit prix."
   },
   {
     "id": "PRD-0033",
@@ -1008,7 +1040,8 @@
       "Micros": "2x Staple",
       "Cordes": "4"
     },
-    "description": "La Höfner Ignition Bass SB délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Épicéa/Érable · Manche : Érable · Touche : Palissandre."
+    "description": "La Höfner Ignition Bass SB délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Épicéa/Érable · Manche : Érable · Touche : Palissandre.",
+    "metaDescription": "Höfner Ignition Bass SB : la basse violon à deux micros Staple et manche court. La silhouette et le son des années 60."
   },
   {
     "id": "PRD-0034",
@@ -1039,7 +1072,8 @@
       "Micros": "P/J actif",
       "Cordes": "4"
     },
-    "description": "La Yamaha TRBX304 délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Acajou · Manche : Érable/Acajou · Touche : Palissandre."
+    "description": "La Yamaha TRBX304 délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Acajou · Manche : Érable/Acajou · Touche : Palissandre.",
+    "metaDescription": "Yamaha TRBX304 : basse 4 cordes à corps acajou et micros P/J actifs. Une basse équilibrée et polyvalente, de la répétition à la scène."
   },
   {
     "id": "PRD-0035",
@@ -1069,7 +1103,8 @@
       "Micros": "PJ actif",
       "Cordes": "4"
     },
-    "description": "La Cort Action DLX AS délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Frêne · Manche : Érable · Touche : Jatoba."
+    "description": "La Cort Action DLX AS délivre un grave profond et une définition qui se tient dans le mix, quel que soit le style abordé. Corps : Frêne · Manche : Érable · Touche : Jatoba.",
+    "metaDescription": "Cort Action DLX AS : basse 4 cordes à corps frêne et micros PJ actifs. Une basse polyvalente au rapport qualité-prix soigné."
   },
   {
     "id": "PRD-0036",
@@ -1100,7 +1135,8 @@
       "Canaux": "1",
       "Réverbe": "Oui"
     },
-    "description": "Le Fender Blues Junior IV couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 15 W · Haut-parleur : 1x12\"."
+    "description": "Le Fender Blues Junior IV couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 15 W · Haut-parleur : 1x12\".",
+    "metaDescription": "Fender Blues Junior IV : ampli à lampes 15 W, haut-parleur 12\" et réverbe. Le combo blues compact, du son clair au crunch."
   },
   {
     "id": "PRD-0037",
@@ -1130,7 +1166,8 @@
       "Canaux": "2",
       "Réverbe": "Oui"
     },
-    "description": "Le Marshall DSL40CR couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 40 W · Haut-parleur : 1x12\"."
+    "description": "Le Marshall DSL40CR couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 40 W · Haut-parleur : 1x12\".",
+    "metaDescription": "Marshall DSL40CR : combo à lampes 40 W, deux canaux, réverbe et haut-parleur 12\". Le son Marshall, du crunch au gain élevé."
   },
   {
     "id": "PRD-0038",
@@ -1160,7 +1197,8 @@
       "Canaux": "5",
       "Effets": "60+"
     },
-    "description": "Le Boss Katana-50 MkII couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Modélisation · Puissance : 50 W · Haut-parleur : 1x12\"."
+    "description": "Le Boss Katana-50 MkII couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Modélisation · Puissance : 50 W · Haut-parleur : 1x12\".",
+    "metaDescription": "Boss Katana-50 MkII : ampli à modélisation 50 W, haut-parleur 12\", cinq types d’ampli et plus de 60 effets, de la maison à la répétition."
   },
   {
     "id": "PRD-0039",
@@ -1191,7 +1229,8 @@
       "Canaux": "2",
       "Réverbe": "Oui"
     },
-    "description": "Le Orange Crush 20RT couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Transistor · Puissance : 20 W · Haut-parleur : 1x8\"."
+    "description": "Le Orange Crush 20RT couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Transistor · Puissance : 20 W · Haut-parleur : 1x8\".",
+    "metaDescription": "Orange Crush 20RT : ampli transistor 20 W, deux canaux, réverbe et accordeur intégré. Le son Orange pour travailler à la maison."
   },
   {
     "id": "PRD-0040",
@@ -1221,7 +1260,8 @@
       "Canaux": "2",
       "Trémolo": "Oui"
     },
-    "description": "Le Vox AC15C1 couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 15 W · Haut-parleur : 1x12\"."
+    "description": "Le Vox AC15C1 couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 15 W · Haut-parleur : 1x12\".",
+    "metaDescription": "Vox AC15C1 : combo à lampes 15 W, haut-parleur 12\", deux canaux, réverbe et trémolo. Le son britannique de la classe A."
   },
   {
     "id": "PRD-0041",
@@ -1251,7 +1291,8 @@
       "Canaux": "2",
       "Réverbe": "Oui"
     },
-    "description": "Le Blackstar HT-5R MkIII couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 5 W · Haut-parleur : 1x12\"."
+    "description": "Le Blackstar HT-5R MkIII couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Lampes · Puissance : 5 W · Haut-parleur : 1x12\".",
+    "metaDescription": "Blackstar HT-5R MkIII : ampli à lampes 5 W, deux canaux, réverbe et haut-parleur 12\". Le son lampes à volume d’appartement."
   },
   {
     "id": "PRD-0042",
@@ -1281,7 +1322,8 @@
       "Canaux": "2",
       "Réverbe": "Oui"
     },
-    "description": "Le Harley Benton HB-20R couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Transistor · Puissance : 20 W · Haut-parleur : 1x8\"."
+    "description": "Le Harley Benton HB-20R couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Transistor · Puissance : 20 W · Haut-parleur : 1x8\".",
+    "metaDescription": "Harley Benton HB-20R : ampli transistor 20 W, deux canaux et réverbe. Un petit combo pour travailler chez soi sans se ruiner."
   },
   {
     "id": "PRD-0043",
@@ -1312,7 +1354,8 @@
       "Bluetooth": "Oui",
       "App": "Oui"
     },
-    "description": "Le Positive Grid Spark 40 couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Modélisation · Puissance : 40 W · Haut-parleur : 2x4\"."
+    "description": "Le Positive Grid Spark 40 couvre un large éventail de sons, du clair cristallin à la saturation dense, dans un format transportable. Type : Modélisation · Puissance : 40 W · Haut-parleur : 2x4\".",
+    "metaDescription": "Positive Grid Spark 40 : ampli à modélisation 40 W, Bluetooth et application mobile. Pour jouer sur des morceaux et explorer les sons."
   },
   {
     "id": "PRD-0044",
@@ -1341,7 +1384,8 @@
       "Haut-parleur": "1x15\"",
       "DI": "Oui"
     },
-    "description": "Le Ampeg Rocket Bass RB-115 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 200 W · Haut-parleur : 1x15\"."
+    "description": "Le Ampeg Rocket Bass RB-115 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 200 W · Haut-parleur : 1x15\".",
+    "metaDescription": "Ampeg Rocket Bass RB-115 : combo basse 200 W, haut-parleur 15\" et sortie DI. Le grave Ampeg, de la répétition à la petite scène."
   },
   {
     "id": "PRD-0045",
@@ -1370,7 +1414,8 @@
       "Haut-parleur": "1x12\"",
       "Poids": "13 kg"
     },
-    "description": "Le Markbass CMD 121P allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 300 W · Haut-parleur : 1x12\"."
+    "description": "Le Markbass CMD 121P allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 300 W · Haut-parleur : 1x12\".",
+    "metaDescription": "Markbass CMD 121P : combo basse 300 W en 12\" pour 13 kg. Un ampli puissant et facile à transporter."
   },
   {
     "id": "PRD-0046",
@@ -1399,7 +1444,8 @@
       "Haut-parleur": "1x12\"",
       "Overdrive": "Oui"
     },
-    "description": "Le Fender Rumble 100 V3 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 100 W · Haut-parleur : 1x12\"."
+    "description": "Le Fender Rumble 100 V3 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 100 W · Haut-parleur : 1x12\".",
+    "metaDescription": "Fender Rumble 100 V3 : combo basse 100 W, haut-parleur 12\" et overdrive intégré. Léger, simple et assez fort pour répéter."
   },
   {
     "id": "PRD-0047",
@@ -1428,7 +1474,8 @@
       "Haut-parleur": "1x12\"",
       "EQ": "3 bandes"
     },
-    "description": "Le Hartke HD75 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 75 W · Haut-parleur : 1x12\"."
+    "description": "Le Hartke HD75 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 75 W · Haut-parleur : 1x12\".",
+    "metaDescription": "Hartke HD75 : combo basse 75 W, haut-parleur 12\" et égaliseur 3 bandes. Un ampli compact pour s’entraîner."
   },
   {
     "id": "PRD-0048",
@@ -1457,7 +1504,8 @@
       "Haut-parleur": "1x10\"",
       "EQ": "3 bandes"
     },
-    "description": "Le Harley Benton BA-40B allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 40 W · Haut-parleur : 1x10\"."
+    "description": "Le Harley Benton BA-40B allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 40 W · Haut-parleur : 1x10\".",
+    "metaDescription": "Harley Benton BA-40B : combo basse 40 W, haut-parleur 10\" et égaliseur 3 bandes. Un petit ampli pour débuter à la maison."
   },
   {
     "id": "PRD-0049",
@@ -1486,7 +1534,8 @@
       "Haut-parleur": "1x10\"",
       "Poids": "10 kg"
     },
-    "description": "Le Gallien-Krueger MB110 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 100 W · Haut-parleur : 1x10\"."
+    "description": "Le Gallien-Krueger MB110 allie puissance et lisibilité, avec l'égalisation nécessaire pour s'adapter à n'importe quelle salle. Type : Combo · Puissance : 100 W · Haut-parleur : 1x10\".",
+    "metaDescription": "Gallien-Krueger MB110 : combo basse 100 W en 10\" pour 10 kg. Le son GK dans un format très compact."
   },
   {
     "id": "PRD-0050",
@@ -1515,7 +1564,8 @@
       "True Bypass": "Non",
       "Réglages": "3"
     },
-    "description": "La Boss DS-1 Distortion est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Distorsion · Alimentation : 9 V · True Bypass : Non."
+    "description": "La Boss DS-1 Distortion est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Distorsion · Alimentation : 9 V · True Bypass : Non.",
+    "metaDescription": "Boss DS-1 Distortion : pédale de distorsion à trois réglages, alimentée en 9 V. La distorsion orange, classique du rock."
   },
   {
     "id": "PRD-0051",
@@ -1544,7 +1594,8 @@
       "True Bypass": "Non",
       "Réglages": "3"
     },
-    "description": "La Ibanez TS9 Tube Screamer est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Overdrive · Alimentation : 9 V · True Bypass : Non."
+    "description": "La Ibanez TS9 Tube Screamer est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Overdrive · Alimentation : 9 V · True Bypass : Non.",
+    "metaDescription": "Ibanez TS9 Tube Screamer : overdrive à trois réglages qui met les médiums en avant. La pédale de référence pour pousser un ampli."
   },
   {
     "id": "PRD-0052",
@@ -1573,7 +1624,8 @@
       "True Bypass": "Oui",
       "Réglages": "3"
     },
-    "description": "La Electro Harmonix Big Muff Pi est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Fuzz · Alimentation : 9 V · True Bypass : Oui."
+    "description": "La Electro Harmonix Big Muff Pi est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Fuzz · Alimentation : 9 V · True Bypass : Oui.",
+    "metaDescription": "Electro Harmonix Big Muff Pi : fuzz à trois réglages en true bypass. Un sustain épais et un grain massif, du rock psyché au stoner."
   },
   {
     "id": "PRD-0053",
@@ -1602,7 +1654,8 @@
       "True Bypass": "Sélectionnable",
       "Presets": "300"
     },
-    "description": "La Strymon BigSky MX est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Réverbe · Alimentation : 9 V · True Bypass : Sélectionnable."
+    "description": "La Strymon BigSky MX est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Réverbe · Alimentation : 9 V · True Bypass : Sélectionnable.",
+    "metaDescription": "Strymon BigSky MX : réverbe haut de gamme, 300 presets et true bypass sélectionnable. Des salles, des ressorts et des nappes de studio."
   },
   {
     "id": "PRD-0054",
@@ -1631,7 +1684,8 @@
       "True Bypass": "Oui",
       "Réglages": "4"
     },
-    "description": "La MXR M234 Analog Chorus est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Chorus · Alimentation : 9 V · True Bypass : Oui."
+    "description": "La MXR M234 Analog Chorus est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Chorus · Alimentation : 9 V · True Bypass : Oui.",
+    "metaDescription": "MXR M234 Analog Chorus : chorus analogique à quatre réglages en true bypass. Une modulation chaude et ample."
   },
   {
     "id": "PRD-0055",
@@ -1660,7 +1714,8 @@
       "True Bypass": "Non",
       "Format": "Pédale"
     },
-    "description": "La Dunlop Cry Baby GCB95 est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Wah · Alimentation : 9 V · True Bypass : Non."
+    "description": "La Dunlop Cry Baby GCB95 est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Wah · Alimentation : 9 V · True Bypass : Non.",
+    "metaDescription": "Dunlop Cry Baby GCB95 : la pédale wah standard, alimentée en 9 V. Le son wah des années 60 à aujourd’hui."
   },
   {
     "id": "PRD-0056",
@@ -1689,7 +1744,8 @@
       "True Bypass": "Oui",
       "Buffer": "Oui"
     },
-    "description": "La TC Electronic Polytune 3 est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Accordeur · Alimentation : 9 V · True Bypass : Oui."
+    "description": "La TC Electronic Polytune 3 est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Accordeur · Alimentation : 9 V · True Bypass : Oui.",
+    "metaDescription": "TC Electronic Polytune 3 : accordeur polyphonique en true bypass avec buffer intégré. Toutes les cordes s’accordent d’un seul coup."
   },
   {
     "id": "PRD-0057",
@@ -1718,7 +1774,8 @@
       "True Bypass": "Oui",
       "Réglages": "3"
     },
-    "description": "La Harley Benton Vintage Overdrive est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Overdrive · Alimentation : 9 V · True Bypass : Oui."
+    "description": "La Harley Benton Vintage Overdrive est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Overdrive · Alimentation : 9 V · True Bypass : Oui.",
+    "metaDescription": "Harley Benton Vintage Overdrive : overdrive à trois réglages en true bypass. Une saturation de type Tube Screamer à tout petit prix."
   },
   {
     "id": "PRD-0058",
@@ -1747,7 +1804,8 @@
       "Blocs": "8",
       "IR": "Oui"
     },
-    "description": "La Line 6 HX Stomp XL est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Multi-effets · Alimentation : 9 V DC · Blocs : 8."
+    "description": "La Line 6 HX Stomp XL est une référence de sa catégorie : réglages directs, réponse musicale et fabrication robuste. Type : Multi-effets · Alimentation : 9 V DC · Blocs : 8.",
+    "metaDescription": "Line 6 HX Stomp XL : multi-effets compact à 8 blocs simultanés, avec chargement d’IR. Toute une chaîne d’effets au pied."
   },
   {
     "id": "PRD-0059",
@@ -1776,7 +1834,8 @@
       "Matière": "Nickel",
       "Jeux": "1"
     },
-    "description": "Les cordes Daddario EXL110 Nickel Wound 10-46 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare électrique · Tirant : 010-046 · Matière : Nickel."
+    "description": "Les cordes Daddario EXL110 Nickel Wound 10-46 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare électrique · Tirant : 010-046 · Matière : Nickel.",
+    "metaDescription": "Daddario EXL110 10-46 : jeu de cordes électriques en nickel, tirant regular light. La référence polyvalente pour guitare électrique."
   },
   {
     "id": "PRD-0060",
@@ -1805,7 +1864,8 @@
       "Matière": "Nickel",
       "Jeux": "1"
     },
-    "description": "Les cordes Ernie Ball Regular Slinky 10-46 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare électrique · Tirant : 010-046 · Matière : Nickel."
+    "description": "Les cordes Ernie Ball Regular Slinky 10-46 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare électrique · Tirant : 010-046 · Matière : Nickel.",
+    "metaDescription": "Ernie Ball Regular Slinky 10-46 : cordes électriques en nickel. Le jeu Slinky de référence, au son brillant et équilibré."
   },
   {
     "id": "PRD-0061",
@@ -1834,7 +1894,8 @@
       "Matière": "Nickel",
       "Jeux": "3"
     },
-    "description": "Les cordes Ernie Ball Super Slinky 3-Pack garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare électrique · Tirant : 009-042 · Matière : Nickel."
+    "description": "Les cordes Ernie Ball Super Slinky 3-Pack garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare électrique · Tirant : 009-042 · Matière : Nickel.",
+    "metaDescription": "Ernie Ball Super Slinky 3-Pack : trois jeux de cordes électriques 9-42 en nickel. Un tirant léger pour des bends faciles."
   },
   {
     "id": "PRD-0062",
@@ -1863,7 +1924,8 @@
       "Matière": "Bronze phosphoreux",
       "Traitement": "Nanoweb"
     },
-    "description": "Les cordes Elixir Nanoweb Phosphor Bronze 12-53 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare acoustique · Tirant : 012-053 · Matière : Bronze phosphoreux."
+    "description": "Les cordes Elixir Nanoweb Phosphor Bronze 12-53 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare acoustique · Tirant : 012-053 · Matière : Bronze phosphoreux.",
+    "metaDescription": "Elixir Nanoweb Phosphor Bronze 12-53 : cordes acoustiques en bronze phosphoreux, avec un revêtement Nanoweb qui prolonge leur durée de vie."
   },
   {
     "id": "PRD-0063",
@@ -1892,7 +1954,8 @@
       "Matière": "Nickel",
       "Jeux": "1"
     },
-    "description": "Les cordes Daddario EXL170 Bass 45-100 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Basse 4 cordes · Tirant : 045-100 · Matière : Nickel."
+    "description": "Les cordes Daddario EXL170 Bass 45-100 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Basse 4 cordes · Tirant : 045-100 · Matière : Nickel.",
+    "metaDescription": "Daddario EXL170 45-100 : jeu de cordes en nickel pour basse 4 cordes. Un son rond et une sensation souple sous les doigts."
   },
   {
     "id": "PRD-0064",
@@ -1921,7 +1984,8 @@
       "Matière": "Nylon",
       "Jeux": "1"
     },
-    "description": "Les cordes Savarez 520R Classical Normal garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare classique · Tension : Normale · Matière : Nylon."
+    "description": "Les cordes Savarez 520R Classical Normal garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Guitare classique · Tension : Normale · Matière : Nylon.",
+    "metaDescription": "Savarez 520R : jeu de cordes nylon pour guitare classique, tension normale. Un son clair et équilibré pour l’étude."
   },
   {
     "id": "PRD-0065",
@@ -1950,7 +2014,8 @@
       "Matière": "Acier inox",
       "Jeux": "1"
     },
-    "description": "Les cordes Rotosound Swing Bass 66 45-105 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Basse 4 cordes · Tirant : 045-105 · Matière : Acier inox."
+    "description": "Les cordes Rotosound Swing Bass 66 45-105 garantissent une tenue d'accord fiable et un rendu constant jeu après jeu. Instrument : Basse 4 cordes · Tirant : 045-105 · Matière : Acier inox.",
+    "metaDescription": "Rotosound Swing Bass 66 45-105 : cordes en acier inoxydable pour basse 4 cordes. Le son brillant et mordant des années 60 et 70."
   },
   {
     "id": "PRD-0066",
@@ -1978,7 +2043,8 @@
       "Compatibilité": "Stratocaster/Telecaster",
       "Poids": "3.9 kg"
     },
-    "description": "Fender Deluxe Molded Strat Case : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Étui rigide · Compatibilité : Stratocaster/Telecaster · Poids : 3.9 kg."
+    "description": "Fender Deluxe Molded Strat Case : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Étui rigide · Compatibilité : Stratocaster/Telecaster · Poids : 3.9 kg.",
+    "metaDescription": "Fender Deluxe Molded Case : étui rigide de 3,9 kg pour Stratocaster et Telecaster. Protège la guitare en transport et en tournée."
   },
   {
     "id": "PRD-0067",
@@ -2006,7 +2072,8 @@
       "Instrument": "Guitare/Basse",
       "Système": "Auto Grip"
     },
-    "description": "Hercules GS414B Plus Stand : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Stand · Instrument : Guitare/Basse · Système : Auto Grip."
+    "description": "Hercules GS414B Plus Stand : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Stand · Instrument : Guitare/Basse · Système : Auto Grip.",
+    "metaDescription": "Hercules GS414B Plus : stand guitare ou basse avec système Auto Grip qui se referme sur le manche. Stable et sûr."
   },
   {
     "id": "PRD-0068",
@@ -2034,7 +2101,8 @@
       "Épaisseur": "0.88 mm",
       "Quantité": "12"
     },
-    "description": "Dunlop Tortex Standard .88 Pack 12 : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Médiators · Épaisseur : 0.88 mm · Quantité : 12."
+    "description": "Dunlop Tortex Standard .88 Pack 12 : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Médiators · Épaisseur : 0.88 mm · Quantité : 12.",
+    "metaDescription": "Dunlop Tortex Standard .88 : 12 médiators de 0,88 mm à la prise antidérapante et à l’attaque nette. Un classique pour toutes les guitares."
   },
   {
     "id": "PRD-0069",
@@ -2062,7 +2130,8 @@
       "Tension": "9 V DC",
       "Intensité": "200 mA"
     },
-    "description": "Boss PSA-230ES Adapter : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Alimentation · Tension : 9 V DC · Intensité : 200 mA."
+    "description": "Boss PSA-230ES Adapter : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Alimentation · Tension : 9 V DC · Intensité : 200 mA.",
+    "metaDescription": "Boss PSA-230ES : alimentation 9 V DC 200 mA pour pédales Boss et compatibles. Remplace les piles sur le pedalboard."
   },
   {
     "id": "PRD-0070",
@@ -2090,7 +2159,8 @@
       "Longueur": "6 m",
       "Connecteurs": "Jack/Jack"
     },
-    "description": "Cordial CSI 6 PP Cable 6m : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Câble jack · Longueur : 6 m · Connecteurs : Jack/Jack."
+    "description": "Cordial CSI 6 PP Cable 6m : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Câble jack · Longueur : 6 m · Connecteurs : Jack/Jack.",
+    "metaDescription": "Cordial CSI 6 PP : câble instrument jack/jack de 6 m. Un câble robuste pour relier guitare ou basse à l’ampli."
   },
   {
     "id": "PRD-0071",
@@ -2118,7 +2188,8 @@
       "Bande": "2.4/5.8 GHz",
       "Autonomie": "12 h"
     },
-    "description": "Shure GLXD16+ Wireless : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Système sans fil · Bande : 2.4/5.8 GHz · Autonomie : 12 h."
+    "description": "Shure GLXD16+ Wireless : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Système sans fil · Bande : 2.4/5.8 GHz · Autonomie : 12 h.",
+    "metaDescription": "Shure GLXD16+ : système sans fil numérique pour guitare, bandes 2,4 et 5,8 GHz et 12 h d’autonomie. Le récepteur tient dans un format pédale."
   },
   {
     "id": "PRD-0072",
@@ -2147,7 +2218,8 @@
       "Longueur": "96-152 cm",
       "Matière": "Polypropylène"
     },
-    "description": "Ernie Ball Polypro Strap Black : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Sangle · Longueur : 96-152 cm · Matière : Polypropylène."
+    "description": "Ernie Ball Polypro Strap Black : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Sangle · Longueur : 96-152 cm · Matière : Polypropylène.",
+    "metaDescription": "Ernie Ball Polypro : sangle en polypropylène réglable de 96 à 152 cm. Simple, légère et résistante."
   },
   {
     "id": "PRD-0073",
@@ -2175,6 +2247,7 @@
       "Fonctions": "Bobineur/Coupe-cordes",
       "Compatibilité": "Universelle"
     },
-    "description": "Planet Waves Pro-Winder String Winder : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Outil · Fonctions : Bobineur/Coupe-cordes · Compatibilité : Universelle."
+    "description": "Planet Waves Pro-Winder String Winder : un accessoire pensé pour durer, conçu pour l'usage quotidien sur scène comme au studio. Type : Outil · Fonctions : Bobineur/Coupe-cordes · Compatibilité : Universelle.",
+    "metaDescription": "Planet Waves Pro-Winder : bobineur de cordes avec coupe-cordes intégré, compatible avec toutes les guitares. Pour changer de cordes en un instant."
   }
 ]

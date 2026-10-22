@@ -82,6 +82,11 @@ export const products = pgTable(
     specs: jsonb('specs').$type<Record<string, string>>().notNull().default({}),
     description: text('description').notNull(),
     /**
+     * Hand-written search snippet. Its own column rather than a cut of
+     * `description`, which runs past what a results page displays.
+     */
+    metaDescription: text('meta_description').notNull(),
+    /**
      * Insertion order of `data/products.json`. The `pertinence` sort returns the
      * seed order today; ordering by this column reproduces it exactly, without
      * betting on that file happening to be sorted by id.

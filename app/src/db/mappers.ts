@@ -40,6 +40,7 @@ export function toProduct(row: ProductRow): Product {
     colors: row.colors,
     specs: row.specs,
     description: row.description,
+    metaDescription: row.metaDescription,
     // `seedPosition` and `searchText` stay behind: they order and index rows, and
     // mean nothing to a caller.
   };
