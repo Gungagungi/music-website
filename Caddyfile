@@ -211,3 +211,37 @@
 		format console
 	}
 }
+
+# Portfolio (~/dev/pro/portfolio): the landing page on the bare domain, a
+# static site presenting the other projects. Same arrangement as the two blocks
+# above: its stack joins `fretline-edge` under the `portfolio-web` alias, and
+# with that stack down this block answers 502 and nothing else moves.
+#
+# Same default pattern: plain HTTP on 8086, inside the container only,
+# without asking Let's Encrypt for anything.
+{$PORTFOLIO_DOMAIN::8086} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	reverse_proxy portfolio-web:80
+
+	log {
+		output stdout
+		format console
+	}
+}
+
+# `www.` sends visitors to the bare domain, so the portfolio lives at a single
+# address. A variable of its own rather than `www.{$PORTFOLIO_DOMAIN}`, for the
+# same reason as the analytics block: `www.:8086` is not an address.
+{$PORTFOLIO_WWW_DOMAIN::8087} {
+	redir https://{$PORTFOLIO_DOMAIN}{uri} permanent
+}
