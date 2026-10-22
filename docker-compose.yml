@@ -240,6 +240,10 @@ services:
       PREPROD_BASIC_AUTH_USER: ${PREPROD_BASIC_AUTH_USER:-fretline}
       PREPROD_BASIC_AUTH_HASH: ${PREPROD_BASIC_AUTH_HASH:-$$2a$$14$$Bcoh63tinCQaAAH8qPR4teL49GuNTsmWW1dhmSueQ5xHWLqKMKI6e}
       PREPROD_ACCESS_KEY: ${PREPROD_ACCESS_KEY:-}
+      # Carnet 190D, a separate stack on the same VPS (see the Caddyfile). Same
+      # reason for the default as above: an empty domain would take the shop
+      # down with the whole configuration.
+      CARNET_DOMAIN: ${CARNET_DOMAIN:-:8084}
     networks:
       - default
       - edge

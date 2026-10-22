@@ -147,3 +147,36 @@
 		format console
 	}
 }
+
+# Carnet 190D: a separate project (~/dev/pro/mercedes) hosted on the same VPS.
+#
+# Served by this Caddy for the same reason as pre-production: 80 and 443 are
+# already taken, and the certificates live here. The application lives in its
+# own Compose stack and joins `fretline-edge` under the `carnet-app` alias —
+# never `app`, which pre-production also answers to on that network. With the
+# carnet stack down, this block answers 502 and nothing else moves.
+#
+# Same default pattern as the blocks above: plain HTTP on 8084, inside the
+# container only, without asking Let's Encrypt for anything.
+{$CARNET_DOMAIN::8084} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	reverse_proxy carnet-app:3000 {
+		health_uri /api/health
+		health_interval 15s
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
