@@ -345,6 +345,11 @@
                           "description": {
                             "type": "string",
                             "minLength": 1
+                          },
+                          "metaDescription": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 155
                           }
                         },
                         "required": [
@@ -367,7 +372,8 @@
                           "leftHanded",
                           "colors",
                           "specs",
-                          "description"
+                          "description",
+                          "metaDescription"
                         ],
                         "additionalProperties": false
                       }
@@ -594,6 +600,11 @@
                       "type": "string",
                       "minLength": 1
                     },
+                    "metaDescription": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 155
+                    },
                     "reviews": {
                       "type": "array",
                       "items": {
@@ -679,6 +690,7 @@
                     "colors",
                     "specs",
                     "description",
+                    "metaDescription",
                     "reviews"
                   ],
                   "additionalProperties": false
@@ -2376,6 +2388,11 @@
                           "description": {
                             "type": "string",
                             "minLength": 1
+                          },
+                          "metaDescription": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 155
                           }
                         },
                         "required": [
@@ -2398,7 +2415,8 @@
                           "leftHanded",
                           "colors",
                           "specs",
-                          "description"
+                          "description",
+                          "metaDescription"
                         ],
                         "additionalProperties": false
                       }

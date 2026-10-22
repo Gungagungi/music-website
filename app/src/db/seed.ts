@@ -45,6 +45,7 @@ function productRows() {
     colors: product.colors,
     specs: product.specs,
     description: product.description,
+    metaDescription: product.metaDescription,
     // Freezes the order of data/products.json, which is what the `pertinence`
     // sort returns today.
     seedPosition: index,

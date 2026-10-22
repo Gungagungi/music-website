@@ -15,7 +15,6 @@ const SHOP_DESCRIPTION =
   'Fretline, la boutique de démonstration dédiée aux guitares, basses, amplis et accessoires. Projet fictif de portfolio QA.';
 
 const OWN_DESCRIPTION_ROUTES = [
-  { id: 'TC-527', name: 'Fiche produit', path: `/p/${PRODUCTS.inStock.slug}` },
   { id: 'TC-528', name: 'Liste des guides', path: '/guides' },
   { id: 'TC-529', name: 'Guide', path: '/guides/choisir-sa-premiere-guitare-electrique' },
 ] as const;
@@ -48,6 +47,23 @@ test.describe('Descriptions de page', () => {
       const description = page.locator('meta[name="description"]');
       await expect(description).toHaveCount(1);
       await expect(description).toHaveAttribute('content', CATEGORIES.electricGuitars.tagline);
+    },
+  );
+
+  test(
+    'une fiche produit est décrite par son extrait dédié',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-527', 'Description — Fiche produit'), covers('REQ-NAV-04')],
+    },
+    async ({ page }) => {
+      await page.goto(`/p/${PRODUCTS.inStock.slug}`);
+
+      // The exact text, not a length bound: falling back to the long generated
+      // description would still be non-empty, and only overrun the snippet.
+      const description = page.locator('meta[name="description"]');
+      await expect(description).toHaveCount(1);
+      await expect(description).toHaveAttribute('content', PRODUCTS.inStock.metaDescription);
     },
   );
 

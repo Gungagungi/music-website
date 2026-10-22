@@ -29,6 +29,13 @@
       "when": 1788161587699,
       "tag": "0003_wishlist_items",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792654074821,
+      "tag": "0004_products_meta_description",
+      "breakpoints": true
     }
   ]
 }
