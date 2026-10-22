@@ -311,3 +311,6 @@ TC-540,Indexation — Accueil,UI,Indexation par les moteurs de recherche,la page
 TC-541,Indexation — Rayon,UI,Indexation par les moteurs de recherche,la page « Rayon » reste indexable,ui/indexation.spec.ts,@regression,REQ-NAV-06,
 TC-542,Indexation — Fiche produit,UI,Indexation par les moteurs de recherche,la page « Fiche produit » reste indexable,ui/indexation.spec.ts,@regression,REQ-NAV-06,
 TC-543,Indexation — Guide,UI,Indexation par les moteurs de recherche,la page « Guide » reste indexable,ui/indexation.spec.ts,@regression,REQ-NAV-06,
+TC-544,robots.txt — plan du site,API,robots.txt,robots.txt annonce le plan du site sur l’origine visitée,api/robots.spec.ts,@regression,REQ-NAV-07,
+TC-545,Plan du site — contenu,API,sitemap.xml,"le plan du site liste l’accueil, chaque rayon, chaque guide et chaque produit",api/sitemap.spec.ts,@smoke,REQ-NAV-07,
+TC-546,Plan du site — pages indexables,API,sitemap.xml,le plan du site ne liste que des pages servies et indexables,api/sitemap.spec.ts,@regression,REQ-NAV-07,

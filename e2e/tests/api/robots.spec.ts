@@ -58,4 +58,20 @@ test.describe('robots.txt', () => {
       expect(disallowed(body).sort()).toEqual(['/api/', '/recherche'].sort());
     },
   );
+
+  test(
+    'robots.txt annonce le plan du site sur l’origine visitée',
+    {
+      tag: [TAGS.regression],
+      annotation: [testCase('TC-544', 'robots.txt — plan du site'), covers('REQ-NAV-07')],
+    },
+    async ({ request, baseURL }) => {
+      const body = await robots(request);
+
+      // Absolute, as the format requires, and on the origin the suite is
+      // visiting: pre-production must not send crawlers to production's map.
+      const sitemaps = body.match(/^Sitemap: .*$/gm) ?? [];
+      expect(sitemaps).toEqual([`Sitemap: ${new URL('/sitemap.xml', baseURL).href}`]);
+    },
+  );
 });
