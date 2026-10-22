@@ -2,7 +2,7 @@
 # Checks REQ-DATA-05: data survives a full shutdown.
 #
 #   CI=true ./scripts/verifier-persistance.sh http://localhost
-#   ./scripts/verifier-persistance.sh http://localhost --jaccepte
+#   ./scripts/verifier-persistance.sh [<base-url>] --jaccepte
 #
 # Places an order, stops the whole stack, starts it again, and reads the order
 # back. It is the only check in the repository the Playwright suite cannot
@@ -15,13 +15,39 @@
 # that is running. Hence the safeguard below.
 set -euo pipefail
 
-BASE_URL="${1:-}"
-CONSENTEMENT="${2:-}"
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+BASE_URL=""
+CONSENTEMENT=""
+for argument in "$@"; do
+  case "$argument" in
+    --jaccepte) CONSENTEMENT="$argument" ;;
+    *) BASE_URL="$argument" ;;
+  esac
+done
 COMPOSE="${COMPOSE:-docker compose}"
 
+# Without a URL, it is derived from FRETLINE_DOMAIN in .env.production, as in
+# verifier-deploiement.sh. `prod:persistance` used to pass http://localhost,
+# which Caddy answers with a 308 to HTTPS on any real domain: the health wait
+# accepted the redirect, the first read got an empty body, and the run died on
+# "Unexpected end of JSON input" — saying nothing about persistence.
 if [[ -z "$BASE_URL" ]]; then
-  echo "usage: [CI=true] $0 <base-url> [--jaccepte]" >&2
-  exit 64
+  if [[ ! -f .env.production ]]; then
+    echo "usage: [CI=true] $0 <base-url> [--jaccepte]" >&2
+    exit 64
+  fi
+
+  domaine=$(grep -E '^FRETLINE_DOMAIN=' .env.production | tail -n1 | cut -d= -f2-)
+  if [[ -z "$domaine" ]]; then
+    echo "FRETLINE_DOMAIN missing from .env.production; pass the URL as an argument." >&2
+    exit 64
+  elif [[ "$domaine" == :* ]]; then
+    # A bare port value: local trial, Caddy serves plain HTTP.
+    BASE_URL="http://localhost"
+  else
+    BASE_URL="https://${domaine}"
+  fi
 fi
 BASE_URL="${BASE_URL%/}"
 
@@ -30,7 +56,7 @@ if [[ "${CI:-}" != "true" && "$CONSENTEMENT" != "--jaccepte" ]]; then
 This script stops the stack and writes a test order.
 On a live deployment, that is not what you want.
 
-  ./scripts/verifier-persistance.sh <url> --jaccepte
+  ./scripts/verifier-persistance.sh [<url>] --jaccepte
 FIN
   exit 65
 fi
@@ -47,8 +73,23 @@ attendre() {
   return 1
 }
 
+# `curl -f` only fails from 400 upwards, so `attendre` takes a redirect for a
+# healthy stack. Checked before anything is written or stopped: an explicit URL
+# can still point at a redirect.
+refuser_une_redirection() {
+  local code cible
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "${BASE_URL}/api/health" || true)
+  if [[ "$code" == 3* ]]; then
+    cible=$(curl -s -o /dev/null -w '%{redirect_url}' --max-time 5 "${BASE_URL}/api/health" || true)
+    echo "  ${BASE_URL} answers ${code} towards ${cible:-?}: pass the final URL." >&2
+    echo "  Nothing was written, the stack was not stopped." >&2
+    exit 1
+  fi
+}
+
 echo "Persistence — ${BASE_URL}"
 attendre
+refuser_une_redirection
 
 # -------------------------------------------------------------- before shutdown
 
