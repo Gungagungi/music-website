@@ -244,6 +244,8 @@ services:
       # reason for the default as above: an empty domain would take the shop
       # down with the whole configuration.
       CARNET_DOMAIN: ${CARNET_DOMAIN:-:8084}
+      # Chez Mag & Flo, same arrangement and same reason for the default.
+      CHEZMAGETFLO_DOMAIN: ${CHEZMAGETFLO_DOMAIN:-:8085}
     networks:
       - default
       - edge

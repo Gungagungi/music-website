@@ -180,3 +180,34 @@
 		format console
 	}
 }
+
+# Chez Mag & Flo: a rehearsal-room booking site (~/dev/pro/chezmagetflo),
+# another separate project hosted on the same VPS. Same arrangement as the
+# carnet block above: its stack joins `fretline-edge` under the
+# `chezmagetflo-app` alias, and with that stack down this block answers 502
+# and nothing else moves.
+#
+# Same default pattern: plain HTTP on 8085, inside the container only,
+# without asking Let's Encrypt for anything.
+{$CHEZMAGETFLO_DOMAIN::8085} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	reverse_proxy chezmagetflo-app:3000 {
+		health_uri /api/health
+		health_interval 15s
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
