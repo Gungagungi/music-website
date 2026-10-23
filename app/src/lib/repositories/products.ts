@@ -80,6 +80,18 @@ export async function categoriesForProducts(
   return new Map(rows.map((row) => [row.id, row.category]));
 }
 
+/**
+ * Every product slug, for the sitemap. Ordered on `id` so that two fetches of
+ * the sitemap are byte-identical.
+ */
+export async function listProductSlugs(executor: DbOrTx = db): Promise<string[]> {
+  const rows = await executor
+    .select({ slug: products.slug })
+    .from(products)
+    .orderBy(asc(products.id));
+  return rows.map((row) => row.slug);
+}
+
 export async function countProducts(executor: DbOrTx = db): Promise<number> {
   const [row] = await executor.select({ count: sql<number>`count(*)::int` }).from(products);
   return row?.count ?? 0;

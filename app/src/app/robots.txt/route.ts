@@ -1,3 +1,5 @@
+import { publicOrigin } from '@/lib/site-origin';
+
 /**
  * robots.txt, written by hand rather than through `app/robots.ts`.
  *
@@ -17,6 +19,11 @@
  * Pre-production serves this same file. Its `X-Robots-Tag: noindex` header
  * (Caddyfile) is what keeps it out of search results, and a `Disallow: /` here
  * would defeat it: a crawler that may not fetch a page never sees its header.
+ *
+ * The one computed line is `Sitemap:`, which the format requires to be an
+ * absolute URL. Its origin comes from the request (lib/site-origin.ts), so
+ * pre-production points at its own sitemap rather than production's — and the
+ * route is dynamic instead of being frozen at build time with no host to read.
  */
 export const ROBOTS_TXT = `# Fretline is a fictional shop: a QA automation portfolio project.
 # Nothing here is for sale. Products, prices, stock levels, reviews and
@@ -32,10 +39,11 @@ Disallow: /api/
 Disallow: /recherche
 `;
 
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 
-export function GET() {
-  return new Response(ROBOTS_TXT, {
+export function GET(request: Request) {
+  const sitemap = new URL('/sitemap.xml', publicOrigin(request.headers)).href;
+  return new Response(`${ROBOTS_TXT}\nSitemap: ${sitemap}\n`, {
     headers: { 'content-type': 'text/plain; charset=utf-8' },
   });
 }
