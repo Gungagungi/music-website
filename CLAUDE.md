@@ -16,7 +16,7 @@ Les scripts sont dans `package.json` (racine et workspaces). Ce que leurs noms n
   dépôt où un test parle directement à une fonction. Le périmètre est celui des modules **purs ou
   purement environnementaux** de `src/lib` — `money.ts`, les fonctions pures de `cart.ts`,
   `availability.ts`, `compare.ts`, `recently-viewed.ts`, `rate-limit.ts`, `search-params.ts`,
-  `theme.ts`, `deployment.ts`, `api.ts`, `password.ts`. Le critère d'admission est qu'un test n'ait
+  `theme.ts`, `deployment.ts`, `api.ts`, `password.ts`, `site-origin.ts`. Le critère d'admission est qu'un test n'ait
   besoin d'aucun service, d'aucun réseau et d'aucune horloge réelle : tout ce qui touche la base
   reste couvert par la suite d'API, contre un vrai PostgreSQL plutôt que contre une doublure.
 - `npm run test:mutation` (Stryker, ~45 s) éprouve les tests de l'arithmétique monétaire, et eux

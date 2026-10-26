@@ -10,13 +10,13 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 186 |
-| — covered by this suite | 185 |
+| Requirements declared | 187 |
+| — covered by this suite | 186 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 312 |
+| Automated test cases | 315 |
 | — Accessibility | 20 |
-| — API | 98 |
+| — API | 101 |
 | — UI | 176 |
 | — Visual | 18 |
 | Test cases without a requirement | 0 |
@@ -138,6 +138,7 @@ if the committed copy differs.
 | `REQ-NAV-04` | `TC-525`, `TC-526`, `TC-527`, `TC-528`, `TC-529` | UI | @regression |
 | `REQ-NAV-05` | `TC-530`, `TC-531` | API | @regression @smoke |
 | `REQ-NAV-06` | `TC-532`, `TC-533`, `TC-534`, `TC-535`, `TC-536`, `TC-537`, `TC-538`, `TC-539`, `TC-540`, `TC-541`, `TC-542`, `TC-543` | UI | @regression |
+| `REQ-NAV-07` | `TC-544`, `TC-545`, `TC-546` | API | @regression @smoke |
 | `REQ-OPS-01` | `TC-001` | API | @contract @smoke |
 | `REQ-ORDER-01` | `TC-120` | UI | @critical @smoke |
 | `REQ-ORDER-02` | `TC-121` | UI | @critical @smoke |
@@ -527,6 +528,9 @@ if the committed copy differs.
 | `TC-541` | Indexation — Rayon | `REQ-NAV-06` | `ui/indexation.spec.ts` |
 | `TC-542` | Indexation — Fiche produit | `REQ-NAV-06` | `ui/indexation.spec.ts` |
 | `TC-543` | Indexation — Guide | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-544` | robots.txt — plan du site | `REQ-NAV-07` | `api/robots.spec.ts` |
+| `TC-545` | Plan du site — contenu | `REQ-NAV-07` | `api/sitemap.spec.ts` |
+| `TC-546` | Plan du site — pages indexables | `REQ-NAV-07` | `api/sitemap.spec.ts` |
 
 ## Verified outside the automated suite
 
