@@ -250,6 +250,9 @@ services:
       # defaults.
       PORTFOLIO_DOMAIN: ${PORTFOLIO_DOMAIN:-:8086}
       PORTFOLIO_WWW_DOMAIN: ${PORTFOLIO_WWW_DOMAIN:-:8087}
+      # Former addresses, redirected to their replacements. Same reason for the
+      # default.
+      LEGACY_DOMAINS: ${LEGACY_DOMAINS:-:8088}
     networks:
       - default
       - edge
