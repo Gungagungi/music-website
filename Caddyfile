@@ -245,3 +245,33 @@
 {$PORTFOLIO_WWW_DOMAIN::8087} {
 	redir https://{$PORTFOLIO_DOMAIN}{uri} permanent
 }
+
+# Former addresses, from before the projects moved to subdomains of the
+# portfolio domain. Each one sends its visitors to the address that replaced
+# it, so links already sent — e-mails, bookmarks, a CV — keep working.
+#
+# 308 rather than `permanent` (301): a 301 lets the client turn a POST into a
+# GET, and the tracker cached in pages served before the move still posts to
+# the old analytics host.
+#
+# The target is picked from the first label, not from a full host name: the
+# list of addresses then lives in a single variable, and the host matching no
+# label is the former shop address, which had none.
+#
+# Carnet 190D is deliberately absent. Its mobile app authenticates with
+# `Authorization: Bearer`, and HTTP clients drop that header when a redirect
+# changes host: every installed build would be logged out on its next call.
+# Its former address is served instead, as a second name in CARNET_DOMAIN,
+# until the builds in circulation target the new one.
+#
+# Same default pattern as the blocks above: plain HTTP on 8088, inside the
+# container only.
+{$LEGACY_DOMAINS::8088} {
+	map {host} {legacy_target} {
+		~^analytics\. {$FRETLINE_ANALYTICS_DOMAIN}
+		~^alertes\. {$FRETLINE_NTFY_DOMAIN}
+		~^preprod\. {$FRETLINE_PREPROD_DOMAIN}
+		default {$FRETLINE_DOMAIN}
+	}
+	redir https://{legacy_target}{uri} 308
+}
