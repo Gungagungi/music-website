@@ -258,11 +258,12 @@
 # list of addresses then lives in a single variable, and the host matching no
 # label is the former shop address, which had none.
 #
-# Carnet 190D is deliberately absent. Its mobile app authenticates with
-# `Authorization: Bearer`, and HTTP clients drop that header when a redirect
-# changes host: every installed build would be logged out on its next call.
-# Its former address is served instead, as a second name in CARNET_DOMAIN,
-# until the builds in circulation target the new one.
+# Carnet 190D is redirected for browsers only. Its mobile app authenticates
+# with `Authorization: Bearer`, and HTTP clients drop that header when a
+# redirect changes host: a build targeting a former address would be logged
+# out on its next call. None is in circulation — no EAS build was ever made
+# before the move — so the redirect is safe; should one exist, the address
+# goes back into CARNET_DOMAIN as a second name instead.
 #
 # Same default pattern as the blocks above: plain HTTP on 8088, inside the
 # container only.
@@ -271,6 +272,7 @@
 		~^analytics\. {$FRETLINE_ANALYTICS_DOMAIN}
 		~^alertes\. {$FRETLINE_NTFY_DOMAIN}
 		~^preprod\. {$FRETLINE_PREPROD_DOMAIN}
+		~^carnet\. {$CARNET_DOMAIN}
 		default {$FRETLINE_DOMAIN}
 	}
 	redir https://{legacy_target}{uri} 308
