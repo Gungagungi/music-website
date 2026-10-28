@@ -87,7 +87,7 @@ export function CompareToggle({
           later: screen readers announce changes to a region they already track,
           and a region inserted together with its text is often never read. An
           empty region is silent. While empty it is `sr-only`: absolutely
-          positioned, so it stays out of the card's flex gap and the layout does
+          positioned, so it takes no room and the layout does
           not move, yet it remains in the accessibility tree. A span rather than
           a <p> because the comparator renders this inside one. */}
       <span role="status" className={message ? 'mt-1 block text-xs text-danger' : 'sr-only'} data-testid="compare-status">
