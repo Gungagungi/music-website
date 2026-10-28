@@ -10,12 +10,12 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 187 |
-| — covered by this suite | 186 |
+| Requirements declared | 188 |
+| — covered by this suite | 187 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 315 |
-| — Accessibility | 20 |
+| Automated test cases | 318 |
+| — Accessibility | 23 |
 | — API | 101 |
 | — UI | 176 |
 | — Visual | 18 |
@@ -32,6 +32,7 @@ if the committed copy differs.
 | `REQ-A11Y-05` | `TC-321` | Accessibility | @critical @regression |
 | `REQ-A11Y-06` | `TC-322` | Accessibility | @regression |
 | `REQ-A11Y-07` | `TC-440`, `TC-441`, `TC-442`, `TC-443`, `TC-444`, `TC-445`, `TC-446` | Accessibility | @regression |
+| `REQ-A11Y-08` | `TC-547`, `TC-548`, `TC-549` | Accessibility | @regression |
 | `REQ-ACC-01` | `TC-088` | UI | @regression |
 | `REQ-ALERT-01` | `TC-478`, `TC-479` | API | @critical @regression |
 | `REQ-ALERT-02` | `TC-467`, `TC-468`, `TC-472` | UI | @regression @security |
@@ -531,6 +532,9 @@ if the committed copy differs.
 | `TC-544` | robots.txt — plan du site | `REQ-NAV-07` | `api/robots.spec.ts` |
 | `TC-545` | Plan du site — contenu | `REQ-NAV-07` | `api/sitemap.spec.ts` |
 | `TC-546` | Plan du site — pages indexables | `REQ-NAV-07` | `api/sitemap.spec.ts` |
+| `TC-547` | Bascules sans double état | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
+| `TC-548` | Nom du lien panier | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
+| `TC-549` | Région live du comparateur | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
 
 ## Verified outside the automated suite
 

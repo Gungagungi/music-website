@@ -75,7 +75,7 @@ export function StockAlertForm({
         type="button"
         onClick={toggle}
         disabled={pending}
-        aria-pressed={subscribed}
+        // No `aria-pressed`: the label flips with the state already, see CompareToggle.
         data-testid="stock-alert-toggle"
         data-subscribed={subscribed ? 'true' : 'false'}
         className="w-full rounded-md border border-line-strong px-4 py-2 text-sm font-semibold hover:border-amber-brand disabled:cursor-not-allowed disabled:text-fg-muted"

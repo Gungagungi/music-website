@@ -64,10 +64,13 @@ export function CompareToggle({
 
   return (
     <>
+      {/* No `aria-pressed`: the label already flips with the state. Both
+          together are read as "Retirer du comparateur, toggle, pressed", a
+          double negation — the ARIA pattern keeps the label fixed when the
+          state is exposed. */}
       <button
         type="button"
         onClick={onClick}
-        aria-pressed={selected}
         data-testid="compare-toggle"
         data-selected={selected ? 'true' : 'false'}
         data-slug={slug}
@@ -80,14 +83,16 @@ export function CompareToggle({
         {label}
       </button>
 
-      {/* Only rendered once it has something to say: an always-present live
-          region on every card would be announced as empty content by some
-          screen readers. */}
-      {message && (
-        <p role="status" className="mt-1 text-xs text-danger" data-testid="compare-limit">
-          {message}
-        </p>
-      )}
+      {/* The live region is always in the DOM and only its content arrives
+          later: screen readers announce changes to a region they already track,
+          and a region inserted together with its text is often never read. An
+          empty region is silent. While empty it is `sr-only`: absolutely
+          positioned, so it takes no room and the layout does
+          not move, yet it remains in the accessibility tree. A span rather than
+          a <p> because the comparator renders this inside one. */}
+      <span role="status" className={message ? 'mt-1 block text-xs text-danger' : 'sr-only'} data-testid="compare-status">
+        {message && <span data-testid="compare-limit">{message}</span>}
+      </span>
     </>
   );
 }

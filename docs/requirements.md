@@ -339,6 +339,7 @@ particular field.
 | `REQ-A11Y-05` | The core journey is operable by keyboard | Catalogue to cart without a pointer, focus always visible |
 | `REQ-A11Y-06` | Informative images have text alternatives | Product images carry a meaningful alternative; decorative images are hidden from the tree |
 | `REQ-A11Y-07` | The dark theme meets the same contrast requirements | axe-core scan with the device set to dark reports no serious or critical violation |
+| `REQ-A11Y-08` | Controls expose a coherent name and state | Toggles state their state once, by their label; names are carried by elements that can hold one; status messages land in a live region already present |
 
 `REQ-A11Y-03` is what [BUG-003](bug-reports/BUG-003-missing-form-labels.md) violates.
 

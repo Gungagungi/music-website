@@ -57,13 +57,19 @@ export async function Header() {
             data-testid="cart-link"
           >
             Panier
+            {/* The count is spelled out in hidden text, not in an `aria-label` on
+                the badge: a plain span has no role, ARIA forbids naming it, and
+                screen readers drop the label and read a bare "Panier 3". */}
             <span
               className="min-w-6 rounded-full bg-chrome px-2 py-0.5 text-center text-xs font-bold text-white"
               data-testid="cart-count"
-              aria-label={`${itemCount} article${itemCount > 1 ? 's' : ''} dans le panier`}
+              aria-hidden="true"
             >
               {itemCount}
             </span>
+            {/* The leading space is explicit: JSX trims it at a line break, and
+                the name would read "Panier(3 articles)". */}
+            <span className="sr-only">{` (${itemCount} article${itemCount > 1 ? 's' : ''})`}</span>
           </Link>
         </nav>
       </div>

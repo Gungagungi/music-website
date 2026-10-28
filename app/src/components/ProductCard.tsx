@@ -70,7 +70,13 @@ export async function ProductCard({ product }: { product: Product }) {
             {availability.label}
           </p>
 
-          <CompareToggle slug={product.slug} selected={compared.includes(product.slug)} />
+          {/* Wrapped so `space-y-2` sees one child: the toggle renders a button
+              plus an always-present live region, and the region would turn the
+              button into a non-last child, give it a bottom margin and grow
+              every card. */}
+          <div>
+            <CompareToggle slug={product.slug} selected={compared.includes(product.slug)} />
+          </div>
         </div>
       </div>
     </article>
