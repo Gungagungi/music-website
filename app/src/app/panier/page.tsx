@@ -8,7 +8,8 @@ import type { Cart } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = { title: 'Panier' };
+// A cart is one visitor's state: indexed, it would show a stranger an empty one.
+export const metadata: Metadata = { title: 'Panier', robots: { index: false } };
 
 export default async function CartPage() {
   const cartId = await currentCartId();

@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Pick<PageProps, 'params'>): P
   const product = await getProductBySlug(slug);
   return {
     title: product ? `${product.brand} ${product.name}` : 'Produit introuvable',
-    description: product?.description,
+    description: product?.metaDescription,
   };
 }
 

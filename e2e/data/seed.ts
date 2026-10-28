@@ -66,6 +66,8 @@ export const PRODUCTS = {
     name: 'Les Paul Standard 60s',
     priceCents: 279900,
     category: 'guitares-electriques',
+    metaDescription:
+      'Les Paul Standard 60s : corps acajou, table érable flammé et deux humbuckers. Le manche et le son des Gibson du début des années 60.',
   },
   outOfStock: {
     slug: 'fender-player-ii-stratocaster-mn',
@@ -258,7 +260,11 @@ export const STOCK_TOP_UP = [
 ] as const;
 
 export const CATEGORIES = {
-  electricGuitars: { slug: 'guitares-electriques', label: 'Guitares électriques' },
+  electricGuitars: {
+    slug: 'guitares-electriques',
+    label: 'Guitares électriques',
+    tagline: 'Solid body, semi-hollow et signatures, du modèle d’étude à la lutherie haut de gamme.',
+  },
   effectPedals: { slug: 'pedales-effets', label: 'Pédales d’effets' },
   strings: { slug: 'cordes', label: 'Cordes' },
 } as const;

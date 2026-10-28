@@ -2,8 +2,9 @@
  * Consistency check of the generated catalogue.
  *
  * Checks the invariants `generate-catalog.mjs` is supposed to guarantee —
- * uniqueness of slugs and SKUs — then, above all, that every facet the filtering
- * specs depend on stays **neither empty nor total**.
+ * uniqueness of slugs, SKUs and meta descriptions, and the length of the latter
+ * — then, above all, that every facet the filtering specs depend on stays
+ * **neither empty nor total**.
  *
  * That second guard is what justifies the script. A facet that drops to zero
  * does not turn the suite red: it turns it empty. `TC-215` asserts that boolean
@@ -64,7 +65,20 @@ for (const [label, predicate] of Object.entries(facets)) {
   }
 }
 
-for (const key of ['slug', 'sku']) {
+// A results page cuts a snippet off past ~155 characters. The field exists
+// because the generated description overran that; nothing else would notice a
+// new row doing the same.
+const META_DESCRIPTION_MAX = 155;
+for (const product of products) {
+  const length = product.metaDescription?.trim().length ?? 0;
+  if (length === 0) {
+    problemes.push(`${product.sku} has no metaDescription`);
+  } else if (length > META_DESCRIPTION_MAX) {
+    problemes.push(`${product.sku} metaDescription runs ${length} characters (max ${META_DESCRIPTION_MAX})`);
+  }
+}
+
+for (const key of ['slug', 'sku', 'metaDescription']) {
   const dupes = duplicates(key);
   if (dupes.length > 0) {
     problemes.push(`duplicate ${key} values: ${dupes.join(', ')}`);
@@ -77,4 +91,4 @@ if (problemes.length > 0) {
   process.exit(1);
 }
 
-console.log('\nslugs and SKUs are unique, every facet discriminates');
+console.log('\nslugs, SKUs and meta descriptions are unique and fit, every facet discriminates');

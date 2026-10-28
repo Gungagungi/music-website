@@ -228,7 +228,7 @@ test.describe('Accessibilité — noms et états des contrôles', () => {
     'les bascules annoncent leur état par leur libellé, sans aria-pressed contradictoire',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-530', 'Bascules sans double état'), covers('REQ-A11Y-08')],
+      annotation: [testCase('TC-547', 'Bascules sans double état'), covers('REQ-A11Y-08')],
     },
     async ({ productPage, page }) => {
       // The out-of-stock product renders all three toggles: compare, wishlist
@@ -250,7 +250,7 @@ test.describe('Accessibilité — noms et états des contrôles', () => {
     'le lien du panier énonce le nombre d’articles dans son nom accessible',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-531', 'Nom du lien panier'), covers('REQ-A11Y-08')],
+      annotation: [testCase('TC-548', 'Nom du lien panier'), covers('REQ-A11Y-08')],
     },
     async ({ page }) => {
       await page.goto('/');
@@ -265,7 +265,7 @@ test.describe('Accessibilité — noms et états des contrôles', () => {
     'le refus d’un quatrième produit arrive dans une région live déjà présente',
     {
       tag: [TAGS.regression],
-      annotation: [testCase('TC-532', 'Région live du comparateur'), covers('REQ-A11Y-08')],
+      annotation: [testCase('TC-549', 'Région live du comparateur'), covers('REQ-A11Y-08')],
     },
     async ({ catalogPage, page }) => {
       await catalogPage.openCategory(CATEGORIES.electricGuitars.slug);

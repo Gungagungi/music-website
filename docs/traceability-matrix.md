@@ -10,14 +10,14 @@ if the committed copy differs.
 
 | | |
 | --- | ---: |
-| Requirements declared | 184 |
-| — covered by this suite | 183 |
+| Requirements declared | 188 |
+| — covered by this suite | 187 |
 | — verified outside it | 1 |
 | — not covered | 0 |
-| Automated test cases | 296 |
+| Automated test cases | 318 |
 | — Accessibility | 23 |
-| — API | 96 |
-| — UI | 159 |
+| — API | 101 |
+| — UI | 176 |
 | — Visual | 18 |
 | Test cases without a requirement | 0 |
 
@@ -32,7 +32,7 @@ if the committed copy differs.
 | `REQ-A11Y-05` | `TC-321` | Accessibility | @critical @regression |
 | `REQ-A11Y-06` | `TC-322` | Accessibility | @regression |
 | `REQ-A11Y-07` | `TC-440`, `TC-441`, `TC-442`, `TC-443`, `TC-444`, `TC-445`, `TC-446` | Accessibility | @regression |
-| `REQ-A11Y-08` | `TC-530`, `TC-531`, `TC-532` | Accessibility | @regression |
+| `REQ-A11Y-08` | `TC-547`, `TC-548`, `TC-549` | Accessibility | @regression |
 | `REQ-ACC-01` | `TC-088` | UI | @regression |
 | `REQ-ALERT-01` | `TC-478`, `TC-479` | API | @critical @regression |
 | `REQ-ALERT-02` | `TC-467`, `TC-468`, `TC-472` | UI | @regression @security |
@@ -136,6 +136,10 @@ if the committed copy differs.
 | `REQ-NAV-01` | `TC-012` | UI | @smoke |
 | `REQ-NAV-02` | `TC-062` | UI | @regression |
 | `REQ-NAV-03` | `TC-506`, `TC-507`, `TC-508`, `TC-509`, `TC-510`, `TC-511`, `TC-512`, `TC-513`, `TC-514`, `TC-515`, `TC-516`, `TC-517`, `TC-518`, `TC-519`, `TC-520`, `TC-521`, `TC-522`, `TC-523`, `TC-524` | UI | @regression |
+| `REQ-NAV-04` | `TC-525`, `TC-526`, `TC-527`, `TC-528`, `TC-529` | UI | @regression |
+| `REQ-NAV-05` | `TC-530`, `TC-531` | API | @regression @smoke |
+| `REQ-NAV-06` | `TC-532`, `TC-533`, `TC-534`, `TC-535`, `TC-536`, `TC-537`, `TC-538`, `TC-539`, `TC-540`, `TC-541`, `TC-542`, `TC-543` | UI | @regression |
+| `REQ-NAV-07` | `TC-544`, `TC-545`, `TC-546` | API | @regression @smoke |
 | `REQ-OPS-01` | `TC-001` | API | @contract @smoke |
 | `REQ-ORDER-01` | `TC-120` | UI | @critical @smoke |
 | `REQ-ORDER-02` | `TC-121` | UI | @critical @smoke |
@@ -506,9 +510,31 @@ if the committed copy differs.
 | `TC-522` | Titre — Confirmation de commande | `REQ-NAV-03` | `ui/titres.spec.ts` |
 | `TC-523` | Titre — Rayon inconnu | `REQ-NAV-03` | `ui/titres.spec.ts` |
 | `TC-524` | Titre — Guide inconnu | `REQ-NAV-03` | `ui/titres.spec.ts` |
-| `TC-530` | Bascules sans double état | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
-| `TC-531` | Nom du lien panier | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
-| `TC-532` | Région live du comparateur | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
+| `TC-525` | Description — Accueil | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
+| `TC-526` | Description — Rayon | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
+| `TC-527` | Description — Fiche produit | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
+| `TC-528` | Description — Liste des guides | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
+| `TC-529` | Description — Guide | `REQ-NAV-04` | `ui/descriptions.spec.ts` |
+| `TC-530` | robots.txt — boutique fictive | `REQ-NAV-05` | `api/robots.spec.ts` |
+| `TC-531` | robots.txt — chemins exclus | `REQ-NAV-05` | `api/robots.spec.ts` |
+| `TC-532` | Indexation — Panier | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-533` | Indexation — Commande | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-534` | Indexation — Connexion | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-535` | Indexation — Inscription | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-536` | Indexation — Mes commandes | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-537` | Indexation — Mes favoris | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-538` | Indexation — Mes alertes | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-539` | Indexation — Confirmation de commande | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-540` | Indexation — Accueil | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-541` | Indexation — Rayon | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-542` | Indexation — Fiche produit | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-543` | Indexation — Guide | `REQ-NAV-06` | `ui/indexation.spec.ts` |
+| `TC-544` | robots.txt — plan du site | `REQ-NAV-07` | `api/robots.spec.ts` |
+| `TC-545` | Plan du site — contenu | `REQ-NAV-07` | `api/sitemap.spec.ts` |
+| `TC-546` | Plan du site — pages indexables | `REQ-NAV-07` | `api/sitemap.spec.ts` |
+| `TC-547` | Bascules sans double état | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
+| `TC-548` | Nom du lien panier | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
+| `TC-549` | Région live du comparateur | `REQ-A11Y-08` | `a11y/accessibilite.spec.ts` |
 
 ## Verified outside the automated suite
 

@@ -44,6 +44,8 @@ export interface Product {
   colors: string[];
   specs: Record<string, string>;
   description: string;
+  /** Search-result snippet, written by hand and capped at 155 characters. */
+  metaDescription: string;
 }
 
 export interface User {

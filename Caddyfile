@@ -147,3 +147,133 @@
 		format console
 	}
 }
+
+# Carnet 190D: a separate project (~/dev/pro/mercedes) hosted on the same VPS.
+#
+# Served by this Caddy for the same reason as pre-production: 80 and 443 are
+# already taken, and the certificates live here. The application lives in its
+# own Compose stack and joins `fretline-edge` under the `carnet-app` alias —
+# never `app`, which pre-production also answers to on that network. With the
+# carnet stack down, this block answers 502 and nothing else moves.
+#
+# Same default pattern as the blocks above: plain HTTP on 8084, inside the
+# container only, without asking Let's Encrypt for anything.
+{$CARNET_DOMAIN::8084} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	reverse_proxy carnet-app:3000 {
+		health_uri /api/health
+		health_interval 15s
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
+
+# Chez Mag & Flo: a rehearsal-room booking site (~/dev/pro/chezmagetflo),
+# another separate project hosted on the same VPS. Same arrangement as the
+# carnet block above: its stack joins `fretline-edge` under the
+# `chezmagetflo-app` alias, and with that stack down this block answers 502
+# and nothing else moves.
+#
+# Same default pattern: plain HTTP on 8085, inside the container only,
+# without asking Let's Encrypt for anything.
+{$CHEZMAGETFLO_DOMAIN::8085} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	reverse_proxy chezmagetflo-app:3000 {
+		health_uri /api/health
+		health_interval 15s
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
+
+# Portfolio (~/dev/pro/portfolio): the landing page on the bare domain, a
+# static site presenting the other projects. Same arrangement as the two blocks
+# above: its stack joins `fretline-edge` under the `portfolio-web` alias, and
+# with that stack down this block answers 502 and nothing else moves.
+#
+# Same default pattern: plain HTTP on 8086, inside the container only,
+# without asking Let's Encrypt for anything.
+{$PORTFOLIO_DOMAIN::8086} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	reverse_proxy portfolio-web:80
+
+	log {
+		output stdout
+		format console
+	}
+}
+
+# `www.` sends visitors to the bare domain, so the portfolio lives at a single
+# address. A variable of its own rather than `www.{$PORTFOLIO_DOMAIN}`, for the
+# same reason as the analytics block: `www.:8086` is not an address.
+{$PORTFOLIO_WWW_DOMAIN::8087} {
+	redir https://{$PORTFOLIO_DOMAIN}{uri} permanent
+}
+
+# Former addresses, from before the projects moved to subdomains of the
+# portfolio domain. Each one sends its visitors to the address that replaced
+# it, so links already sent — e-mails, bookmarks, a CV — keep working.
+#
+# 308 rather than `permanent` (301): a 301 lets the client turn a POST into a
+# GET, and the tracker cached in pages served before the move still posts to
+# the old analytics host.
+#
+# The target is picked from the first label, not from a full host name: the
+# list of addresses then lives in a single variable, and the host matching no
+# label is the former shop address, which had none.
+#
+# Carnet 190D is redirected for browsers only. Its mobile app authenticates
+# with `Authorization: Bearer`, and HTTP clients drop that header when a
+# redirect changes host: a build targeting a former address would be logged
+# out on its next call. None is in circulation — no EAS build was ever made
+# before the move — so the redirect is safe; should one exist, the address
+# goes back into CARNET_DOMAIN as a second name instead.
+#
+# Same default pattern as the blocks above: plain HTTP on 8088, inside the
+# container only.
+{$LEGACY_DOMAINS::8088} {
+	map {host} {legacy_target} {
+		~^analytics\. {$FRETLINE_ANALYTICS_DOMAIN}
+		~^alertes\. {$FRETLINE_NTFY_DOMAIN}
+		~^preprod\. {$FRETLINE_PREPROD_DOMAIN}
+		~^carnet\. {$CARNET_DOMAIN}
+		default {$FRETLINE_DOMAIN}
+	}
+	redir https://{legacy_target}{uri} 308
+}

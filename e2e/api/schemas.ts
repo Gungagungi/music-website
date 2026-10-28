@@ -47,6 +47,7 @@ export const productSchema = z
     colors: z.array(z.string()).min(1),
     specs: z.record(z.string(), z.string()),
     description: z.string().min(1),
+    metaDescription: z.string().min(1).max(155),
   })
   .strict();
 

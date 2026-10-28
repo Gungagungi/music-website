@@ -240,6 +240,19 @@ services:
       PREPROD_BASIC_AUTH_USER: ${PREPROD_BASIC_AUTH_USER:-fretline}
       PREPROD_BASIC_AUTH_HASH: ${PREPROD_BASIC_AUTH_HASH:-$$2a$$14$$Bcoh63tinCQaAAH8qPR4teL49GuNTsmWW1dhmSueQ5xHWLqKMKI6e}
       PREPROD_ACCESS_KEY: ${PREPROD_ACCESS_KEY:-}
+      # Carnet 190D, a separate stack on the same VPS (see the Caddyfile). Same
+      # reason for the default as above: an empty domain would take the shop
+      # down with the whole configuration.
+      CARNET_DOMAIN: ${CARNET_DOMAIN:-:8084}
+      # Chez Mag & Flo, same arrangement and same reason for the default.
+      CHEZMAGETFLO_DOMAIN: ${CHEZMAGETFLO_DOMAIN:-:8085}
+      # Portfolio, the landing page on the bare domain. Same reason for the
+      # defaults.
+      PORTFOLIO_DOMAIN: ${PORTFOLIO_DOMAIN:-:8086}
+      PORTFOLIO_WWW_DOMAIN: ${PORTFOLIO_WWW_DOMAIN:-:8087}
+      # Former addresses, redirected to their replacements. Same reason for the
+      # default.
+      LEGACY_DOMAINS: ${LEGACY_DOMAINS:-:8088}
     networks:
       - default
       - edge
