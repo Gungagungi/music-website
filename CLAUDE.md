@@ -233,9 +233,10 @@ sort en 1 exactement quand un constat dépasse le seuil, le seul cas qui mérite
 
 ## Autoréparation CI — branches `ci-autofix/<date>`
 
-Un agent planifié (cron sur le VPS, 03:00 UTC) inspecte les runs échoués, reproduit, classe et
-propose un correctif en PR. Les règles qu'il suit, et que doit suivre quiconque reprend ce
-travail à la main :
+Un timer systemd du VPS (`ci-autofix.timer`, ~03:01 UTC) lance `claude -p` depuis un worktree
+dédié : il inspecte les runs échoués, reproduit, classe et propose un correctif en PR. Script,
+prompt et journal quotidien vivent hors dépôt, dans `~/.local/share/ci-autofix/`.
+Les règles qu'il suit, et que doit suivre quiconque reprend ce travail à la main :
 
 - **Périmètre** : échecs de `CI` sur `main`, de `Nightly` et de `Pages`. Les PR ouvertes sont
   hors périmètre — leurs branches appartiennent à leur auteur.
@@ -261,6 +262,16 @@ travail à la main :
   dernier via fnm (`~/.local/share/fnm`), le paquet Debian restant en 20 sur `/usr/bin/node`.
   L'activation fnm est explicite dans le runner : `~/.bashrc` sort avant le bloc fnm pour les
   shells non interactifs, et un job systemd en est un.
+
+## Proxy partagé du VPS
+
+Le Caddy de ce dépôt occupe 80/443 et sert aussi les autres projets du VPS, joints sur le réseau
+externe `fretline-edge` : Carnet 190D (`CARNET_DOMAIN`), Chez Mag & Flo (`CHEZMAGETFLO_DOMAIN`)
+et le portfolio (`PORTFOLIO_DOMAIN`, `PORTFOLIO_WWW_DOMAIN`). Tous les sites sont sur des
+sous-domaines de `lambertdeharosanchez.com` ; les anciennes adresses `sslip.io` sont listées dans
+`LEGACY_DOMAINS` et redirigées en 308, la cible étant choisie d'après le premier label. Arrêter
+ou casser cette pile coupe donc quatre sites, pas un : toute modification du `Caddyfile` ou du
+réseau se vérifie contre chacun d'eux.
 
 ## Conventions
 
