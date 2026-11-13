@@ -253,6 +253,10 @@ services:
       # Former addresses, redirected to their replacements. Same reason for the
       # default.
       LEGACY_DOMAINS: ${LEGACY_DOMAINS:-:8088}
+      # The two Godot games, served on the server's bare IP address (see the
+      # Caddyfile). The default is `http://:8089`, not `:8089`: the scheme is
+      # what keeps the block's `tls` policy from becoming a catch-all.
+      GAMES_IP_ADDRESS: ${GAMES_IP_ADDRESS:-http://:8089}
     networks:
       - default
       - edge
