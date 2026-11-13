@@ -277,3 +277,76 @@
 	}
 	redir https://{legacy_target}{uri} 308
 }
+
+# The two Godot games (mecha-survivant-2, hells-survivant-2), reachable straight
+# from the server's IP address, in HTTPS:
+#   https://<ip>/mecha-survivant-2/
+#   https://<ip>/hells-survivant-2/
+#
+# Relayed, not hosted: the games live on GitHub Pages (~/dev/perso/games), whose
+# CI builds the Godot exports on every push. Proxying keeps a single build and
+# a single source of truth; the VPS only carries the bytes. Both exports are
+# single-threaded, so no COOP/COEP headers are needed on top of what Pages
+# sends.
+#
+# An IP certificate from Let's Encrypt only exists in the `shortlived` profile
+# (about six days); Caddy renews it on its own. The `tls` block below only
+# applies when the address is a real IP: the default is `http://:8089`, and
+# Caddy drops a `tls` block on an http:// site. A bare `:8089` default would
+# not do — it would turn this block into a catch-all policy and put every
+# other site of this Caddy on six-day certificates.
+#
+# One IP, one root: the root lists the two games, anything else is a 404 so
+# the rest of the Pages site does not leak out under the IP.
+{$GAMES_IP_ADDRESS:http://:8089} {
+	tls {
+		issuer acme {
+			profile shortlived
+		}
+	}
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# Pages would answer these itself, but with a redirect to its own domain,
+	# which would change the address bar.
+	redir /mecha-survivant-2 /mecha-survivant-2/ permanent
+	redir /hells-survivant-2 /hells-survivant-2/ permanent
+
+	@jeux path /mecha-survivant-2/* /hells-survivant-2/*
+	handle @jeux {
+		# Over HTTPS, Caddy already sends the upstream's own Host, which is
+		# what Pages routes on.
+		reverse_proxy https://jeux.lambertdeharosanchez.com
+	}
+
+	handle / {
+		header Content-Type "text/html; charset=utf-8"
+		respond `<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jeux</title>
+<body style="font-family:system-ui,sans-serif;max-width:32rem;margin:3rem auto;padding:0 1rem;line-height:1.6">
+<h1>Jeux</h1>
+<ul>
+<li><a href="/mecha-survivant-2/">Mecha Survivant 2</a></li>
+<li><a href="/hells-survivant-2/">Hell's Survivant 2</a></li>
+</ul>
+</body>
+</html>
+`
+	}
+
+	handle {
+		respond 404
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
