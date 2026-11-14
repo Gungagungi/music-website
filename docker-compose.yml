@@ -254,9 +254,13 @@ services:
       # default.
       LEGACY_DOMAINS: ${LEGACY_DOMAINS:-:8088}
       # The two Godot games, served on the server's bare IP address (see the
-      # Caddyfile). The default is `http://:8089`, not `:8089`: the scheme is
-      # what keeps the block's `tls` policy from becoming a catch-all.
-      GAMES_IP_ADDRESS: ${GAMES_IP_ADDRESS:-http://:8089}
+      # Caddyfile). The next two are derived from it and stay empty without
+      # it: the `default_sni` global option, and the import of the IP
+      # certificate settings. Either one present without an IP would break the
+      # configuration or put every site on six-day certificates.
+      GAMES_IP_ADDRESS: ${GAMES_IP_ADDRESS:-:8089}
+      GAMES_IP_SNI_OPTION: ${GAMES_IP_ADDRESS:+default_sni ${GAMES_IP_ADDRESS}}
+      GAMES_IP_TLS: ${GAMES_IP_ADDRESS:+import games-ip-tls}
     networks:
       - default
       - edge

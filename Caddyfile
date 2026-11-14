@@ -8,6 +8,36 @@
 # Traefik would do the same, but by exposing the Docker socket to the proxy;
 # that only pays off from a dozen or so services to discover dynamically.
 
+# Global options.
+#
+# `default_sni`: browsers never send SNI when the address typed is an IP — the
+# TLS spec reserves SNI for host names. Caddy then looks for a certificate
+# matching the interface the connection arrived on, which inside Docker is the
+# container's private address, finds none, and drops the handshake. Naming the
+# public IP here makes it the certificate served to every SNI-less client, so
+# that https://<ip>/ works (see the games block at the end of this file).
+#
+# The whole line comes from docker-compose.yml, built from GAMES_IP_ADDRESS,
+# and is empty when that is unset. A fixed `default_sni` would not do: it adds
+# TLS connection policies, and Caddy then refuses an http:// site carrying a
+# `tls` directive — the games block in CI and local trials — taking the whole
+# configuration, and the shop, down with it.
+{
+	{$GAMES_IP_SNI_OPTION}
+}
+
+# TLS for the games block, imported only when it is served on a real IP (see
+# GAMES_IP_TLS in docker-compose.yml). An IP certificate from Let's Encrypt
+# only exists in the `shortlived` profile (about six days); Caddy renews it on
+# its own.
+(games-ip-tls) {
+	tls {
+		issuer acme {
+			profile shortlived
+		}
+	}
+}
+
 {$FRETLINE_DOMAIN} {
 	encode zstd gzip
 
@@ -289,21 +319,16 @@
 # single-threaded, so no COOP/COEP headers are needed on top of what Pages
 # sends.
 #
-# An IP certificate from Let's Encrypt only exists in the `shortlived` profile
-# (about six days); Caddy renews it on its own. The `tls` block below only
-# applies when the address is a real IP: the default is `http://:8089`, and
-# Caddy drops a `tls` block on an http:// site. A bare `:8089` default would
-# not do — it would turn this block into a catch-all policy and put every
-# other site of this Caddy on six-day certificates.
+# The `tls` settings (six-day IP certificate) are imported only when
+# GAMES_IP_ADDRESS is set: written inline, they would turn the `:8089` default
+# into a catch-all policy and put every other site of this Caddy on six-day
+# certificates. See the `games-ip-tls` snippet and the global options at the
+# top of this file.
 #
 # One IP, one root: the root lists the two games, anything else is a 404 so
 # the rest of the Pages site does not leak out under the IP.
-{$GAMES_IP_ADDRESS:http://:8089} {
-	tls {
-		issuer acme {
-			profile shortlived
-		}
-	}
+{$GAMES_IP_ADDRESS::8089} {
+	{$GAMES_IP_TLS}
 
 	header {
 		X-Content-Type-Options "nosniff"

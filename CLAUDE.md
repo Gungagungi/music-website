@@ -273,6 +273,18 @@ sous-domaines de `lambertdeharosanchez.com` ; les anciennes adresses `sslip.io` 
 ou casser cette pile coupe donc quatre sites, pas un : toute modification du `Caddyfile` ou du
 réseau se vérifie contre chacun d'eux.
 
+Il relaie aussi les deux jeux Godot (`mecha-survivant-2`, `hells-survivant-2`) sur l'**adresse IP
+nue** du serveur, `https://<ip>/<jeu>/`, quand `GAMES_IP_ADDRESS` est renseignée (vide : bloc
+servi en HTTP sur `:8089`, dans le conteneur seulement). Les jeux restent hébergés sur GitHub
+Pages (`~/dev/perso/games`) : le VPS ne fait que `reverse_proxy`, la racine liste les deux jeux et
+tout le reste répond 404. Le certificat d'IP Let's Encrypt n'existe qu'en profil `shortlived`
+(~6 jours, renouvelé par Caddy). Deux pièges, tous deux résolus dans `docker-compose.yml` :
+`GAMES_IP_SNI_OPTION` (`default_sni`, indispensable car un navigateur n'envoie pas de SNI pour une
+IP) et `GAMES_IP_TLS` (import du snippet `games-ip-tls`) sont **dérivées** de `GAMES_IP_ADDRESS` et
+restent vides sans elle. Ne jamais les écrire en dur dans le Caddyfile : un `tls` inline ferait du
+bloc par défaut une politique fourre-tout (tous les sites en certificats de six jours), et un
+`default_sni` fixe fait refuser la configuration entière en CI, boutique comprise.
+
 ## Conventions
 
 - Français pour l'interface, les messages d'erreur API, les noms de tests et les messages de commit (`feat|fix|test|ci(scope): …`).
