@@ -135,5 +135,23 @@ jobs:
         with:
           path: site
 
+      # A second attempt, and only on failure. Three scheduled runs (21, 22
+      # and 24/11, same commit as the green ones around them) failed here
+      # with `No artifacts named "github-pages" were found` while the upload
+      # step was green and the artifact was listed on the run: the artifact
+      # service had not yet exposed what it had just accepted. Re-running the
+      # job does not help — the rerun sees the first attempt's artifact too
+      # and fails with `Multiple artifacts … count is 2` — so the retry has to
+      # live inside the same attempt. deploy-pages has no retry input; the
+      # pause gives the listing time to catch up.
       - id: deploiement
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - name: Wait before retrying the deployment
+        if: steps.deploiement.outcome == 'failure'
+        run: sleep 60
+
+      - id: deploiement-reprise
+        if: steps.deploiement.outcome == 'failure'
         uses: actions/deploy-pages@v5
