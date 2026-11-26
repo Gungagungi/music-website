@@ -135,5 +135,20 @@ jobs:
         with:
           path: site
 
+      # `deploy-pages` échoue parfois juste après un `upload-pages-artifact` pourtant
+      # réussi : "No artifacts named github-pages were found for this workflow run".
+      # L'artifact est bien finalisé — l'upload précédent le confirme — mais l'API
+      # de Pages met quelques secondes à l'indexer ; observé deux nuits de suite
+      # (24 et 25/11/2026). Une seconde tentative après une courte attente suffit,
+      # le délai étant côté propagation GitHub et non côté site.
       - id: deploiement
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - name: Attendre l'indexation de l'artifact avant de réessayer
+        if: steps.deploiement.outcome == 'failure'
+        run: sleep 20
+
+      - id: deploiement-nouvelle-tentative
+        if: steps.deploiement.outcome == 'failure'
         uses: actions/deploy-pages@v5
